@@ -207,8 +207,8 @@ function ThemeToggle({
           onClick={() => onChange('light')}
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${
             value === 'light'
-              ? 'border-tiffany bg-tiffany/10 text-tiffany font-medium'
-              : 'border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700'
+              ? 'border-tiffany bg-white dark:bg-neutral-700 text-tiffany font-medium ring-2 ring-tiffany'
+              : 'border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-600'
           }`}
         >
           <Sun size={16} />
@@ -218,8 +218,8 @@ function ThemeToggle({
           onClick={() => onChange('dark')}
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${
             value === 'dark'
-              ? 'border-tiffany bg-tiffany/10 text-tiffany font-medium'
-              : 'border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700'
+              ? 'border-tiffany bg-neutral-700 text-tiffany font-medium ring-2 ring-tiffany'
+              : 'border-gray-300 dark:border-neutral-600 bg-neutral-700 text-gray-300 hover:bg-neutral-600'
           }`}
         >
           <Moon size={16} />

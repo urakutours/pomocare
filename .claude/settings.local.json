@@ -11,7 +11,8 @@
       "Bash(ping:*)",
       "Bash(git rm:*)",
       "Bash(git reset:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm run deploy:*)"
     ]
   }
 }

@@ -206,7 +206,8 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-5 pr-2">
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="space-y-5 p-1">
           <PresetEditor
             label={t.activePresetsLabel}
             presets={activePresets}
@@ -222,6 +223,7 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
             restOffLabel={t.restOffLabel}
             addLabel={t.addPreset}
           />
+          </div>
         </div>
 
         <div className="flex-shrink-0 pt-4">
@@ -245,7 +247,8 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
         </button>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-2">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="space-y-4 p-1">
         <div>
           <label className="block text-sm text-gray-600 mb-1">
             {t.languageLabel}
@@ -301,6 +304,7 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
         >
           {t.presetSettingsLabel} &rarr;
         </button>
+        </div>
       </div>
 
       <div className="flex-shrink-0 pt-4">

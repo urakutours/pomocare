@@ -16,7 +16,7 @@ export function TimerDisplay({ timeLeft, mode }: TimerDisplayProps) {
         {formatTime(timeLeft)}
       </div>
       {mode === 'break' && (
-        <div className="text-sm text-tiffany mt-2">{t.breakMode}</div>
+        <div className="text-sm text-tiffany mt-2">{t.restMode}</div>
       )}
     </div>
   );

@@ -10,15 +10,21 @@ export interface Translations {
   appTitle: string;
 
   // Timer
-  breakMode: string;
+  restMode: string;
 
   // Settings
   settings: string;
-  workTimeLabel: string;
-  breakTimeLabel: string;
+  activeTimeLabel: string;
+  restTimeLabel: string;
   customMessageLabel: string;
   languageLabel: string;
   applySettings: string;
+  customInput: string;
+  presetSettingsLabel: string;
+  activePresetsLabel: string;
+  restPresetsLabel: string;
+  addPreset: string;
+  restOffLabel: string;
 
   // Stats
   weeklyStats: string;

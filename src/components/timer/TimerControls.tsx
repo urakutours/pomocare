@@ -17,7 +17,7 @@ export function TimerControls({ isRunning, onToggle, onReset }: TimerControlsPro
       </button>
       <button
         onClick={onReset}
-        className="w-16 h-16 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 flex items-center justify-center transition-colors"
+        className="w-16 h-16 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-gray-700 dark:text-gray-300 flex items-center justify-center transition-colors"
       >
         <RotateCcw size={24} />
       </button>

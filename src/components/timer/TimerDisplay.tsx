@@ -12,7 +12,7 @@ export function TimerDisplay({ timeLeft, mode }: TimerDisplayProps) {
 
   return (
     <div className="text-center mb-8">
-      <div className="text-7xl font-light text-gray-800 tracking-tight">
+      <div className="text-7xl font-light text-gray-800 dark:text-gray-200 tracking-tight">
         {formatTime(timeLeft)}
       </div>
       {mode === 'break' && (

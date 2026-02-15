@@ -16,15 +16,15 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
       <div className="flex gap-2">
         <button
           onClick={onStatsClick}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors titlebar-no-drag"
+          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors titlebar-no-drag"
         >
-          <BarChart3 size={20} className="text-gray-600" />
+          <BarChart3 size={20} className="text-gray-600 dark:text-gray-400" />
         </button>
         <button
           onClick={onSettingsClick}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors titlebar-no-drag"
+          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors titlebar-no-drag"
         >
-          <Settings size={20} className="text-gray-600" />
+          <Settings size={20} className="text-gray-600 dark:text-gray-400" />
         </button>
       </div>
     </div>

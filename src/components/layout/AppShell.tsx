@@ -7,7 +7,7 @@ interface AppShellProps {
 
 export function AppShell({ header, children }: AppShellProps) {
   return (
-    <div className="h-full bg-white flex items-center justify-center p-4">
+    <div className="h-full bg-white dark:bg-neutral-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="p-8 flex flex-col" style={{ height: '520px' }}>
           <div className="flex-shrink-0">{header}</div>

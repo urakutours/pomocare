@@ -1,5 +1,7 @@
 import type { Language } from '@/i18n';
 
+export type ThemeMode = 'light' | 'dark';
+
 export interface PomodoroSettings {
   workTime: number;
   breakTime: number;
@@ -7,6 +9,7 @@ export interface PomodoroSettings {
   language: Language;
   activePresets: number[];
   restPresets: number[];
+  theme: ThemeMode;
 }
 
 export const DEFAULT_ACTIVE_PRESETS = [15, 25, 35, 45];
@@ -19,4 +22,5 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   language: 'en',
   activePresets: DEFAULT_ACTIVE_PRESETS,
   restPresets: DEFAULT_REST_PRESETS,
+  theme: 'light',
 };

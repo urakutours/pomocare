@@ -25,6 +25,9 @@ export interface Translations {
   restPresetsLabel: string;
   addPreset: string;
   restOffLabel: string;
+  themeLabel: string;
+  themeLight: string;
+  themeDark: string;
 
   // Stats
   weeklyStats: string;

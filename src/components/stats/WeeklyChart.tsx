@@ -23,13 +23,13 @@ export function WeeklyChart({ getWeekData, onClose }: WeeklyChartProps) {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-gray-700">{t.weeklyStats}</h3>
+        <h3 className="font-semibold text-gray-700 dark:text-gray-200">{t.weeklyStats}</h3>
         <button onClick={onClose}>
-          <X size={18} className="text-gray-500" />
+          <X size={18} className="text-gray-500 dark:text-gray-400" />
         </button>
       </div>
 
-      <div className="text-center text-sm text-gray-600 mb-4">{dateRange}</div>
+      <div className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">{dateRange}</div>
 
       <div className="flex justify-between items-end h-32 mb-4">
         {weekData.map((data, index) => (
@@ -46,8 +46,8 @@ export function WeeklyChart({ getWeekData, onClose }: WeeklyChartProps) {
                 }}
               />
             </div>
-            <div className="text-xs text-gray-600 mt-2">{data.day}</div>
-            <div className="text-xs text-gray-400">{data.count}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-2">{data.day}</div>
+            <div className="text-xs text-gray-400 dark:text-gray-500">{data.count}</div>
           </div>
         ))}
       </div>
@@ -55,14 +55,14 @@ export function WeeklyChart({ getWeekData, onClose }: WeeklyChartProps) {
       <div className="flex gap-2">
         <button
           onClick={() => setWeekOffset(weekOffset + 1)}
-          className="flex-1 py-2 px-4 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+          className="flex-1 py-2 px-4 bg-white dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600"
         >
           {t.previousWeek}
         </button>
         <button
           onClick={() => setWeekOffset(Math.max(0, weekOffset - 1))}
           disabled={weekOffset === 0}
-          className="flex-1 py-2 px-4 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 py-2 px-4 bg-white dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t.nextWeek}
         </button>

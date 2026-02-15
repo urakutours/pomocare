@@ -17,7 +17,7 @@ type SettingsView = 'main' | 'presets';
 const selectClass =
   'flex-1 px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200';
 const inputClass =
-  'w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-500';
+  'w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400';
 const inputSmClass =
   'w-20 px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200';
 const labelClass = 'block text-sm text-gray-600 dark:text-gray-400 mb-1';
@@ -207,8 +207,8 @@ function ThemeToggle({
           onClick={() => onChange('light')}
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${
             value === 'light'
-              ? 'border-tiffany bg-white dark:bg-neutral-700 text-tiffany font-medium ring-2 ring-tiffany'
-              : 'border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-600'
+              ? 'border-tiffany bg-white text-tiffany font-medium ring-2 ring-tiffany'
+              : 'border-gray-300 dark:border-neutral-500 bg-white text-gray-600 hover:bg-gray-50'
           }`}
         >
           <Sun size={16} />

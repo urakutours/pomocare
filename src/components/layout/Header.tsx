@@ -1,5 +1,6 @@
 import { BarChart3, Settings } from 'lucide-react';
 import logoSvg from '/icons/logo.svg';
+import logoDarkSvg from '/icons/logo_dark.svg';
 
 interface HeaderProps {
   onLogoClick: () => void;
@@ -11,7 +12,8 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
   return (
     <div className="flex justify-between items-center mb-8 titlebar-drag">
       <button onClick={onLogoClick} className="hover:opacity-70 transition-opacity titlebar-no-drag">
-        <img src={logoSvg} alt="PomoCare" className="h-6" />
+        <img src={logoSvg} alt="PomoCare" className="h-6 dark:hidden" />
+        <img src={logoDarkSvg} alt="PomoCare" className="h-6 hidden dark:block" />
       </button>
       <div className="flex gap-2">
         <button

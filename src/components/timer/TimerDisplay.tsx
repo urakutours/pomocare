@@ -11,8 +11,8 @@ export function TimerDisplay({ timeLeft, mode }: TimerDisplayProps) {
   const { t } = useI18n();
 
   return (
-    <div className="text-center mb-8">
-      <div className="text-7xl font-light text-gray-800 dark:text-gray-200 tracking-tight">
+    <div className="text-center mb-8 landscape:mb-3">
+      <div className="text-7xl landscape:text-6xl font-light text-gray-800 dark:text-gray-200 tracking-tight">
         {formatTime(timeLeft)}
       </div>
       {mode === 'break' && (

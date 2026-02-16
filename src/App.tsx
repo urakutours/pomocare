@@ -95,15 +95,18 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
       )}
 
       {view === 'timer' && (
-        <>
-          <TimerDisplay timeLeft={timeLeft} mode={mode} />
-          <TimerControls isRunning={isRunning} onToggle={toggle} onReset={reset} />
-          <SessionSummary todayCount={getTodayCount()} weekCount={getWeekCount()} />
-
-          <div className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
-            {displayMessage}
+        <div className="landscape:flex landscape:items-center landscape:gap-8">
+          <div className="landscape:flex-1">
+            <TimerDisplay timeLeft={timeLeft} mode={mode} />
+            <TimerControls isRunning={isRunning} onToggle={toggle} onReset={reset} />
           </div>
-        </>
+          <div className="landscape:flex-1">
+            <SessionSummary todayCount={getTodayCount()} weekCount={getWeekCount()} />
+            <div className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
+              {displayMessage}
+            </div>
+          </div>
+        </div>
       )}
 
       <audio ref={audioRef} src={notificationSound} />

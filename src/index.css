@@ -12,6 +12,13 @@ body,
   overscroll-behavior: none;
   -webkit-user-select: none;
   user-select: none;
+  background-color: #ffffff;
+}
+
+html.dark,
+html.dark body,
+html.dark #root {
+  background-color: #262626;
 }
 
 /* Safe area padding for standalone PWA (notch devices etc.) */

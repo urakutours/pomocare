@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderProps) {
   return (
-    <div className="flex justify-between items-center mb-8 titlebar-drag">
+    <div className="flex justify-between items-center mb-8 landscape:mb-2 titlebar-drag">
       <button onClick={onLogoClick} className="hover:opacity-70 transition-opacity titlebar-no-drag">
         <img src={logoSvg} alt="PomoCare" className="h-6 dark:hidden" />
         <img src={logoDarkSvg} alt="PomoCare" className="h-6 hidden dark:block" />

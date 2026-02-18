@@ -37,6 +37,7 @@ export interface Translations {
   alarmSoundBell: string;
   alarmSoundDigital: string;
   alarmSoundChime: string;
+  alarmSoundKitchen: string;
   alarmSoundNone: string;
   alarmRepeatLabel: string;
 

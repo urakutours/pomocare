@@ -26,6 +26,7 @@ export const ja: Translations = {
   alarmSoundBell: 'ベル',
   alarmSoundDigital: 'デジタル',
   alarmSoundChime: 'チャイム',
+  alarmSoundKitchen: 'キッチンタイマー',
   alarmSoundNone: 'なし',
   alarmRepeatLabel: 'アラーム音の繰り返し回数',
   labelNote: 'タスクメモ',

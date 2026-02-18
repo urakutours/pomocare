@@ -91,6 +91,55 @@ function playDigital(ctx: AudioContext, startTime: number): number {
 }
 
 /**
+ * Kitchen Timer: ポモドーロ型キッチンタイマーの「チーン」音
+ * ゼンマイが解ける最後の「チン！」をイメージした金属的な高音
+ */
+function playKitchen(ctx: AudioContext, startTime: number): number {
+  const duration = 3.0;
+
+  // メインの「チン！」: 高い金属音
+  const mainPartials: { freq: number; gain: number; decay: number }[] = [
+    { freq: 2000, gain: 0.45, decay: duration },
+    { freq: 4000, gain: 0.25, decay: duration * 0.7 },
+    { freq: 6500, gain: 0.15, decay: duration * 0.5 },
+    { freq: 1000, gain: 0.20, decay: duration * 0.8 },
+  ];
+
+  mainPartials.forEach(({ freq, gain, decay }) => {
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, startTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.97, startTime + decay);
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.003);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
+    osc.start(startTime);
+    osc.stop(startTime + decay);
+  });
+
+  // ゼンマイの「カチカチ」余韻 (0.3秒後に短いノイズバースト)
+  for (let i = 0; i < 3; i++) {
+    const t = startTime + 0.3 + i * 0.15;
+    const osc2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    osc2.connect(g2);
+    g2.connect(ctx.destination);
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(800 - i * 80, t);
+    g2.gain.setValueAtTime(0, t);
+    g2.gain.linearRampToValueAtTime(0.05, t + 0.005);
+    g2.gain.linearRampToValueAtTime(0, t + 0.04);
+    osc2.start(t);
+    osc2.stop(t + 0.05);
+  }
+
+  return duration;
+}
+
+/**
  * Chime: 3音アルペジオ
  */
 function playChime(ctx: AudioContext, startTime: number): number {
@@ -120,6 +169,7 @@ function playSingleAlarm(ctx: AudioContext, sound: AlarmSound, startTime: number
   if (sound === 'bell') return playBell(ctx, startTime);
   if (sound === 'digital') return playDigital(ctx, startTime);
   if (sound === 'chime') return playChime(ctx, startTime);
+  if (sound === 'kitchen') return playKitchen(ctx, startTime);
   return 0;
 }
 

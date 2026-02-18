@@ -26,6 +26,7 @@ export const de: Translations = {
   alarmSoundBell: 'Glocke',
   alarmSoundDigital: 'Digital',
   alarmSoundChime: 'Chime',
+  alarmSoundKitchen: 'Küchentimer',
   alarmSoundNone: 'Keiner',
   alarmRepeatLabel: 'Alarm-Wiederholungen',
   labelNote: 'Aufgabennotiz',

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, Plus, Trash2, Sun, Moon, Play } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, Palette } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition } from '@/types/session';
@@ -27,6 +27,28 @@ const labelClass = 'block text-sm text-gray-600 dark:text-gray-400 mb-1';
 // Long break options (0 = OFF)
 const LONG_BREAK_OPTIONS = [0, 15, 20];
 const LONG_BREAK_INTERVAL_OPTIONS = [0, 3, 4];
+
+// ---- Refined color palette (inspired by popular palette sites) ----
+const LABEL_COLORS = [
+  // Warm pastels / blush
+  '#F4A7A0', '#F28B7D', '#E8736A', '#D45C54',
+  // Pinks / roses
+  '#F4A0C0', '#E87DA8', '#D45C8F', '#C04477',
+  // Purples / lavenders
+  '#B8A4D8', '#9B87C4', '#7C6BAF', '#6355A0',
+  // Blues / periwinkle
+  '#A4BAE8', '#7FA0D8', '#5A87C8', '#3B6DB8',
+  // Teals / cyans
+  '#7FD4CC', '#4DB8B0', '#2A9C94', '#0abab5',
+  // Greens / sage
+  '#A0D4A0', '#7DBF7D', '#5AAA5A', '#3D943D',
+  // Yellows / golds
+  '#F4D48A', '#E8BC5A', '#D4A030', '#B88820',
+  // Oranges / terracotta
+  '#F4B07A', '#E8904A', '#D4702A', '#B85A18',
+  // Neutrals / stone
+  '#C0B8B0', '#A09890', '#808070', '#606050',
+];
 
 function TimeSelector({
   label,
@@ -236,22 +258,213 @@ function ThemeToggle({
   );
 }
 
-// ---- Label Manager ----
-const LABEL_COLORS = [
-  // Reds / Pinks
-  '#ef4444', '#f87171', '#fb7185', '#ec4899',
-  // Oranges / Yellows
-  '#f97316', '#fb923c', '#f59e0b', '#fbbf24',
-  // Greens / Limes
-  '#84cc16', '#4ade80', '#22c55e', '#10b981',
-  // Teals / Blues
-  '#14b8a6', '#0abab5', '#38bdf8', '#3b82f6',
-  // Purples / Violets
-  '#818cf8', '#8b5cf6', '#a78bfa', '#d946ef',
-  // Neutrals
-  '#94a3b8', '#64748b', '#78716c', '#a8a29e',
-];
+// ---- Color Picker with custom color support ----
+function ColorPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (c: string) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
 
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      {LABEL_COLORS.map((c) => (
+        <button
+          key={c}
+          onClick={() => onChange(c)}
+          className={`w-5 h-5 rounded-full transition-transform flex-shrink-0 ${value === c ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-300 scale-110' : 'hover:scale-105'}`}
+          style={{ backgroundColor: c }}
+        />
+      ))}
+      {/* Custom color button */}
+      <button
+        onClick={() => fileRef.current?.click()}
+        title="カスタムカラー"
+        className="w-5 h-5 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-500 flex items-center justify-center hover:border-tiffany transition-colors flex-shrink-0"
+        style={!LABEL_COLORS.includes(value) ? { backgroundColor: value, borderStyle: 'solid', borderColor: '#6b7280' } : {}}
+      >
+        {LABEL_COLORS.includes(value) && <Plus size={10} className="text-gray-400" />}
+      </button>
+      <input
+        ref={fileRef}
+        type="color"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="sr-only"
+      />
+    </div>
+  );
+}
+
+// ---- Add Label Modal ----
+function AddLabelModal({
+  onAdd,
+  onClose,
+  addLabel,
+}: {
+  onAdd: (label: LabelDefinition) => void;
+  onClose: () => void;
+  addLabel: string;
+}) {
+  const [name, setName] = useState('');
+  const [color, setColor] = useState(LABEL_COLORS[19]); // tiffany default
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleAdd = () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    onAdd({ id: Date.now().toString(36), name: trimmed, color });
+    onClose();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') { e.preventDefault(); handleAdd(); }
+    if (e.key === 'Escape') onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div
+        className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-5 w-72 mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-3">
+          <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm">{addLabel}</h4>
+          <button onClick={onClose}><X size={16} className="text-gray-400" /></button>
+        </div>
+        <input
+          ref={inputRef}
+          autoFocus
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Label name"
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 mb-3"
+        />
+        <ColorPicker value={color} onChange={setColor} />
+        <button
+          onClick={handleAdd}
+          disabled={!name.trim()}
+          className="mt-4 w-full py-2 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg disabled:opacity-40 transition-colors"
+        >
+          + {addLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---- Edit Label Modal ----
+type EditMode = 'color' | 'name' | 'delete' | null;
+
+function LabelDotMenu({
+  label,
+  onChangeColor,
+  onChangeName,
+  onDelete,
+}: {
+  label: LabelDefinition;
+  onChangeColor: (id: string, color: string) => void;
+  onChangeName: (id: string, name: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<EditMode>(null);
+  const [editName, setEditName] = useState(label.name);
+  const [editColor, setEditColor] = useState(label.color);
+
+  const close = () => { setOpen(false); setMode(null); };
+
+  return (
+    <div className="relative flex-shrink-0">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
+      >
+        <MoreVertical size={14} />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-6 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-44 overflow-hidden">
+          {mode === null && (
+            <>
+              <button
+                onClick={() => setMode('color')}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
+              >
+                <Palette size={13} /> 色を変更
+              </button>
+              <button
+                onClick={() => { setEditName(label.name); setMode('name'); }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
+              >
+                <Pencil size={13} /> 名前を変更
+              </button>
+              <button
+                onClick={() => setMode('delete')}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
+              >
+                <Trash2 size={13} /> 削除
+              </button>
+            </>
+          )}
+          {mode === 'color' && (
+            <div className="p-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">色を選択</p>
+              <ColorPicker value={editColor} onChange={(c) => setEditColor(c)} />
+              <button
+                onClick={() => { onChangeColor(label.id, editColor); close(); }}
+                className="mt-3 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
+              >
+                適用
+              </button>
+            </div>
+          )}
+          {mode === 'name' && (
+            <div className="p-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">名前を変更</p>
+              <input
+                autoFocus
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') { onChangeName(label.id, editName.trim()); close(); }
+                  if (e.key === 'Escape') close();
+                }}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-600 dark:text-gray-200"
+              />
+              <button
+                onClick={() => { if (editName.trim()) { onChangeName(label.id, editName.trim()); close(); } }}
+                className="mt-2 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
+              >
+                適用
+              </button>
+            </div>
+          )}
+          {mode === 'delete' && (
+            <div className="p-3">
+              <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">「{label.name}」を削除しますか？</p>
+              <div className="flex gap-2">
+                <button onClick={close} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300">
+                  キャンセル
+                </button>
+                <button onClick={() => { onDelete(label.id); close(); }} className="flex-1 py-1.5 text-xs bg-red-500 text-white rounded-lg hover:bg-red-600">
+                  削除
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---- Label Manager (redesigned) ----
 function LabelManager({
   labels,
   onChange,
@@ -261,71 +474,64 @@ function LabelManager({
   onChange: (labels: LabelDefinition[]) => void;
   addLabel: string;
 }) {
-  const [newName, setNewName] = useState('');
-  const [newColor, setNewColor] = useState(LABEL_COLORS[0]);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  const handleAdd = () => {
-    const name = newName.trim();
-    if (!name) return;
-    const id = Date.now().toString(36);
-    onChange([...labels, { id, name, color: newColor }]);
-    setNewName('');
+  const handleAdd = (label: LabelDefinition) => {
+    onChange([...labels, label]);
   };
 
-  const handleRemove = (id: string) => {
+  const handleChangeColor = (id: string, color: string) => {
+    onChange(labels.map((l) => l.id === id ? { ...l, color } : l));
+  };
+
+  const handleChangeName = (id: string, name: string) => {
+    onChange(labels.map((l) => l.id === id ? { ...l, name } : l));
+  };
+
+  const handleDelete = (id: string) => {
     onChange(labels.filter((l) => l.id !== id));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAdd();
-    }
-  };
-
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-1.5 mb-2">
+    <div>
+      {/* Add button at top */}
+      <button
+        onClick={() => setShowAddModal(true)}
+        className="flex items-center gap-1.5 px-3 py-1.5 mb-4 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
+      >
+        <Plus size={14} />
+        {addLabel}
+      </button>
+
+      {/* Label list */}
+      <div className="space-y-1">
+        {labels.length === 0 && (
+          <p className="text-sm text-gray-400 dark:text-gray-500 py-2">ラベルがありません</p>
+        )}
         {labels.map((l) => (
-          <span
-            key={l.id}
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-sm text-white"
-            style={{ backgroundColor: l.color }}
-          >
-            {l.name}
-            <button onClick={() => handleRemove(l.id)} className="opacity-70 hover:opacity-100">
-              <X size={11} />
-            </button>
-          </span>
+          <div key={l.id} className="flex items-center gap-2.5 py-2 px-1 border-b border-gray-100 dark:border-neutral-700">
+            <span
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: l.color }}
+            />
+            <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate">{l.name}</span>
+            <LabelDotMenu
+              label={l}
+              onChangeColor={handleChangeColor}
+              onChangeName={handleChangeName}
+              onDelete={handleDelete}
+            />
+          </div>
         ))}
       </div>
-      <div className="flex gap-2 items-center">
-        <input
-          type="text"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Label name"
-          className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-neutral-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200"
+
+      {showAddModal && (
+        <AddLabelModal
+          onAdd={handleAdd}
+          onClose={() => setShowAddModal(false)}
+          addLabel={addLabel}
         />
-        <button
-          onClick={handleAdd}
-          className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-600 text-gray-700 dark:text-gray-300 flex items-center gap-1 whitespace-nowrap"
-        >
-          <Plus size={14} />
-          {addLabel}
-        </button>
-      </div>
-      <div className="grid grid-cols-8 gap-1.5">
-        {LABEL_COLORS.map((c) => (
-          <button
-            key={c}
-            onClick={() => setNewColor(c)}
-            className={`w-6 h-6 rounded-full transition-transform ${newColor === c ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-500 scale-110' : ''}`}
-            style={{ backgroundColor: c }}
-          />
-        ))}
-      </div>
+      )}
     </div>
   );
 }
@@ -341,6 +547,7 @@ function AlarmSettingsPanel({
   bellLabel,
   digitalLabel,
   chimeLabel,
+  kitchenLabel,
   noneLabel,
 }: {
   sound: AlarmSound;
@@ -352,12 +559,14 @@ function AlarmSettingsPanel({
   bellLabel: string;
   digitalLabel: string;
   chimeLabel: string;
+  kitchenLabel: string;
   noneLabel: string;
 }) {
   const sounds: { value: AlarmSound; label: string }[] = [
     { value: 'bell', label: bellLabel },
     { value: 'digital', label: digitalLabel },
     { value: 'chime', label: chimeLabel },
+    { value: 'kitchen', label: kitchenLabel },
     { value: 'none', label: noneLabel },
   ];
 
@@ -461,7 +670,7 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="space-y-5 p-1">
             <PresetEditor
               label={t.activePresetsLabel}
@@ -504,7 +713,7 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="p-1">
             <LabelManager
               labels={labels}
@@ -516,7 +725,7 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
 
         <div className="flex-shrink-0 pt-4">
           <button
-            onClick={() => setView('main')}
+            onClick={() => { handleApply(); }}
             className="w-full py-2 rounded-lg text-white font-medium bg-tiffany hover:bg-tiffany-hover transition-colors"
           >
             {t.applySettings}
@@ -536,7 +745,7 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
         </button>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="space-y-4 p-1">
           {/* 1. Active time */}
           <TimeSelector
@@ -594,6 +803,7 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
             bellLabel={t.alarmSoundBell}
             digitalLabel={t.alarmSoundDigital}
             chimeLabel={t.alarmSoundChime}
+            kitchenLabel={t.alarmSoundKitchen}
             noneLabel={t.alarmSoundNone}
           />
 

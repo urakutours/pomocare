@@ -26,6 +26,7 @@ export const en: Translations = {
   alarmSoundBell: 'Bell',
   alarmSoundDigital: 'Digital',
   alarmSoundChime: 'Chime',
+  alarmSoundKitchen: 'Kitchen Timer',
   alarmSoundNone: 'None',
   alarmRepeatLabel: 'Alarm Repeat Count',
   labelNote: 'Task Note',

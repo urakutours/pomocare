@@ -244,37 +244,36 @@ export function StatsChart({
         </button>
       </div>
 
-      {/* Label filter pills */}
+      {/* Label filter dropdown */}
       {labels.length > 0 && (
-        <div className="flex gap-1.5 flex-wrap mb-3 flex-shrink-0">
-          <button
-            onClick={() => setFilterLabel(null)}
-            className={`px-2.5 py-0.5 rounded-full text-xs border transition-colors ${
-              filterLabel === null
-                ? 'border-tiffany bg-tiffany text-white'
-                : 'border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700'
-            }`}
-          >
-            {allText}
-          </button>
-          {labels.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => setFilterLabel(filterLabel === l.id ? null : l.id)}
-              className={`px-2.5 py-0.5 rounded-full text-xs border transition-colors ${
-                filterLabel === l.id
-                  ? 'text-white border-transparent'
-                  : 'border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700'
-              }`}
-              style={filterLabel === l.id ? { backgroundColor: l.color } : undefined}
+        <div className="mb-3 flex-shrink-0">
+          <div className="relative inline-block">
+            {filterLabel && (
+              <span
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none"
+                style={{ backgroundColor: labels.find((l) => l.id === filterLabel)?.color }}
+              />
+            )}
+            <select
+              value={filterLabel ?? ''}
+              onChange={(e) => setFilterLabel(e.target.value === '' ? null : e.target.value)}
+              className={`pr-6 py-1 text-xs border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 appearance-none ${filterLabel ? 'pl-6' : 'pl-2.5'}`}
             >
-              {l.name}
-            </button>
-          ))}
+              <option value="">{allText}</option>
+              {labels.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
+            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+          </div>
         </div>
       )}
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {/* Summary cards */}
         <div className="flex gap-3 mb-3 text-center">
           <div className="flex-1 bg-gray-50 dark:bg-neutral-800 rounded-lg py-2">

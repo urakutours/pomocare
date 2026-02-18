@@ -25,14 +25,16 @@ interface PomodoroAppProps {
   updateSettings: (settings: PomodoroSettings) => void;
 }
 
-// ---- Inline label creator (shown from TOP screen) ----
+// ---- Quick label creator modal (shown from TOP screen) ----
 const QUICK_COLORS = [
-  '#ef4444', '#f97316', '#f59e0b', '#84cc16',
-  '#22c55e', '#14b8a6', '#0abab5', '#3b82f6',
-  '#8b5cf6', '#ec4899', '#d946ef', '#64748b',
+  '#F4A7A0', '#F28B7D', '#F4A0C0', '#E87DA8',
+  '#B8A4D8', '#9B87C4', '#A4BAE8', '#7FA0D8',
+  '#7FD4CC', '#4DB8B0', '#0abab5', '#2A9C94',
+  '#A0D4A0', '#5AAA5A', '#F4D48A', '#E8BC5A',
+  '#F4B07A', '#E8904A', '#C0B8B0', '#808070',
 ];
 
-function InlineLabelCreator({
+function QuickLabelModal({
   onAdd,
   onClose,
   addNewLabel,
@@ -42,18 +44,13 @@ function InlineLabelCreator({
   addNewLabel: string;
 }) {
   const [name, setName] = useState('');
-  const [color, setColor] = useState(QUICK_COLORS[6]); // tiffany default
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  const [color, setColor] = useState(QUICK_COLORS[10]); // tiffany default
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleAdd = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
     onAdd({ id: Date.now().toString(36), name: trimmed, color });
-    setName('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -62,34 +59,56 @@ function InlineLabelCreator({
   };
 
   return (
-    <div className="mt-2 p-3 bg-gray-50 dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-700">
-      <div className="flex gap-2 mb-2">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div
+        className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-5 w-72 mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-3">
+          <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm">{addNewLabel.replace('+ ', '')}</h4>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">✕</button>
+        </div>
         <input
-          ref={inputRef}
+          autoFocus
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={addNewLabel.replace('+ ', '')}
-          className="flex-1 px-2.5 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400"
+          placeholder="ラベル名"
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 mb-3"
         />
+        <div className="flex flex-wrap gap-1.5">
+          {QUICK_COLORS.map((c) => (
+            <button
+              key={c}
+              onClick={() => setColor(c)}
+              className={`w-5 h-5 rounded-full transition-transform flex-shrink-0 ${color === c ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-300 scale-110' : 'hover:scale-105'}`}
+              style={{ backgroundColor: c }}
+            />
+          ))}
+          {/* Custom color */}
+          <button
+            onClick={() => colorInputRef.current?.click()}
+            className="w-5 h-5 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-500 flex items-center justify-center hover:border-tiffany transition-colors flex-shrink-0"
+            style={!QUICK_COLORS.includes(color) ? { backgroundColor: color, borderStyle: 'solid' } : {}}
+          >
+            {QUICK_COLORS.includes(color) && <span className="text-gray-400 text-xs leading-none">+</span>}
+          </button>
+          <input
+            ref={colorInputRef}
+            type="color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            className="sr-only"
+          />
+        </div>
         <button
           onClick={handleAdd}
           disabled={!name.trim()}
-          className="px-3 py-1.5 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg disabled:opacity-40 transition-colors"
+          className="mt-4 w-full py-2 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg disabled:opacity-40 transition-colors"
         >
-          ＋
+          追加
         </button>
-      </div>
-      <div className="flex gap-1.5 flex-wrap">
-        {QUICK_COLORS.map((c) => (
-          <button
-            key={c}
-            onClick={() => setColor(c)}
-            className={`w-5 h-5 rounded-full transition-transform ${color === c ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-500 scale-110' : ''}`}
-            style={{ backgroundColor: c }}
-          />
-        ))}
       </div>
     </div>
   );
@@ -219,67 +238,64 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             />
 
             {/* Label dropdown + memo */}
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-2 flex flex-col items-center">
               {/* Dropdown row */}
-              <div className="flex gap-2 items-center justify-center">
-                <div className="relative flex-1 max-w-xs">
-                  {/* Color dot indicator */}
-                  {activeLabelDef && (
-                    <span
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full pointer-events-none"
-                      style={{ backgroundColor: activeLabelDef.color }}
-                    />
-                  )}
-                  <select
-                    value={activeLabel ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '__new__') {
-                        setShowLabelCreator(true);
-                      } else {
-                        setActiveLabel(val === '' ? null : val);
-                        setShowLabelCreator(false);
-                      }
-                    }}
-                    className={`w-full py-1.5 pr-3 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 appearance-none ${activeLabelDef ? 'pl-7' : 'pl-3'}`}
-                  >
-                    <option value="">{t.labelSelectPlaceholder}</option>
-                    {labels.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.name}
-                      </option>
-                    ))}
-                    <option value="__new__">{t.addNewLabel}</option>
-                  </select>
-                  {/* Custom chevron */}
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
-                </div>
+              <div className="relative w-full max-w-xs">
+                {/* Color dot indicator */}
+                {activeLabelDef && (
+                  <span
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full pointer-events-none"
+                    style={{ backgroundColor: activeLabelDef.color }}
+                  />
+                )}
+                <select
+                  value={activeLabel ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '__new__') {
+                      setShowLabelCreator(true);
+                    } else {
+                      setActiveLabel(val === '' ? null : val);
+                    }
+                  }}
+                  className={`w-full py-1.5 pr-3 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 appearance-none ${activeLabelDef ? 'pl-7' : 'pl-3'}`}
+                >
+                  <option value="">{t.labelSelectPlaceholder}</option>
+                  {labels.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.name}
+                    </option>
+                  ))}
+                  <option value="__new__">{t.addNewLabel}</option>
+                </select>
+                {/* Custom chevron */}
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
               </div>
 
-              {/* Inline label creator */}
-              {showLabelCreator && (
-                <InlineLabelCreator
-                  onAdd={handleAddLabelInline}
-                  onClose={() => setShowLabelCreator(false)}
-                  addNewLabel={t.addNewLabel}
-                />
-              )}
-
-              {/* Task memo input (shown when a label is selected) */}
-              {activeLabel && !showLabelCreator && (
+              {/* Task memo input (same width as dropdown) */}
+              {activeLabel && (
                 <textarea
                   value={activeNote}
                   onChange={(e) => setActiveNote(e.target.value)}
                   placeholder={t.labelNotePlaceholder}
                   rows={2}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 resize-none"
+                  className="w-full max-w-xs px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 resize-none"
                 />
               )}
             </div>
+
+            {/* New label modal */}
+            {showLabelCreator && (
+              <QuickLabelModal
+                onAdd={handleAddLabelInline}
+                onClose={() => setShowLabelCreator(false)}
+                addNewLabel={t.addNewLabel}
+              />
+            )}
 
             <div className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400">
               {displayMessage}

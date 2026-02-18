@@ -5,73 +5,122 @@ import type { AlarmSound } from '@/types/settings';
  */
 function createAudioContext(): AudioContext | null {
   try {
-    return new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    return new (
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    )();
   } catch {
     return null;
   }
 }
 
+/**
+ * Bell: リアルなベル音 - 複数倍音 + ピッチ微下降
+ */
 function playBell(ctx: AudioContext, startTime: number): number {
-  const duration = 1.5;
-  // Fundamental + harmonics for bell-like sound
-  const freqs = [880, 1760, 2640];
-  freqs.forEach((freq, i) => {
+  const duration = 2.5;
+
+  const partials: { freq: number; gain: number; decay: number }[] = [
+    { freq: 440,  gain: 0.40, decay: duration },
+    { freq: 880,  gain: 0.20, decay: duration * 0.8 },
+    { freq: 1318, gain: 0.15, decay: duration * 0.6 },
+    { freq: 1760, gain: 0.10, decay: duration * 0.5 },
+    { freq: 2217, gain: 0.07, decay: duration * 0.4 },
+    { freq: 2637, gain: 0.05, decay: duration * 0.3 },
+  ];
+
+  partials.forEach(({ freq, gain, decay }) => {
     const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    const gainNode = ctx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, startTime);
-    const vol = 0.3 / (i + 1);
-    gain.gain.setValueAtTime(vol, startTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.98, startTime + duration);
+
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.005);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
+
     osc.start(startTime);
-    osc.stop(startTime + duration);
+    osc.stop(startTime + decay);
   });
+
   return duration;
 }
 
+/**
+ * Digital: 電子目覚ましアラーム - 矩形波パルスの連続ビープ
+ */
 function playDigital(ctx: AudioContext, startTime: number): number {
-  // Two-tone digital beep
-  const beepDuration = 0.15;
-  const gap = 0.05;
-  const tones = [1000, 1200];
-  tones.forEach((freq, i) => {
-    const t = startTime + i * (beepDuration + gap);
+  const beepFreq = 1040;
+  const pulseOn = 0.08;
+  const pulseOff = 0.04;
+  const cycleTime = pulseOn + pulseOff;
+  const totalBeeps = 8;
+  const totalDuration = totalBeeps * cycleTime;
+
+  for (let i = 0; i < totalBeeps; i++) {
+    const t = startTime + i * cycleTime;
+
     const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    const filter = ctx.createBiquadFilter();
+    const gainNode = ctx.createGain();
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(3000, t);
+
+    osc.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
     osc.type = 'square';
-    osc.frequency.setValueAtTime(freq, t);
-    gain.gain.setValueAtTime(0.2, t);
-    gain.gain.setValueAtTime(0.2, t + beepDuration - 0.01);
-    gain.gain.linearRampToValueAtTime(0, t + beepDuration);
+    osc.frequency.setValueAtTime(i % 2 === 0 ? beepFreq * 1.06 : beepFreq, t);
+
+    gainNode.gain.setValueAtTime(0, t);
+    gainNode.gain.linearRampToValueAtTime(0.25, t + 0.005);
+    gainNode.gain.setValueAtTime(0.25, t + pulseOn - 0.01);
+    gainNode.gain.linearRampToValueAtTime(0, t + pulseOn);
+
     osc.start(t);
-    osc.stop(t + beepDuration);
-  });
-  return beepDuration * 2 + gap;
+    osc.stop(t + pulseOn);
+  }
+
+  return totalDuration;
 }
 
+/**
+ * Chime: 3音アルペジオ
+ */
 function playChime(ctx: AudioContext, startTime: number): number {
-  // Three ascending notes
   const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
-  const noteDuration = 0.4;
-  const noteGap = 0.15;
+  const noteDuration = 0.5;
+  const noteGap = 0.12;
+
   notes.forEach((freq, i) => {
-    const t = startTime + i * (noteDuration * 0.6 + noteGap);
+    const t = startTime + i * (noteDuration * 0.5 + noteGap);
     const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    const gainNode = ctx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, t);
-    gain.gain.setValueAtTime(0.3, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + noteDuration);
+    gainNode.gain.setValueAtTime(0, t);
+    gainNode.gain.linearRampToValueAtTime(0.35, t + 0.005);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, t + noteDuration);
     osc.start(t);
     osc.stop(t + noteDuration);
   });
-  return notes.length * (noteDuration * 0.6 + noteGap) + noteDuration;
+
+  return notes.length * (noteDuration * 0.5 + noteGap) + noteDuration;
+}
+
+function playSingleAlarm(ctx: AudioContext, sound: AlarmSound, startTime: number): number {
+  if (sound === 'bell') return playBell(ctx, startTime);
+  if (sound === 'digital') return playDigital(ctx, startTime);
+  if (sound === 'chime') return playChime(ctx, startTime);
+  return 0;
 }
 
 export function playAlarm(sound: AlarmSound, repeat: number): void {
@@ -80,30 +129,22 @@ export function playAlarm(sound: AlarmSound, repeat: number): void {
   const ctx = createAudioContext();
   if (!ctx) return;
 
-  // Resume suspended context (required after user interaction)
   const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
   resume.then(() => {
     const now = ctx.currentTime;
-    let singleDuration = 0;
+    let cursor = now;
+    const gap = 0.4;
 
     for (let i = 0; i < repeat; i++) {
-      const t = now + i * (singleDuration + 0.3);
-      if (sound === 'bell') {
-        singleDuration = playBell(ctx, t);
-      } else if (sound === 'digital') {
-        singleDuration = playDigital(ctx, t);
-      } else if (sound === 'chime') {
-        singleDuration = playChime(ctx, t);
-      }
+      const d = playSingleAlarm(ctx, sound, cursor);
+      cursor += d + gap;
     }
 
-    // Close context after all sounds finish
-    const totalDuration = repeat * (singleDuration + 0.3) + 1;
-    setTimeout(() => ctx.close(), totalDuration * 1000);
+    setTimeout(() => ctx.close(), (cursor - now + 1) * 1000);
   });
 }
 
-/** Preview a single play for settings UI */
-export function previewAlarm(sound: AlarmSound): void {
-  playAlarm(sound, 1);
+/** プレビュー: 指定の繰り返し回数で再生 */
+export function previewAlarm(sound: AlarmSound, repeat: number): void {
+  playAlarm(sound, repeat);
 }

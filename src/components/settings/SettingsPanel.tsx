@@ -369,7 +369,7 @@ function AlarmSettingsPanel({
           </select>
           {sound !== 'none' && (
             <button
-              onClick={() => previewAlarm(sound)}
+              onClick={() => previewAlarm(sound, repeat)}
               className="p-2 rounded-lg border border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-600 text-gray-600 dark:text-gray-400"
               title="Preview"
             >

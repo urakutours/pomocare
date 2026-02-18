@@ -13,12 +13,11 @@ import { TimerDisplay } from '@/components/timer/TimerDisplay';
 import { TimerControls } from '@/components/timer/TimerControls';
 import { FocusMode } from '@/components/timer/FocusMode';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
-import { WeeklyChart } from '@/components/stats/WeeklyChart';
+import { StatsChart } from '@/components/stats/StatsChart';
 import { SessionSummary } from '@/components/stats/SessionSummary';
 import type { PomodoroSession } from '@/types/session';
 import type { PomodoroSettings } from '@/types/settings';
 import type { StorageService } from '@/services/storage/types';
-import notificationSound from '@/assets/notification.wav';
 
 interface PomodoroAppProps {
   storage: StorageService;
@@ -28,7 +27,20 @@ interface PomodoroAppProps {
 
 function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   const { t } = useI18n();
-  const { addSession, getTodayCount, getWeekCount, getWeekData } = useSessions(storage, t.days);
+  const {
+    sessions,
+    addSession,
+    getTodayCount,
+    getTodayTotalSeconds,
+    getWeekCount,
+    getWeekTotalSeconds,
+    getWeekData,
+    getMonthData,
+    getYearData,
+  } = useSessions(storage, t.days);
+
+  // Active label state
+  const [activeLabel, setActiveLabel] = useState<string | null>(settings.activeLabel ?? null);
 
   const onSessionComplete = useCallback(
     (session: PomodoroSession) => {
@@ -37,16 +49,20 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     [addSession],
   );
 
-  const { timeLeft, isRunning, mode, toggle, reset, audioRef } = useTimer({
+  const { timeLeft, isRunning, mode, toggle, reset } = useTimer({
     workTime: settings.workTime,
     breakTime: settings.breakTime,
+    longBreakTime: settings.longBreakTime ?? 0,
+    longBreakInterval: settings.longBreakInterval ?? 0,
+    alarm: settings.alarm ?? { sound: 'bell', repeat: 1 },
+    activeLabel,
     onSessionComplete,
   });
 
   const [view, setView] = useState<'timer' | 'settings' | 'stats'>('timer');
 
   const handleSaveSettings = (newSettings: PomodoroSettings) => {
-    updateSettings(newSettings);
+    updateSettings({ ...newSettings, activeLabel });
     setView('timer');
     reset();
   };
@@ -61,13 +77,10 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   const isFocusMode = isRunning && mode === 'work';
 
   if (isFocusMode) {
-    return (
-      <>
-        <FocusMode timeLeft={timeLeft} onStop={handleFocusStop} />
-        <audio ref={audioRef} src={notificationSound} />
-      </>
-    );
+    return <FocusMode timeLeft={timeLeft} onStop={handleFocusStop} />;
   }
+
+  const labels = settings.labels ?? [];
 
   return (
     <AppShell
@@ -81,15 +94,18 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     >
       {view === 'settings' && (
         <SettingsPanel
-          settings={settings}
+          settings={{ ...settings, activeLabel }}
           onSave={handleSaveSettings}
           onClose={() => setView('timer')}
         />
       )}
 
       {view === 'stats' && (
-        <WeeklyChart
+        <StatsChart
+          sessions={sessions}
           getWeekData={getWeekData}
+          getMonthData={getMonthData}
+          getYearData={getYearData}
           onClose={() => setView('timer')}
         />
       )}
@@ -101,15 +117,49 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             <TimerControls isRunning={isRunning} onToggle={toggle} onReset={reset} />
           </div>
           <div className="landscape:flex-1">
-            <SessionSummary todayCount={getTodayCount()} weekCount={getWeekCount()} />
-            <div className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
+            <SessionSummary
+              todayCount={getTodayCount()}
+              weekCount={getWeekCount()}
+              todayTotalSeconds={getTodayTotalSeconds()}
+              weekTotalSeconds={getWeekTotalSeconds()}
+            />
+
+            {/* Label selector */}
+            {labels.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-1.5 justify-center">
+                <button
+                  onClick={() => setActiveLabel(null)}
+                  className={`px-2.5 py-0.5 rounded-full text-xs border transition-colors ${
+                    activeLabel === null
+                      ? 'border-tiffany bg-tiffany text-white'
+                      : 'border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700'
+                  }`}
+                >
+                  {t.noLabel}
+                </button>
+                {labels.map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => setActiveLabel(l.id)}
+                    className={`px-2.5 py-0.5 rounded-full text-xs border transition-colors ${
+                      activeLabel === l.id
+                        ? 'text-white border-transparent'
+                        : 'border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700'
+                    }`}
+                    style={activeLabel === l.id ? { backgroundColor: l.color } : undefined}
+                  >
+                    {l.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400">
               {displayMessage}
             </div>
           </div>
         </div>
       )}
-
-      <audio ref={audioRef} src={notificationSound} />
     </AppShell>
   );
 }

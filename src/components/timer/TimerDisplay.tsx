@@ -18,6 +18,9 @@ export function TimerDisplay({ timeLeft, mode }: TimerDisplayProps) {
       {mode === 'break' && (
         <div className="text-sm text-tiffany mt-2">{t.restMode}</div>
       )}
+      {mode === 'longBreak' && (
+        <div className="text-sm text-tiffany mt-2">{t.longBreakMode}</div>
+      )}
     </div>
   );
 }

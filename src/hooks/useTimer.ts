@@ -1,19 +1,34 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { TimerMode } from '@/types/timer';
 import type { PomodoroSession } from '@/types/session';
+import type { AlarmSettings } from '@/types/settings';
 import { analytics } from '@/services/analytics/AnalyticsService';
+import { playAlarm } from '@/utils/alarm';
 
 interface UseTimerOptions {
   workTime: number;
   breakTime: number;
+  longBreakTime: number;      // 0 = disabled
+  longBreakInterval: number;  // 0 = disabled, else trigger every N completed work sessions
+  alarm: AlarmSettings;
+  activeLabel: string | null;
   onSessionComplete: (session: PomodoroSession) => void;
 }
 
-export function useTimer({ workTime, breakTime, onSessionComplete }: UseTimerOptions) {
+export function useTimer({
+  workTime,
+  breakTime,
+  longBreakTime,
+  longBreakInterval,
+  alarm,
+  activeLabel,
+  onSessionComplete,
+}: UseTimerOptions) {
   const [timeLeft, setTimeLeft] = useState(workTime * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState<TimerMode>('work');
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Count of completed work sessions (used to trigger long break)
+  const completedSessionsRef = useRef(0);
 
   // Sync timeLeft only when workTime setting changes while not running
   const prevWorkTimeRef = useRef(workTime);
@@ -34,25 +49,38 @@ export function useTimer({ workTime, breakTime, onSessionComplete }: UseTimerOpt
     } else if (timeLeft === 0 && isRunning) {
       setIsRunning(false);
 
-      if (audioRef.current) {
-        audioRef.current.play();
-      }
+      // Play alarm
+      playAlarm(alarm.sound, alarm.repeat);
 
       if (mode === 'work') {
         const session: PomodoroSession = {
           date: new Date().toISOString(),
           duration: workTime * 60,
+          label: activeLabel ?? undefined,
         };
         onSessionComplete(session);
         analytics.track({ name: 'session_completed', properties: { duration: workTime } });
 
-        if (breakTime > 0) {
+        completedSessionsRef.current += 1;
+
+        // Determine next break type
+        const shouldLongBreak =
+          longBreakTime > 0 &&
+          longBreakInterval > 0 &&
+          completedSessionsRef.current % longBreakInterval === 0;
+
+        if (shouldLongBreak) {
+          setMode('longBreak' as TimerMode);
+          setTimeLeft(longBreakTime * 60);
+        } else if (breakTime > 0) {
           setMode('break');
           setTimeLeft(breakTime * 60);
         } else {
+          setMode('work');
           setTimeLeft(workTime * 60);
         }
       } else {
+        // break or longBreak finished
         setMode('work');
         setTimeLeft(workTime * 60);
       }
@@ -61,7 +89,7 @@ export function useTimer({ workTime, breakTime, onSessionComplete }: UseTimerOpt
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, timeLeft, mode, workTime, breakTime, onSessionComplete]);
+  }, [isRunning, timeLeft, mode, workTime, breakTime, longBreakTime, longBreakInterval, alarm, activeLabel, onSessionComplete]);
 
   const toggle = useCallback(() => {
     setIsRunning((prev) => {
@@ -74,8 +102,9 @@ export function useTimer({ workTime, breakTime, onSessionComplete }: UseTimerOpt
     setIsRunning(false);
     setMode('work');
     setTimeLeft(workTime * 60);
+    completedSessionsRef.current = 0;
     analytics.track({ name: 'timer_reset' });
   }, [workTime]);
 
-  return { timeLeft, isRunning, mode, toggle, reset, audioRef };
+  return { timeLeft, isRunning, mode, toggle, reset };
 }

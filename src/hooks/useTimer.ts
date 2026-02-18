@@ -12,6 +12,7 @@ interface UseTimerOptions {
   longBreakInterval: number;  // 0 = disabled, else trigger every N completed work sessions
   alarm: AlarmSettings;
   activeLabel: string | null;
+  activeNote: string;
   onSessionComplete: (session: PomodoroSession) => void;
 }
 
@@ -22,6 +23,7 @@ export function useTimer({
   longBreakInterval,
   alarm,
   activeLabel,
+  activeNote,
   onSessionComplete,
 }: UseTimerOptions) {
   const [timeLeft, setTimeLeft] = useState(workTime * 60);
@@ -57,6 +59,7 @@ export function useTimer({
           date: new Date().toISOString(),
           duration: workTime * 60,
           label: activeLabel ?? undefined,
+          note: activeNote || undefined,
         };
         onSessionComplete(session);
         analytics.track({ name: 'session_completed', properties: { duration: workTime } });
@@ -89,7 +92,7 @@ export function useTimer({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, timeLeft, mode, workTime, breakTime, longBreakTime, longBreakInterval, alarm, activeLabel, onSessionComplete]);
+  }, [isRunning, timeLeft, mode, workTime, breakTime, longBreakTime, longBreakInterval, alarm, activeLabel, activeNote, onSessionComplete]);
 
   const toggle = useCallback(() => {
     setIsRunning((prev) => {

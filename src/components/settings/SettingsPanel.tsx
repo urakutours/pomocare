@@ -238,8 +238,18 @@ function ThemeToggle({
 
 // ---- Label Manager ----
 const LABEL_COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e',
-  '#0abab5', '#3b82f6', '#8b5cf6', '#ec4899',
+  // Reds / Pinks
+  '#ef4444', '#f87171', '#fb7185', '#ec4899',
+  // Oranges / Yellows
+  '#f97316', '#fb923c', '#f59e0b', '#fbbf24',
+  // Greens / Limes
+  '#84cc16', '#4ade80', '#22c55e', '#10b981',
+  // Teals / Blues
+  '#14b8a6', '#0abab5', '#38bdf8', '#3b82f6',
+  // Purples / Violets
+  '#818cf8', '#8b5cf6', '#a78bfa', '#d946ef',
+  // Neutrals
+  '#94a3b8', '#64748b', '#78716c', '#a8a29e',
 ];
 
 function LabelManager({
@@ -306,12 +316,12 @@ function LabelManager({
           {addLabel}
         </button>
       </div>
-      <div className="flex gap-1.5 flex-wrap">
+      <div className="grid grid-cols-8 gap-1.5">
         {LABEL_COLORS.map((c) => (
           <button
             key={c}
             onClick={() => setNewColor(c)}
-            className={`w-5 h-5 rounded-full transition-transform ${newColor === c ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : ''}`}
+            className={`w-6 h-6 rounded-full transition-transform ${newColor === c ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-500 scale-110' : ''}`}
             style={{ backgroundColor: c }}
           />
         ))}

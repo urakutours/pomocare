@@ -42,6 +42,12 @@ export interface Translations {
 
   // Labels
   labelsLabel: string;
+  labelNote: string;
+  labelNotePlaceholder: string;
+  labelSelectPlaceholder: string;
+  addNewLabel: string;
+  labelStats: string;
+  allLabels: string;
   addLabel: string;
   activeLabelLabel: string;
   noLabel: string;

@@ -23,27 +23,37 @@ export function BreakMode({ timeLeft, mode, isRunning, onToggle, onReset, displa
         {formatTime(timeLeft)}
       </div>
 
-      {/* Mode label */}
-      <div className="text-base text-tiffany font-medium mt-2 mb-8">{label}</div>
+      {/* Mode label – 2× size, weight 400 */}
+      <div className="text-2xl text-tiffany font-normal mt-4 mb-10">{label}</div>
 
-      {/* Play / Pause + Skip (reset) */}
+      {/* Buttons */}
       <div className="flex items-center gap-4 mb-12">
-        <button
-          onClick={onToggle}
-          className="w-16 h-16 rounded-full bg-tiffany hover:bg-tiffany-hover text-white flex items-center justify-center transition-colors shadow-md"
-        >
-          {isRunning
-            ? <Pause size={22} fill="white" strokeWidth={0} />
-            : <Play size={22} fill="white" strokeWidth={0} className="ml-0.5" />
-          }
-        </button>
-        <button
-          onClick={onReset}
-          title="Skip break"
-          className="w-12 h-12 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-gray-500 dark:text-gray-300 flex items-center justify-center transition-colors"
-        >
-          <RotateCcw size={16} />
-        </button>
+        {isRunning ? (
+          /* Running → gray Pause button with two vertical lines */
+          <button
+            onClick={onToggle}
+            className="w-16 h-16 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-gray-700 dark:text-gray-300 flex items-center justify-center transition-colors"
+          >
+            <Pause size={24} />
+          </button>
+        ) : (
+          /* Stopped / Paused → Start + Skip Break (matching normal TimerControls) */
+          <>
+            <button
+              onClick={onToggle}
+              className="w-16 h-16 rounded-full bg-tiffany hover:bg-tiffany-hover text-white flex items-center justify-center transition-colors shadow-md"
+            >
+              <Play size={24} className="ml-1" />
+            </button>
+            <button
+              onClick={onReset}
+              title="Skip break"
+              className="w-16 h-16 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-gray-700 dark:text-gray-300 flex items-center justify-center transition-colors"
+            >
+              <RotateCcw size={24} />
+            </button>
+          </>
+        )}
       </div>
 
       {/* Custom message */}

@@ -12,6 +12,7 @@ interface SettingsPanelProps {
   settings: PomodoroSettings;
   onSave: (settings: PomodoroSettings) => void;
   onClose: () => void;
+  onClearAll: () => void;
 }
 
 type SettingsTab = 'general' | 'labels' | 'presets';
@@ -721,7 +722,7 @@ function AlarmSettingsPanel({
   );
 }
 
-export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps) {
+export function SettingsPanel({ settings, onSave, onClose, onClearAll }: SettingsPanelProps) {
   const { t } = useI18n();
   const [workTime, setWorkTime] = useState(settings.workTime);
   const [breakTime, setBreakTime] = useState(settings.breakTime);
@@ -740,6 +741,9 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
   const [alarmRepeat, setAlarmRepeat] = useState(settings.alarm?.repeat ?? 1);
   const [labels, setLabels] = useState<LabelDefinition[]>(settings.labels ?? []);
   const [tab, setTab] = useState<SettingsTab>('general');
+
+  // Data reset confirmation (2-step)
+  const [resetStep, setResetStep] = useState<0 | 1 | 2>(0);
 
   const handleApply = () => {
     onSave({
@@ -910,6 +914,67 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
         >
           {t.applySettings}
         </button>
+      </div>
+
+      {/* Data reset section */}
+      <div className="flex-shrink-0 mt-6 pt-5 border-t border-gray-200 dark:border-neutral-700">
+        <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+          {t.dataResetTitle}
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+          {t.dataResetDescription}
+        </p>
+
+        {resetStep === 0 && (
+          <button
+            onClick={() => setResetStep(1)}
+            className="w-full py-2 rounded-lg border border-red-300 dark:border-red-700 text-red-500 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            {t.dataResetButton}
+          </button>
+        )}
+
+        {resetStep === 1 && (
+          <div className="space-y-2">
+            <p className="text-sm text-red-500 dark:text-red-400 font-medium text-center">
+              {t.dataResetConfirm1}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setResetStep(0)}
+                className="flex-1 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-300 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+              >
+                {t.dataResetCancel}
+              </button>
+              <button
+                onClick={() => setResetStep(2)}
+                className="flex-1 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
+              >
+                {t.dataResetConfirm2}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {resetStep === 2 && (
+          <div className="space-y-2">
+            <p className="text-sm text-red-600 dark:text-red-400 font-semibold text-center">
+              {t.dataResetConfirm1}
+            </p>
+            <button
+              onClick={onClearAll}
+              className="w-full py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition-colors"
+            >
+              {t.dataResetConfirm2}
+            </button>
+            <button
+              onClick={() => setResetStep(0)}
+              className="w-full py-1.5 rounded-lg text-gray-500 dark:text-gray-400 text-xs hover:underline transition-colors"
+            >
+              {t.dataResetCancel}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

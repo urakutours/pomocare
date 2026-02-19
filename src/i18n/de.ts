@@ -64,4 +64,10 @@ export const de: Translations = {
   sessionChangeLabel: 'Bezeichnung ändern',
   sessionEditNote: 'Notiz bearbeiten',
   sessionDelete: 'Löschen',
+  dataResetTitle: 'Daten zurücksetzen',
+  dataResetDescription: 'Alle Sitzungen und Einstellungen löschen. Diese Aktion kann nicht rückgängig gemacht werden.',
+  dataResetButton: 'Alle Daten zurücksetzen',
+  dataResetConfirm1: 'Bist du sicher?',
+  dataResetConfirm2: 'Ja, alles löschen',
+  dataResetCancel: 'Abbrechen',
 };

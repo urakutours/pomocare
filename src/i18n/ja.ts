@@ -64,4 +64,10 @@ export const ja: Translations = {
   sessionChangeLabel: 'ラベルの変更',
   sessionEditNote: 'メモの修正',
   sessionDelete: '削除',
+  dataResetTitle: 'データの初期化',
+  dataResetDescription: 'セッション履歴と設定をすべて削除します。この操作は取り消せません。',
+  dataResetButton: 'データを初期化する',
+  dataResetConfirm1: '本当に削除しますか？',
+  dataResetConfirm2: '完全に削除する',
+  dataResetCancel: 'キャンセル',
 };

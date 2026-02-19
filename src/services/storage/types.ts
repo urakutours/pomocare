@@ -6,4 +6,5 @@ export interface StorageService {
   saveSessions(sessions: PomodoroSession[]): Promise<void>;
   getSettings(): Promise<PomodoroSettings>;
   saveSettings(settings: PomodoroSettings): Promise<void>;
+  clearAll(): Promise<void>;
 }

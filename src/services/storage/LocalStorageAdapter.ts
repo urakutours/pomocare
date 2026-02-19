@@ -40,4 +40,13 @@ export class LocalStorageAdapter implements StorageService {
       console.error('設定の保存に失敗しました');
     }
   }
+
+  async clearAll(): Promise<void> {
+    try {
+      localStorage.removeItem(STORAGE_KEYS.sessions);
+      localStorage.removeItem(STORAGE_KEYS.settings);
+    } catch {
+      console.error('データの初期化に失敗しました');
+    }
+  }
 }

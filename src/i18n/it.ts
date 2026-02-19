@@ -64,4 +64,10 @@ export const it: Translations = {
   sessionChangeLabel: 'Cambia etichetta',
   sessionEditNote: 'Modifica nota',
   sessionDelete: 'Elimina',
+  dataResetTitle: 'Reimposta dati',
+  dataResetDescription: 'Elimina tutta la cronologia delle sessioni e le impostazioni. Questa azione è irreversibile.',
+  dataResetButton: 'Reimposta tutti i dati',
+  dataResetConfirm1: 'Sei sicuro?',
+  dataResetConfirm2: 'Sì, elimina tutto',
+  dataResetCancel: 'Annulla',
 };

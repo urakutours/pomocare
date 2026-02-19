@@ -64,4 +64,10 @@ export const es: Translations = {
   sessionChangeLabel: 'Cambiar etiqueta',
   sessionEditNote: 'Editar nota',
   sessionDelete: 'Eliminar',
+  dataResetTitle: 'Restablecer datos',
+  dataResetDescription: 'Eliminar todo el historial de sesiones y configuración. Esta acción no se puede deshacer.',
+  dataResetButton: 'Restablecer todos los datos',
+  dataResetConfirm1: '¿Estás seguro?',
+  dataResetConfirm2: 'Sí, eliminar todo',
+  dataResetCancel: 'Cancelar',
 };

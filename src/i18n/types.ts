@@ -58,6 +58,14 @@ export interface Translations {
   sessionEditNote: string;
   sessionDelete: string;
 
+  // Data reset
+  dataResetTitle: string;
+  dataResetDescription: string;
+  dataResetButton: string;
+  dataResetConfirm1: string;
+  dataResetConfirm2: string;
+  dataResetCancel: string;
+
   // Stats
   weeklyStats: string;
   weekly: string;

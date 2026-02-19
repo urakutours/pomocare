@@ -64,4 +64,10 @@ export const en: Translations = {
   sessionChangeLabel: 'Change Label',
   sessionEditNote: 'Edit Note',
   sessionDelete: 'Delete',
+  dataResetTitle: 'Reset Data',
+  dataResetDescription: 'Delete all session history and settings. This action cannot be undone.',
+  dataResetButton: 'Reset All Data',
+  dataResetConfirm1: 'Are you sure?',
+  dataResetConfirm2: 'Yes, delete everything',
+  dataResetCancel: 'Cancel',
 };

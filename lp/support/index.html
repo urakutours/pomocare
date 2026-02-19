@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support - PomoCare</title>
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .support-content { max-width: 760px; margin: 0 auto; padding: 120px 24px 80px; }
+    .support-content h1 { font-size: 2rem; font-weight: 700; margin-bottom: 32px; color: #111827; }
+    .support-content h2 { font-size: 1.25rem; font-weight: 600; margin: 36px 0 12px; color: #111827; }
+    .support-content p, .support-content li { color: #4b5563; font-size: 0.95rem; line-height: 1.8; margin-bottom: 12px; }
+    .support-content ul { padding-left: 24px; list-style: disc; }
+    .legal-back { display: inline-flex; align-items: center; gap: 6px; color: #0abab5; font-weight: 500; margin-bottom: 24px; font-size: 0.9rem; }
+    .legal-back:hover { text-decoration: underline; }
+    .contact-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 32px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    .contact-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+    .contact-card p { color: #6b7280; margin-bottom: 16px; }
+    .contact-card a { color: #0abab5; font-weight: 600; font-size: 1.1rem; }
+    .contact-card a:hover { text-decoration: underline; }
+    .support-faq { margin-top: 40px; }
+    .support-faq details {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .support-faq summary {
+      padding: 20px 24px;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: #111827;
+    }
+    .support-faq summary::-webkit-details-marker { display: none; }
+    .support-faq summary::after { content: '+'; font-size: 1.4rem; color: #9ca3af; }
+    .support-faq details[open] summary::after { content: '-'; }
+    .support-faq details p { padding: 0 24px 20px; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <nav class="nav container">
+      <a href="/" class="logo" aria-label="PomoCare">
+        <svg class="logo-icon" viewBox="0 0 512 512" width="36" height="36">
+          <circle cx="256" cy="256" r="256" fill="#0abab5"/>
+          <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
+        </svg>
+        <span class="logo-text">PomoCare</span>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Language Switcher -->
+  <div class="lang-switcher" id="langSwitcher">
+    <button class="lang-btn active" data-lang="ja">JP</button>
+    <button class="lang-btn" data-lang="en">EN</button>
+  </div>
+
+  <main class="support-content">
+    <a href="/" class="legal-back">&larr; <span data-i18n="backToHome">トップに戻る</span></a>
+
+    <!-- Japanese version -->
+    <div id="support-ja">
+      <h1>サポート</h1>
+
+      <div class="contact-card">
+        <h3>お問い合わせ</h3>
+        <p>PomoCareに関するご質問やお問い合わせはメールにてお願いいたします。</p>
+        <a href="mailto:support@pomocare.com">support@pomocare.com</a>
+      </div>
+
+      <h2>よくある質問</h2>
+      <div class="support-faq">
+        <details>
+          <summary>データが消えてしまいました。復元できますか？</summary>
+          <p>無料版をご利用の場合、データはデバイスのブラウザ（ローカルストレージ）に保存されています。ブラウザのキャッシュやデータを消去した場合、データは復元できません。有料版でクラウド同期を有効にしている場合は、再ログインでデータを復元できます。定期的にCSVエクスポート機能でバックアップを取ることもおすすめします。</p>
+        </details>
+        <details>
+          <summary>別のデバイスにデータを移行できますか？</summary>
+          <p>有料版（Standard / Pro）をご利用の場合、クラウド同期機能により複数のデバイス間でデータを自動同期できます。同じアカウントでログインするだけで、すべてのデバイスで同じデータにアクセスできます。無料版の場合は、CSVエクスポート機能でデータを書き出すことができます。</p>
+        </details>
+        <details>
+          <summary>アカウントを削除したいです。</summary>
+          <p>有料版のアカウント削除は、アプリ内の設定画面から行えます。または support@pomocare.com にご連絡ください。アカウントを削除すると、クラウド上のすべてのデータが完全に削除され、復元できなくなりますのでご注意ください。</p>
+        </details>
+        <details>
+          <summary>有料プランの解約方法を教えてください。</summary>
+          <p>サブスクリプション（Standard）プランの解約は、ご購入いただいたアプリストア（Google Play / Microsoft Store）から行えます。各ストアのサブスクリプション管理画面からキャンセルしてください。</p>
+        </details>
+        <details>
+          <summary>アプリが正しく動作しません。</summary>
+          <p>以下をお試しください:<br>
+          1. ブラウザまたはアプリを最新版にアップデートする<br>
+          2. ブラウザのキャッシュをクリアする（データは消えません）<br>
+          3. 別のブラウザで試す<br>
+          それでも解決しない場合は、support@pomocare.com までお問い合わせください。</p>
+        </details>
+        <details>
+          <summary>機能のリクエストや改善提案を送りたいです。</summary>
+          <p>ぜひ support@pomocare.com までお送りください。ユーザーの皆様からのフィードバックは、PomoCareの改善に活かさせていただきます。</p>
+        </details>
+      </div>
+
+      <h2>対応プラットフォーム</h2>
+      <ul>
+        <li><strong>Web:</strong> Chrome、Safari、Firefox、Edge（最新版）</li>
+        <li><strong>Windows:</strong> Windows 10 / 11（Microsoft Store）</li>
+        <li><strong>Android:</strong> Android 8.0以降（Google Play）</li>
+      </ul>
+
+      <h2>運営情報</h2>
+      <p>
+        運営会社: 株式会社URAKU<br>
+        メール: support@pomocare.com
+      </p>
+    </div>
+
+    <!-- English version -->
+    <div id="support-en" style="display:none;">
+      <h1>Support</h1>
+
+      <div class="contact-card">
+        <h3>Contact Us</h3>
+        <p>For questions or inquiries about PomoCare, please reach out via email.</p>
+        <a href="mailto:support@pomocare.com">support@pomocare.com</a>
+      </div>
+
+      <h2>Frequently Asked Questions</h2>
+      <div class="support-faq">
+        <details>
+          <summary>My data disappeared. Can I recover it?</summary>
+          <p>If you're using the free version, data is stored in your browser's local storage. If you cleared your browser cache or data, it cannot be recovered. If you're using a paid plan with cloud sync enabled, simply log in again to restore your data. We also recommend regularly backing up with the CSV export feature.</p>
+        </details>
+        <details>
+          <summary>Can I transfer data to another device?</summary>
+          <p>With a paid plan (Standard / Pro), cloud sync automatically synchronizes your data across multiple devices. Just log in with the same account to access your data everywhere. For the free version, you can export your data using the CSV export feature.</p>
+        </details>
+        <details>
+          <summary>How do I delete my account?</summary>
+          <p>You can delete your paid account from the App's settings, or by contacting support@pomocare.com. Please note that account deletion will permanently remove all cloud data and cannot be undone.</p>
+        </details>
+        <details>
+          <summary>How do I cancel my paid plan?</summary>
+          <p>To cancel a Standard (subscription) plan, go to the subscription management section of the app store where you made the purchase (Google Play / Microsoft Store).</p>
+        </details>
+        <details>
+          <summary>The app isn't working properly.</summary>
+          <p>Please try the following:<br>
+          1. Update your browser or app to the latest version<br>
+          2. Clear your browser cache (this won't delete your data)<br>
+          3. Try a different browser<br>
+          If the issue persists, please contact us at support@pomocare.com.</p>
+        </details>
+        <details>
+          <summary>I'd like to suggest a feature or improvement.</summary>
+          <p>Please send your ideas to support@pomocare.com. We value feedback from our users and use it to improve PomoCare.</p>
+        </details>
+      </div>
+
+      <h2>Supported Platforms</h2>
+      <ul>
+        <li><strong>Web:</strong> Chrome, Safari, Firefox, Edge (latest versions)</li>
+        <li><strong>Windows:</strong> Windows 10 / 11 (Microsoft Store)</li>
+        <li><strong>Android:</strong> Android 8.0+ (Google Play)</li>
+      </ul>
+
+      <h2>Company Information</h2>
+      <p>
+        Operated by: URAKU & CO.<br>
+        Email: support@pomocare.com
+      </p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <svg class="logo-icon" viewBox="0 0 512 512" width="28" height="28">
+          <circle cx="256" cy="256" r="256" fill="#0abab5"/>
+          <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
+        </svg>
+        <span class="logo-text">PomoCare</span>
+      </div>
+      <div class="footer-links">
+        <a href="/privacy/">プライバシーポリシー</a>
+        <a href="/terms/">利用規約</a>
+        <a href="/support/">サポート</a>
+      </div>
+      <div class="footer-copy">
+        <p>&copy; 2026 Pomocare. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function setLegalLang(lang) {
+      document.getElementById('support-ja').style.display = lang === 'ja' ? 'block' : 'none';
+      document.getElementById('support-en').style.display = lang === 'en' ? 'block' : 'none';
+      document.documentElement.lang = lang;
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+      localStorage.setItem('pomocare-lp-lang', lang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('pomocare-lp-lang');
+      const lang = saved || (navigator.language.startsWith('ja') ? 'ja' : 'en');
+      setLegalLang(lang);
+      document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => setLegalLang(b.dataset.lang)));
+    });
+  </script>
+</body>
+</html>

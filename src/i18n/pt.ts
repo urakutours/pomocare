@@ -64,4 +64,10 @@ export const pt: Translations = {
   sessionChangeLabel: 'Alterar etiqueta',
   sessionEditNote: 'Editar nota',
   sessionDelete: 'Excluir',
+  dataResetTitle: 'Redefinir dados',
+  dataResetDescription: 'Excluir todo o histórico de sessões e configurações. Esta ação não pode ser desfeita.',
+  dataResetButton: 'Redefinir todos os dados',
+  dataResetConfirm1: 'Tem certeza?',
+  dataResetConfirm2: 'Sim, excluir tudo',
+  dataResetCancel: 'Cancelar',
 };

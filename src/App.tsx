@@ -181,6 +181,11 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     reset();
   };
 
+  const handleClearAll = async () => {
+    await storage.clearAll();
+    window.location.reload();
+  };
+
   const handleFocusStop = () => {
     toggle();
   };
@@ -236,6 +241,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             settings={{ ...settings, activeLabel, labels }}
             onSave={handleSaveSettings}
             onClose={() => setView('timer')}
+            onClearAll={handleClearAll}
           />
         )}
 
@@ -282,6 +288,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           settings={{ ...settings, activeLabel, labels }}
           onSave={handleSaveSettings}
           onClose={() => setView('timer')}
+          onClearAll={handleClearAll}
         />
       )}
 

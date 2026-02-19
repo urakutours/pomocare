@@ -1,4 +1,4 @@
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Play, Square, RotateCcw } from 'lucide-react';
 import { formatTime } from '@/utils/time';
 import type { TimerMode } from '@/types/timer';
 import { useI18n } from '@/contexts/I18nContext';
@@ -29,12 +29,12 @@ export function BreakMode({ timeLeft, mode, isRunning, onToggle, onReset, displa
       {/* Buttons */}
       <div className="flex items-center gap-4 mb-12">
         {isRunning ? (
-          /* Running → gray Pause button with two vertical lines */
+          /* Running → gray Pause button with filled square */
           <button
             onClick={onToggle}
             className="w-16 h-16 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-gray-700 dark:text-gray-300 flex items-center justify-center transition-colors"
           >
-            <Pause size={24} />
+            <Square size={18} fill="currentColor" strokeWidth={0} />
           </button>
         ) : (
           /* Stopped / Paused → Start + Skip Break (matching normal TimerControls) */

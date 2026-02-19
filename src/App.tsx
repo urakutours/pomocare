@@ -216,14 +216,35 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           />
         }
       >
-        <BreakMode
-          timeLeft={timeLeft}
-          mode={mode}
-          isRunning={isRunning}
-          onToggle={toggle}
-          onReset={reset}
-          displayMessage={displayMessage}
-        />
+        {view === 'settings' && (
+          <SettingsPanel
+            settings={{ ...settings, activeLabel, labels }}
+            onSave={handleSaveSettings}
+            onClose={() => setView('timer')}
+          />
+        )}
+
+        {view === 'stats' && (
+          <StatsChart
+            sessions={sessions}
+            labels={labels}
+            getWeekData={getWeekData}
+            getMonthData={getMonthData}
+            getYearData={getYearData}
+            onClose={() => setView('timer')}
+          />
+        )}
+
+        {view === 'timer' && (
+          <BreakMode
+            timeLeft={timeLeft}
+            mode={mode}
+            isRunning={isRunning}
+            onToggle={toggle}
+            onReset={reset}
+            displayMessage={displayMessage}
+          />
+        )}
       </AppShell>
     );
   }

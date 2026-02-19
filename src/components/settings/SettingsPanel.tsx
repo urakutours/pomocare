@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, Palette } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, Palette, GripVertical } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition } from '@/types/session';
@@ -477,7 +477,7 @@ function LabelDotMenu({
   );
 }
 
-// ---- Label Manager (redesigned) ----
+// ---- Label Manager (redesigned with drag-to-reorder) ----
 function LabelManager({
   labels,
   onChange,
@@ -488,6 +488,8 @@ function LabelManager({
   addLabel: string;
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
 
   const handleAdd = (label: LabelDefinition) => {
     onChange([...labels, label]);
@@ -505,6 +507,72 @@ function LabelManager({
     onChange(labels.filter((l) => l.id !== id));
   };
 
+  const handleDragStart = useCallback((idx: number) => {
+    setDragIdx(idx);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    setOverIdx(idx);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, dropIdx: number) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === dropIdx) {
+      setDragIdx(null);
+      setOverIdx(null);
+      return;
+    }
+    const reordered = [...labels];
+    const [moved] = reordered.splice(dragIdx, 1);
+    reordered.splice(dropIdx, 0, moved);
+    onChange(reordered);
+    setDragIdx(null);
+    setOverIdx(null);
+  }, [dragIdx, labels, onChange]);
+
+  const handleDragEnd = useCallback(() => {
+    setDragIdx(null);
+    setOverIdx(null);
+  }, []);
+
+  // --- Touch-based reorder ---
+  const touchStartIdx = useRef<number | null>(null);
+  const touchCurrentIdx = useRef<number | null>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleTouchStart = useCallback((idx: number) => {
+    touchStartIdx.current = idx;
+    setDragIdx(idx);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!el) return;
+    const rowEl = el.closest('[data-label-idx]') as HTMLElement | null;
+    if (rowEl) {
+      const idx = Number(rowEl.dataset.labelIdx);
+      touchCurrentIdx.current = idx;
+      setOverIdx(idx);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const from = touchStartIdx.current;
+    const to = touchCurrentIdx.current;
+    if (from !== null && to !== null && from !== to) {
+      const reordered = [...labels];
+      const [moved] = reordered.splice(from, 1);
+      reordered.splice(to, 0, moved);
+      onChange(reordered);
+    }
+    touchStartIdx.current = null;
+    touchCurrentIdx.current = null;
+    setDragIdx(null);
+    setOverIdx(null);
+  }, [labels, onChange]);
+
   return (
     <div>
       {/* Add button at top */}
@@ -521,8 +589,26 @@ function LabelManager({
         {labels.length === 0 && (
           <p className="text-sm text-gray-400 dark:text-gray-500 py-2">ラベルがありません</p>
         )}
-        {labels.map((l) => (
-          <div key={l.id} className="flex items-center gap-2.5 py-2 px-1 border-b border-gray-100 dark:border-neutral-700">
+        {labels.map((l, i) => (
+          <div
+            key={l.id}
+            data-label-idx={i}
+            ref={(el) => { rowRefs.current[i] = el; }}
+            draggable
+            onDragStart={() => handleDragStart(i)}
+            onDragOver={(e) => handleDragOver(e, i)}
+            onDrop={(e) => handleDrop(e, i)}
+            onDragEnd={handleDragEnd}
+            onTouchStart={() => handleTouchStart(i)}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className={`flex items-center gap-2 py-2 px-1 border-b border-gray-100 dark:border-neutral-700 transition-colors select-none ${
+              dragIdx === i ? 'opacity-40' : ''
+            } ${overIdx === i && dragIdx !== i ? 'bg-tiffany/10' : ''}`}
+          >
+            <span className="cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-500 flex-shrink-0 touch-none">
+              <GripVertical size={14} />
+            </span>
             <span
               className="w-3 h-3 rounded-full flex-shrink-0"
               style={{ backgroundColor: l.color }}

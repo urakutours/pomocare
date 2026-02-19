@@ -15,25 +15,25 @@ export function BreakMode({ timeLeft, mode, onStop, displayMessage }: BreakModeP
   const label = mode === 'longBreak' ? t.longBreakMode : t.restMode;
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 gap-8">
-      {/* Mode label */}
-      <div className="text-sm text-tiffany font-medium tracking-wide">{label}</div>
-
+    <div className="flex flex-col items-center justify-center flex-1 gap-10">
       {/* Timer display */}
-      <div className="text-7xl font-extralight text-gray-700 dark:text-gray-300 tracking-tight tabular-nums">
+      <div className="text-7xl font-light text-gray-800 dark:text-gray-200 tracking-tight tabular-nums">
         {formatTime(timeLeft)}
       </div>
 
-      {/* Stop button */}
+      {/* Mode label */}
+      <div className="text-base text-tiffany font-medium -mt-6">{label}</div>
+
+      {/* Stop button — tiffany circle like the main play button */}
       <button
         onClick={onStop}
-        className="w-14 h-14 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-neutral-700 dark:hover:bg-neutral-600 text-gray-400 dark:text-gray-400 flex items-center justify-center transition-colors"
+        className="w-16 h-16 rounded-full bg-tiffany hover:bg-tiffany-hover text-white flex items-center justify-center transition-colors shadow-md"
       >
-        <Square size={16} />
+        <Square size={18} fill="white" strokeWidth={0} />
       </button>
 
       {/* Custom message */}
-      <p className="text-sm text-gray-400 dark:text-gray-500 text-center px-4">
+      <p className="text-sm text-gray-400 dark:text-gray-500 text-center px-6">
         {displayMessage}
       </p>
     </div>

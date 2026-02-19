@@ -29,12 +29,12 @@ export function BreakMode({ timeLeft, mode, isRunning, onToggle, onReset, displa
       {/* Buttons */}
       <div className="flex items-center gap-4 mb-12">
         {isRunning ? (
-          /* Running → gray Pause button with filled square */
+          /* Running → gray stop button (matching FocusMode) */
           <button
             onClick={onToggle}
-            className="w-16 h-16 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-gray-700 dark:text-gray-300 flex items-center justify-center transition-colors"
+            className="w-16 h-16 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-gray-500 dark:text-gray-300 flex items-center justify-center transition-colors"
           >
-            <Square size={18} fill="currentColor" strokeWidth={0} />
+            <Square size={18} />
           </button>
         ) : (
           /* Stopped / Paused → Start + Skip Break (matching normal TimerControls) */

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { X, Download } from 'lucide-react';
 import type { DayData, MonthDayData } from '@/hooks/useSessions';
 import { useI18n } from '@/contexts/I18nContext';
@@ -29,13 +29,14 @@ function StackedBar({
   maxCount,
   segments,
   totalSeconds,
+  barHeight,
 }: {
   total: number;
   maxCount: number;
   segments: { color: string; count: number }[];
   totalSeconds: number;
+  barHeight: number;
 }) {
-  const barHeight = 80;
   const heightPx = total > 0 ? Math.max((total / maxCount) * barHeight, 6) : 0;
   return (
     <div className="flex flex-col items-center flex-1 group relative">
@@ -70,15 +71,17 @@ function Bar({
   count,
   totalSeconds,
   color,
+  barHeight,
 }: {
   ratio: number;
   count: number;
   totalSeconds: number;
   color?: string;
+  barHeight: number;
 }) {
   return (
     <div className="flex flex-col items-center flex-1 group relative">
-      <div className="w-full flex items-end justify-center" style={{ height: '80px' }}>
+      <div className="w-full flex items-end justify-center" style={{ height: `${barHeight}px` }}>
         <div
           className="w-full max-w-[28px] rounded-t transition-all"
           style={{
@@ -109,6 +112,27 @@ export function StatsChart({
   const [tab, setTab] = useState<StatTab>('weekly');
   const [offset, setOffset] = useState(0);
   const [filterLabel, setFilterLabel] = useState<string | null>(null);
+
+  // Resizable bar chart height
+  const [barHeight, setBarHeight] = useState(80);
+  const dragRef = useRef<{ startY: number; startH: number } | null>(null);
+
+  const handleDragStart = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    dragRef.current = { startY: e.clientY, startH: barHeight };
+    const onMove = (ev: PointerEvent) => {
+      if (!dragRef.current) return;
+      const delta = dragRef.current.startY - ev.clientY;
+      setBarHeight(Math.max(40, Math.min(300, dragRef.current.startH + delta)));
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }, [barHeight]);
 
   const isAllMode = filterLabel === null;
 
@@ -346,9 +370,9 @@ export function StatsChart({
             <div className="flex justify-between items-end mb-1">
               {effectiveWeekData.map((data, i) =>
                 isAllMode && weekStackedData ? (
-                  <StackedBar key={i} total={data.count} maxCount={weekMaxCount} segments={(data as typeof weekStackedData[0]).segments} totalSeconds={data.totalSeconds} />
+                  <StackedBar key={i} total={data.count} maxCount={weekMaxCount} segments={(data as typeof weekStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} />
                 ) : (
-                  <Bar key={i} ratio={data.count / weekMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} />
+                  <Bar key={i} ratio={data.count / weekMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} />
                 )
               )}
             </div>
@@ -366,9 +390,9 @@ export function StatsChart({
             <div className="flex justify-between items-end mb-1 gap-px">
               {effectiveMonthData.map((data, i) =>
                 isAllMode && monthStackedData ? (
-                  <StackedBar key={i} total={data.count} maxCount={monthMaxCount} segments={(data as typeof monthStackedData[0]).segments} totalSeconds={data.totalSeconds} />
+                  <StackedBar key={i} total={data.count} maxCount={monthMaxCount} segments={(data as typeof monthStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} />
                 ) : (
-                  <Bar key={i} ratio={data.count / monthMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} />
+                  <Bar key={i} ratio={data.count / monthMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} />
                 )
               )}
             </div>
@@ -388,9 +412,9 @@ export function StatsChart({
             <div className="flex justify-between items-end mb-1">
               {effectiveYearData.map((data, i) =>
                 isAllMode && yearStackedData ? (
-                  <StackedBar key={i} total={data.count} maxCount={yearMaxCount} segments={(data as typeof yearStackedData[0]).segments} totalSeconds={data.totalSeconds} />
+                  <StackedBar key={i} total={data.count} maxCount={yearMaxCount} segments={(data as typeof yearStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} />
                 ) : (
-                  <Bar key={i} ratio={data.count / yearMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} />
+                  <Bar key={i} ratio={data.count / yearMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} />
                 )
               )}
             </div>
@@ -404,6 +428,14 @@ export function StatsChart({
           </div>
         )}
 
+        {/* Drag handle to resize chart height */}
+        <div
+          onPointerDown={handleDragStart}
+          className="flex justify-center items-center py-2 cursor-ns-resize touch-none select-none group"
+        >
+          <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-neutral-600 group-hover:bg-gray-300 dark:group-hover:bg-neutral-500 transition-colors" />
+        </div>
+
         {/* Per-label aggregation section */}
         {(labelStats.length > 0 || unlabeledSessions.length > 0) && (
           <div className="mt-5">
@@ -414,28 +446,32 @@ export function StatsChart({
                 return (
                   <div key={label.id} className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: label.color }} />
-                    <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 truncate">{label.name}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 tabular-nums">{count} &middot; {formatDuration(totalSeconds)}</span>
-                    <div className="w-16 h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden flex-shrink-0">
+                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[40%]">{label.name}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 tabular-nums whitespace-nowrap">{count} &middot; {formatDuration(totalSeconds)}</span>
+                    <div className="flex-1 min-w-[40px] h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${ratio * 100}%`, backgroundColor: label.color }} />
                     </div>
                   </div>
                 );
               })}
-              {unlabeledSessions.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-neutral-600" />
-                  <span className="text-sm text-gray-500 dark:text-gray-400 flex-1 truncate">{t.noLabel}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 tabular-nums">
-                    {unlabeledSessions.length} &middot; {formatDuration(unlabeledSessions.reduce((s, sess) => s + sess.duration, 0))}
-                  </span>
-                  <div className="w-16 h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden flex-shrink-0">
-                    <div className="h-full rounded-full bg-gray-300 dark:bg-neutral-600 transition-all"
-                      style={{ width: allTotalSeconds > 0 ? `${(unlabeledSessions.reduce((s, sess) => s + sess.duration, 0) / allTotalSeconds) * 100}%` : '0%' }}
-                    />
+              {unlabeledSessions.length > 0 && (() => {
+                const unlabeledTotal = unlabeledSessions.reduce((s, sess) => s + sess.duration, 0);
+                const unlabeledRatio = allTotalSeconds > 0 ? unlabeledTotal / allTotalSeconds : 0;
+                return (
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-neutral-600" />
+                    <span className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[40%]">{t.noLabel}</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 tabular-nums whitespace-nowrap">
+                      {unlabeledSessions.length} &middot; {formatDuration(unlabeledTotal)}
+                    </span>
+                    <div className="flex-1 min-w-[40px] h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-gray-300 dark:bg-neutral-600 transition-all"
+                        style={{ width: `${unlabeledRatio * 100}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
         )}

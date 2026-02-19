@@ -140,6 +140,16 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     setLabels(settings.labels ?? []);
   }, [settings.labels]);
 
+  // Persist activeLabel to settings whenever it changes
+  const prevActiveLabelRef = useRef(activeLabel);
+  useEffect(() => {
+    if (prevActiveLabelRef.current !== activeLabel) {
+      prevActiveLabelRef.current = activeLabel;
+      updateSettings({ ...settings, activeLabel });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLabel]);
+
   const onSessionComplete = useCallback(
     (session: PomodoroSession) => {
       addSession(session);

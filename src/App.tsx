@@ -115,6 +115,111 @@ function QuickLabelModal({
   );
 }
 
+// ---- Custom label selector with color dots ----
+function LabelSelect({
+  labels,
+  value,
+  placeholder,
+  addNewLabel,
+  onChange,
+}: {
+  labels: LabelDefinition[];
+  value: string | null;
+  placeholder: string;
+  addNewLabel: string;
+  onChange: (val: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const selected = labels.find((l) => l.id === value) ?? null;
+
+  return (
+    <div ref={ref} className="relative w-full max-w-xs">
+      {/* Trigger button */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-left focus:outline-none focus:ring-2 focus:ring-tiffany"
+      >
+        {selected ? (
+          <>
+            <span
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: selected.color }}
+            />
+            <span className="flex-1 truncate text-gray-700 dark:text-gray-200">{selected.name}</span>
+          </>
+        ) : (
+          <span className="flex-1 text-gray-400 dark:text-gray-500">{placeholder}</span>
+        )}
+        <svg className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+        </svg>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute z-40 w-full mt-1 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg overflow-hidden">
+          {/* No label option */}
+          <button
+            type="button"
+            onClick={() => { onChange(''); setOpen(false); }}
+            className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-600 ${!value ? 'bg-tiffany/10' : ''}`}
+          >
+            <span className="w-3 h-3 rounded-full flex-shrink-0 border border-gray-300 dark:border-neutral-500" />
+            <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>
+          </button>
+
+          {/* Label options */}
+          {labels.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              onClick={() => { onChange(l.id); setOpen(false); }}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-600 ${value === l.id ? 'bg-tiffany/10' : ''}`}
+            >
+              <span
+                className="w-3 h-3 rounded-full flex-shrink-0"
+                style={{ backgroundColor: l.color }}
+              />
+              <span className="flex-1 truncate text-gray-700 dark:text-gray-200">{l.name}</span>
+              {value === l.id && (
+                <svg className="w-3.5 h-3.5 text-tiffany flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
+          ))}
+
+          {/* Add new label */}
+          <button
+            type="button"
+            onClick={() => { onChange('__new__'); setOpen(false); }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-tiffany hover:bg-tiffany/5 border-t border-gray-100 dark:border-neutral-600"
+          >
+            <span className="w-3 h-3 rounded-full flex-shrink-0 border-2 border-dashed border-tiffany flex items-center justify-center">
+            </span>
+            <span>{addNewLabel}</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   const { t } = useI18n();
   const {
@@ -270,9 +375,6 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     );
   }
 
-  // Active label definition
-  const activeLabelDef = labels.find((l) => l.id === activeLabel) ?? null;
-
   return (
     <AppShell
       header={
@@ -323,42 +425,20 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
             {/* Label dropdown + memo */}
             <div className="mt-4 space-y-2 flex flex-col items-center">
-              {/* Dropdown row */}
-              <div className="relative w-full max-w-xs">
-                {/* Color dot indicator */}
-                {activeLabelDef && (
-                  <span
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full pointer-events-none"
-                    style={{ backgroundColor: activeLabelDef.color }}
-                  />
-                )}
-                <select
-                  value={activeLabel ?? ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === '__new__') {
-                      setShowLabelCreator(true);
-                    } else {
-                      setActiveLabel(val === '' ? null : val);
-                    }
-                  }}
-                  className={`w-full py-1.5 pr-3 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 appearance-none ${activeLabelDef ? 'pl-7' : 'pl-3'}`}
-                >
-                  <option value="">{t.labelSelectPlaceholder}</option>
-                  {labels.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name}
-                    </option>
-                  ))}
-                  <option value="__new__">{t.addNewLabel}</option>
-                </select>
-                {/* Custom chevron */}
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </span>
-              </div>
+              {/* Custom label selector with color dots */}
+              <LabelSelect
+                labels={labels}
+                value={activeLabel}
+                placeholder={t.labelSelectPlaceholder}
+                addNewLabel={t.addNewLabel}
+                onChange={(val) => {
+                  if (val === '__new__') {
+                    setShowLabelCreator(true);
+                  } else {
+                    setActiveLabel(val === '' ? null : val);
+                  }
+                }}
+              />
 
               {/* Task memo input (same width as dropdown) */}
               {activeLabel && (

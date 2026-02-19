@@ -358,8 +358,53 @@ function AddLabelModal({
   );
 }
 
+// ---- Shared confirm modal (same style as FocusMode) ----
+function ConfirmModal({
+  message,
+  confirmLabel,
+  confirmClass,
+  onConfirm,
+  onCancel,
+}: {
+  message: string;
+  confirmLabel: string;
+  confirmClass?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl p-6 w-72 mx-4 flex flex-col gap-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-center text-sm font-medium text-gray-700 dark:text-gray-200 leading-relaxed">
+          {message}
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-neutral-600 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+          >
+            キャンセル
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`flex-1 py-2.5 rounded-xl text-sm text-white font-medium transition-colors ${confirmClass ?? 'bg-red-500 hover:bg-red-600'}`}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---- Edit Label Modal ----
-type EditMode = 'color' | 'name' | 'delete' | null;
+type EditMode = 'color' | 'name' | null;
 
 function LabelDotMenu({
   label,
@@ -376,6 +421,7 @@ function LabelDotMenu({
   const [mode, setMode] = useState<EditMode>(null);
   const [editName, setEditName] = useState(label.name);
   const [editColor, setEditColor] = useState(label.color);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const close = () => { setOpen(false); setMode(null); };
@@ -393,88 +439,88 @@ function LabelDotMenu({
   }, [open]);
 
   return (
-    <div ref={menuRef} className="relative flex-shrink-0">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
-      >
-        <MoreVertical size={14} />
-      </button>
+    <>
+      {/* Delete confirm modal — rendered outside the dropdown so it overlays everything */}
+      {showDeleteConfirm && (
+        <ConfirmModal
+          message={`「${label.name}」を削除しますか？`}
+          confirmLabel="削除"
+          confirmClass="bg-red-500 hover:bg-red-600"
+          onConfirm={() => { setShowDeleteConfirm(false); onDelete(label.id); }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
 
-      {open && (
-        <div className="absolute right-0 top-6 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-44 overflow-hidden">
-          {mode === null && (
-            <>
-              <button
-                onClick={() => setMode('color')}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
-              >
-                <Palette size={13} /> 色を変更
-              </button>
-              <button
-                onClick={() => { setEditName(label.name); setMode('name'); }}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
-              >
-                <Pencil size={13} /> 名前を変更
-              </button>
-              <button
-                onClick={() => setMode('delete')}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
-              >
-                <Trash2 size={13} /> 削除
-              </button>
-            </>
-          )}
-          {mode === 'color' && (
-            <div className="p-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">色を選択</p>
-              <ColorPicker value={editColor} onChange={(c) => setEditColor(c)} />
-              <button
-                onClick={() => { onChangeColor(label.id, editColor); close(); }}
-                className="mt-3 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
-              >
-                適用
-              </button>
-            </div>
-          )}
-          {mode === 'name' && (
-            <div className="p-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">名前を変更</p>
-              <input
-                autoFocus
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') { onChangeName(label.id, editName.trim()); close(); }
-                  if (e.key === 'Escape') close();
-                }}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-600 dark:text-gray-200"
-              />
-              <button
-                onClick={() => { if (editName.trim()) { onChangeName(label.id, editName.trim()); close(); } }}
-                className="mt-2 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
-              >
-                適用
-              </button>
-            </div>
-          )}
-          {mode === 'delete' && (
-            <div className="p-3">
-              <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">「{label.name}」を削除しますか？</p>
-              <div className="flex gap-2">
-                <button onClick={close} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300">
-                  キャンセル
+      <div ref={menuRef} className="relative flex-shrink-0">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
+        >
+          <MoreVertical size={14} />
+        </button>
+
+        {open && (
+          <div className="absolute right-0 top-6 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-44 overflow-hidden">
+            {mode === null && (
+              <>
+                <button
+                  onClick={() => setMode('color')}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
+                >
+                  <Palette size={13} /> 色を変更
                 </button>
-                <button onClick={() => { onDelete(label.id); close(); }} className="flex-1 py-1.5 text-xs bg-red-500 text-white rounded-lg hover:bg-red-600">
-                  削除
+                <button
+                  onClick={() => { setEditName(label.name); setMode('name'); }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
+                >
+                  <Pencil size={13} /> 名前を変更
+                </button>
+                <button
+                  onClick={() => { close(); setShowDeleteConfirm(true); }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
+                >
+                  <Trash2 size={13} /> 削除
+                </button>
+              </>
+            )}
+            {mode === 'color' && (
+              <div className="p-3">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">色を選択</p>
+                <ColorPicker value={editColor} onChange={(c) => setEditColor(c)} />
+                <button
+                  onClick={() => { onChangeColor(label.id, editColor); close(); }}
+                  className="mt-3 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
+                >
+                  適用
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+            )}
+            {mode === 'name' && (
+              <div className="p-3">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">名前を変更</p>
+                <input
+                  autoFocus
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { onChangeName(label.id, editName.trim()); close(); }
+                    if (e.key === 'Escape') close();
+                  }}
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-600 dark:text-gray-200"
+                />
+                <button
+                  onClick={() => { if (editName.trim()) { onChangeName(label.id, editName.trim()); close(); } }}
+                  className="mt-2 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
+                >
+                  適用
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -742,8 +788,8 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll }: Setting
   const [labels, setLabels] = useState<LabelDefinition[]>(settings.labels ?? []);
   const [tab, setTab] = useState<SettingsTab>('general');
 
-  // Data reset confirmation (2-step)
-  const [resetStep, setResetStep] = useState<0 | 1 | 2>(0);
+  // Data reset confirmation modal
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const handleApply = () => {
     onSave({
@@ -870,6 +916,22 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll }: Setting
                 ))}
               </select>
             </div>
+
+            {/* Data reset — at the bottom of General tab */}
+            <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                {t.dataResetTitle}
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                {t.dataResetDescription}
+              </p>
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="w-full py-2 rounded-lg border border-red-300 dark:border-red-700 text-red-500 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                {t.dataResetButton}
+              </button>
+            </div>
           </div>
         )}
 
@@ -916,66 +978,16 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll }: Setting
         </button>
       </div>
 
-      {/* Data reset section */}
-      <div className="flex-shrink-0 mt-6 pt-5 border-t border-gray-200 dark:border-neutral-700">
-        <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
-          {t.dataResetTitle}
-        </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
-          {t.dataResetDescription}
-        </p>
-
-        {resetStep === 0 && (
-          <button
-            onClick={() => setResetStep(1)}
-            className="w-full py-2 rounded-lg border border-red-300 dark:border-red-700 text-red-500 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-          >
-            {t.dataResetButton}
-          </button>
-        )}
-
-        {resetStep === 1 && (
-          <div className="space-y-2">
-            <p className="text-sm text-red-500 dark:text-red-400 font-medium text-center">
-              {t.dataResetConfirm1}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setResetStep(0)}
-                className="flex-1 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-300 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
-              >
-                {t.dataResetCancel}
-              </button>
-              <button
-                onClick={() => setResetStep(2)}
-                className="flex-1 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
-              >
-                {t.dataResetConfirm2}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {resetStep === 2 && (
-          <div className="space-y-2">
-            <p className="text-sm text-red-600 dark:text-red-400 font-semibold text-center">
-              {t.dataResetConfirm1}
-            </p>
-            <button
-              onClick={onClearAll}
-              className="w-full py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition-colors"
-            >
-              {t.dataResetConfirm2}
-            </button>
-            <button
-              onClick={() => setResetStep(0)}
-              className="w-full py-1.5 rounded-lg text-gray-500 dark:text-gray-400 text-xs hover:underline transition-colors"
-            >
-              {t.dataResetCancel}
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Data reset confirm modal */}
+      {showResetConfirm && (
+        <ConfirmModal
+          message={t.dataResetConfirm1}
+          confirmLabel={t.dataResetConfirm2}
+          confirmClass="bg-red-500 hover:bg-red-600"
+          onConfirm={() => { setShowResetConfirm(false); onClearAll(); }}
+          onCancel={() => setShowResetConfirm(false)}
+        />
+      )}
     </div>
   );
 }

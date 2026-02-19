@@ -109,5 +109,41 @@ export function useTimer({
     analytics.track({ name: 'timer_reset' });
   }, [workTime]);
 
-  return { timeLeft, isRunning, mode, toggle, reset };
+  // Complete work session early — record actual elapsed time and move to break
+  const completeEarly = useCallback(() => {
+    if (mode !== 'work') return;
+    const elapsed = workTime * 60 - timeLeft;
+    if (elapsed <= 0) return;
+
+    setIsRunning(false);
+
+    const session: PomodoroSession = {
+      date: new Date().toISOString(),
+      duration: elapsed,
+      label: activeLabel ?? undefined,
+      note: activeNote || undefined,
+    };
+    onSessionComplete(session);
+    analytics.track({ name: 'session_completed_early', properties: { duration: Math.round(elapsed / 60) } });
+
+    completedSessionsRef.current += 1;
+
+    const shouldLongBreak =
+      longBreakTime > 0 &&
+      longBreakInterval > 0 &&
+      completedSessionsRef.current % longBreakInterval === 0;
+
+    if (shouldLongBreak) {
+      setMode('longBreak' as TimerMode);
+      setTimeLeft(longBreakTime * 60);
+    } else if (breakTime > 0) {
+      setMode('break');
+      setTimeLeft(breakTime * 60);
+    } else {
+      setMode('work');
+      setTimeLeft(workTime * 60);
+    }
+  }, [mode, workTime, timeLeft, breakTime, longBreakTime, longBreakInterval, activeLabel, activeNote, onSessionComplete]);
+
+  return { timeLeft, isRunning, mode, toggle, reset, completeEarly };
 }

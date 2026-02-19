@@ -159,7 +159,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     [addSession],
   );
 
-  const { timeLeft, isRunning, mode, toggle, reset } = useTimer({
+  const { timeLeft, isRunning, mode, toggle, reset, completeEarly } = useTimer({
     workTime: settings.workTime,
     breakTime: settings.breakTime,
     longBreakTime: settings.longBreakTime ?? 0,
@@ -199,7 +199,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   const isFocusMode = isRunning && mode === 'work';
 
   if (isFocusMode) {
-    return <FocusMode timeLeft={timeLeft} onStop={handleFocusStop} />;
+    return <FocusMode timeLeft={timeLeft} onStop={handleFocusStop} onComplete={completeEarly} />;
   }
 
   // Break mode: break/longBreak (running or paused) → header + minimal break UI
@@ -293,6 +293,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
               weekCount={getWeekCount()}
               todayTotalSeconds={getTodayTotalSeconds()}
               weekTotalSeconds={getWeekTotalSeconds()}
+              sessions={sessions}
+              labels={labels}
             />
 
             {/* Label dropdown + memo */}

@@ -14,7 +14,7 @@ interface SettingsPanelProps {
   onClose: () => void;
 }
 
-type SettingsView = 'main' | 'presets' | 'labels';
+type SettingsTab = 'general' | 'labels' | 'presets';
 
 const selectClass =
   'flex-1 px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200';
@@ -739,7 +739,7 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
   const [alarmSound, setAlarmSound] = useState<AlarmSound>(settings.alarm?.sound ?? 'bell');
   const [alarmRepeat, setAlarmRepeat] = useState(settings.alarm?.repeat ?? 1);
   const [labels, setLabels] = useState<LabelDefinition[]>(settings.labels ?? []);
-  const [view, setView] = useState<SettingsView>('main');
+  const [tab, setTab] = useState<SettingsTab>('general');
 
   const handleApply = () => {
     onSave({
@@ -758,18 +758,130 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
     });
   };
 
-  // Presets view
-  if (view === 'presets') {
-    return (
-      <div className="flex flex-col h-full">
-        <div className="flex justify-between items-center mb-3 flex-shrink-0">
-          <h3 className="font-semibold text-gray-700 dark:text-gray-200">{t.presetSettingsLabel}</h3>
-          <button onClick={() => setView('main')}>
-            <X size={18} className="text-gray-500 dark:text-gray-400" />
-          </button>
-        </div>
+  const tabClass = (active: boolean) =>
+    `flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+      active ? 'bg-tiffany text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700'
+    }`;
 
-        <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-3 flex-shrink-0">
+        <h3 className="font-semibold text-gray-700 dark:text-gray-200">{t.settings}</h3>
+        <button onClick={onClose}>
+          <X size={18} className="text-gray-500 dark:text-gray-400" />
+        </button>
+      </div>
+
+      {/* Tab switcher */}
+      <div className="flex gap-1 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1 mb-3 flex-shrink-0">
+        <button className={tabClass(tab === 'general')} onClick={() => setTab('general')}>{t.settingsTabGeneral}</button>
+        <button className={tabClass(tab === 'labels')} onClick={() => setTab('labels')}>{t.settingsTabLabels}</button>
+        <button className={tabClass(tab === 'presets')} onClick={() => setTab('presets')}>{t.settingsTabPresets}</button>
+      </div>
+
+      {/* Tab content */}
+      <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {/* General tab */}
+        {tab === 'general' && (
+          <div className="space-y-4 p-1">
+            <TimeSelector
+              label={t.activeTimeLabel}
+              value={workTime}
+              presets={activePresets}
+              onChange={setWorkTime}
+              restOffLabel={t.restOffLabel}
+              customLabel={t.customInput}
+            />
+            <TimeSelector
+              label={t.restTimeLabel}
+              value={breakTime}
+              presets={restPresets}
+              onChange={setBreakTime}
+              isRest
+              restOffLabel={t.restOffLabel}
+              customLabel={t.customInput}
+            />
+            <TimeSelector
+              label={t.longBreakTimeLabel}
+              value={longBreakTime}
+              presets={LONG_BREAK_OPTIONS}
+              onChange={setLongBreakTime}
+              isRest
+              restOffLabel={t.restOffLabel}
+              customLabel={t.customInput}
+            />
+            {longBreakTime > 0 && (
+              <TimeSelector
+                label={t.longBreakIntervalLabel}
+                value={longBreakInterval}
+                presets={LONG_BREAK_INTERVAL_OPTIONS}
+                onChange={setLongBreakInterval}
+                isRest
+                restOffLabel={t.restOffLabel}
+                customLabel={t.customInput}
+              />
+            )}
+            <AlarmSettingsPanel
+              sound={alarmSound}
+              repeat={alarmRepeat}
+              onSoundChange={setAlarmSound}
+              onRepeatChange={setAlarmRepeat}
+              alarmLabel={t.alarmLabel}
+              repeatLabel={t.alarmRepeatLabel}
+              bellLabel={t.alarmSoundBell}
+              digitalLabel={t.alarmSoundDigital}
+              chimeLabel={t.alarmSoundChime}
+              kitchenLabel={t.alarmSoundKitchen}
+              noneLabel={t.alarmSoundNone}
+            />
+            <ThemeToggle
+              label={t.themeLabel}
+              value={theme}
+              onChange={setTheme}
+              lightLabel={t.themeLight}
+              darkLabel={t.themeDark}
+            />
+            <div>
+              <label className={labelClass}>{t.customMessageLabel}</label>
+              <input
+                type="text"
+                value={customMessage}
+                onChange={(e) => setCustomMessage(e.target.value)}
+                placeholder={t.defaultCustomMessage}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>{t.languageLabel}</label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                className={selectClass + ' w-full'}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {getTranslations(lang).languageName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Labels tab */}
+        {tab === 'labels' && (
+          <div className="p-1">
+            <LabelManager
+              labels={labels}
+              onChange={setLabels}
+              addLabel={t.addLabel}
+            />
+          </div>
+        )}
+
+        {/* Presets tab */}
+        {tab === 'presets' && (
           <div className="space-y-5 p-1">
             <PresetEditor
               label={t.activePresetsLabel}
@@ -787,180 +899,10 @@ export function SettingsPanel({ settings, onSave, onClose }: SettingsPanelProps)
               addLabel={t.addPreset}
             />
           </div>
-        </div>
-
-        <div className="flex-shrink-0 pt-4">
-          <button
-            onClick={() => setView('main')}
-            className="w-full py-2 rounded-lg text-white font-medium bg-tiffany hover:bg-tiffany-hover transition-colors"
-          >
-            {t.applySettings}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Labels view
-  if (view === 'labels') {
-    return (
-      <div className="flex flex-col h-full">
-        <div className="flex justify-between items-center mb-3 flex-shrink-0">
-          <h3 className="font-semibold text-gray-700 dark:text-gray-200">{t.labelsLabel}</h3>
-          <button onClick={() => setView('main')}>
-            <X size={18} className="text-gray-500 dark:text-gray-400" />
-          </button>
-        </div>
-
-        <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="p-1">
-            <LabelManager
-              labels={labels}
-              onChange={setLabels}
-              addLabel={t.addLabel}
-            />
-          </div>
-        </div>
-
-        <div className="flex-shrink-0 pt-4">
-          <button
-            onClick={() => { handleApply(); }}
-            className="w-full py-2 rounded-lg text-white font-medium bg-tiffany hover:bg-tiffany-hover transition-colors"
-          >
-            {t.applySettings}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Main view
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center mb-3 flex-shrink-0">
-        <h3 className="font-semibold text-gray-700 dark:text-gray-200">{t.settings}</h3>
-        <button onClick={onClose}>
-          <X size={18} className="text-gray-500 dark:text-gray-400" />
-        </button>
+        )}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="space-y-4 p-1">
-          {/* 1. Active time */}
-          <TimeSelector
-            label={t.activeTimeLabel}
-            value={workTime}
-            presets={activePresets}
-            onChange={setWorkTime}
-            restOffLabel={t.restOffLabel}
-            customLabel={t.customInput}
-          />
-
-          {/* 2. Rest time */}
-          <TimeSelector
-            label={t.restTimeLabel}
-            value={breakTime}
-            presets={restPresets}
-            onChange={setBreakTime}
-            isRest
-            restOffLabel={t.restOffLabel}
-            customLabel={t.customInput}
-          />
-
-          {/* 3. Long break time */}
-          <TimeSelector
-            label={t.longBreakTimeLabel}
-            value={longBreakTime}
-            presets={LONG_BREAK_OPTIONS}
-            onChange={setLongBreakTime}
-            isRest
-            restOffLabel={t.restOffLabel}
-            customLabel={t.customInput}
-          />
-
-          {/* 4. Long break interval (only shown when long break is enabled) */}
-          {longBreakTime > 0 && (
-            <TimeSelector
-              label={t.longBreakIntervalLabel}
-              value={longBreakInterval}
-              presets={LONG_BREAK_INTERVAL_OPTIONS}
-              onChange={setLongBreakInterval}
-              isRest
-              restOffLabel={t.restOffLabel}
-              customLabel={t.customInput}
-            />
-          )}
-
-          {/* 5. Alarm */}
-          <AlarmSettingsPanel
-            sound={alarmSound}
-            repeat={alarmRepeat}
-            onSoundChange={setAlarmSound}
-            onRepeatChange={setAlarmRepeat}
-            alarmLabel={t.alarmLabel}
-            repeatLabel={t.alarmRepeatLabel}
-            bellLabel={t.alarmSoundBell}
-            digitalLabel={t.alarmSoundDigital}
-            chimeLabel={t.alarmSoundChime}
-            kitchenLabel={t.alarmSoundKitchen}
-            noneLabel={t.alarmSoundNone}
-          />
-
-          {/* 6. Theme */}
-          <ThemeToggle
-            label={t.themeLabel}
-            value={theme}
-            onChange={setTheme}
-            lightLabel={t.themeLight}
-            darkLabel={t.themeDark}
-          />
-
-          {/* 7. Custom message */}
-          <div>
-            <label className={labelClass}>{t.customMessageLabel}</label>
-            <input
-              type="text"
-              value={customMessage}
-              onChange={(e) => setCustomMessage(e.target.value)}
-              placeholder={t.defaultCustomMessage}
-              className={inputClass}
-            />
-          </div>
-
-          {/* 8. Language */}
-          <div>
-            <label className={labelClass}>{t.languageLabel}</label>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-              className={selectClass + ' w-full'}
-            >
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <option key={lang} value={lang}>
-                  {getTranslations(lang).languageName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Preset settings link */}
-          <button
-            onClick={() => setView('presets')}
-            className="w-full text-left text-sm text-tiffany hover:underline"
-          >
-            {t.presetSettingsLabel} &rarr;
-          </button>
-
-          {/* Labels link */}
-          <button
-            onClick={() => setView('labels')}
-            className="w-full text-left text-sm text-tiffany hover:underline"
-          >
-            {t.labelsLabel} &rarr;
-          </button>
-        </div>
-      </div>
-
+      {/* Apply button */}
       <div className="flex-shrink-0 pt-4">
         <button
           onClick={handleApply}

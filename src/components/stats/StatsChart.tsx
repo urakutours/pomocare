@@ -122,7 +122,7 @@ export function StatsChart({
     dragRef.current = { startY: e.clientY, startH: barHeight };
     const onMove = (ev: PointerEvent) => {
       if (!dragRef.current) return;
-      const delta = dragRef.current.startY - ev.clientY;
+      const delta = ev.clientY - dragRef.current.startY;
       setBarHeight(Math.max(40, Math.min(300, dragRef.current.startH + delta)));
     };
     const onUp = () => {
@@ -262,13 +262,16 @@ export function StatsChart({
   const handleTabChange = (next: StatTab) => { setTab(next); setOffset(0); };
 
   const handleExportCsv = () => {
-    const header = 'date,label,note,duration_minutes';
+    const header = 'date,time,label,note,duration_minutes';
     const rows = filteredSessions.map((s) => {
-      const date = new Date(s.date).toISOString().slice(0, 10);
-      const label = s.label ?? '';
+      const d = new Date(s.date);
+      const date = d.toISOString().slice(0, 10);
+      const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      const labelDef = s.label ? labels.find((l) => l.id === s.label) : null;
+      const label = labelDef ? labelDef.name : '';
       const note = (s.note ?? '').replace(/,/g, ' ');
       const mins = Math.round(s.duration / 60);
-      return `${date},${label},${note},${mins}`;
+      return `${date},${time},${label},${note},${mins}`;
     });
     const csv = [header, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -440,15 +443,17 @@ export function StatsChart({
         {(labelStats.length > 0 || unlabeledSessions.length > 0) && (
           <div className="mt-5">
             <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{t.labelStats}</h4>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {labelStats.map(({ label, count, totalSeconds }) => {
                 const ratio = allTotalSeconds > 0 ? totalSeconds / allTotalSeconds : 0;
                 return (
-                  <div key={label.id} className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: label.color }} />
-                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[40%]">{label.name}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 tabular-nums whitespace-nowrap">{count} &middot; {formatDuration(totalSeconds)}</span>
-                    <div className="flex-1 min-w-[40px] h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
+                  <div key={label.id}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: label.color }} />
+                      <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{label.name}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums whitespace-nowrap">{count} &middot; {formatDuration(totalSeconds)}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${ratio * 100}%`, backgroundColor: label.color }} />
                     </div>
                   </div>
@@ -458,13 +463,15 @@ export function StatsChart({
                 const unlabeledTotal = unlabeledSessions.reduce((s, sess) => s + sess.duration, 0);
                 const unlabeledRatio = allTotalSeconds > 0 ? unlabeledTotal / allTotalSeconds : 0;
                 return (
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-neutral-600" />
-                    <span className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[40%]">{t.noLabel}</span>
-                    <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 tabular-nums whitespace-nowrap">
-                      {unlabeledSessions.length} &middot; {formatDuration(unlabeledTotal)}
-                    </span>
-                    <div className="flex-1 min-w-[40px] h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-neutral-600" />
+                      <span className="text-sm text-gray-500 dark:text-gray-400 truncate">{t.noLabel}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums whitespace-nowrap">
+                        {unlabeledSessions.length} &middot; {formatDuration(unlabeledTotal)}
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
                       <div className="h-full rounded-full bg-gray-300 dark:bg-neutral-600 transition-all"
                         style={{ width: `${unlabeledRatio * 100}%` }}
                       />

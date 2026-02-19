@@ -70,6 +70,11 @@ export interface Translations {
   nextYear: string;
   exportCsv: string;
 
+  // Settings tabs
+  settingsTabGeneral: string;
+  settingsTabLabels: string;
+  settingsTabPresets: string;
+
   // Install banner
   installApp: string;
 

@@ -203,8 +203,18 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   // Paused mid-session: timer was started but user pressed stop (not reset)
   const isPaused = !isRunning && mode === 'work' && timeLeft < settings.workTime * 60;
 
-  if (isFocusMode) {
-    return <FocusMode timeLeft={timeLeft} onStop={handleFocusStop} onComplete={completeEarly} />;
+  // Both running and paused mid-session use the same full-screen FocusMode layout
+  if (isFocusMode || isPaused) {
+    return (
+      <FocusMode
+        timeLeft={timeLeft}
+        isRunning={isRunning}
+        onStop={handleFocusStop}
+        onResume={toggle}
+        onComplete={completeEarly}
+        onReset={reset}
+      />
+    );
   }
 
   // Break mode: break/longBreak (running or paused) → header + minimal break UI
@@ -292,7 +302,6 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             <TimerDisplay timeLeft={timeLeft} mode={mode} />
             <TimerControls isRunning={isRunning} onToggle={toggle} onReset={reset} />
           </div>
-          {!isPaused && (
           <div className="landscape:flex-1">
             <SessionSummary
               todayCount={getTodayCount()}
@@ -369,7 +378,6 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
               {displayMessage}
             </div>
           </div>
-          )}
         </div>
       )}
     </AppShell>

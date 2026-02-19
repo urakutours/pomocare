@@ -25,6 +25,20 @@ const translations = {
     feature5Desc: 'テーマ切替（ライト/ダーク）、アラーム音の選択、プリセット設定など、自分好みにカスタマイズ可能。',
     feature6Title: 'プライバシー重視 & クラウド同期',
     feature6Desc: '無料版はデバイス内にデータを保存し、アカウント登録も不要。有料版ではクラウド同期で複数デバイスから同じデータにアクセスできます。',
+    useCasesTitle: 'こんな場面で活躍します',
+    useCasesSubtitle: 'PomoCareは、集中したいすべての人のために設計されています',
+    useCase1Title: '受験・学業',
+    useCase1Desc: '参考書1冊を25分ずつ。ラベルで「数学」「英語」「暗記」を分けて管理すれば、どの科目にどれだけ集中できたかが一目瞭然。試験前の追い込みも計画的に。',
+    useCase1Tag: '📊 科目別の学習時間を可視化',
+    useCase2Title: '語学習得',
+    useCase2Desc: 'TOEICや英会話の上達に必要なのは、毎日の積み上げ。「リスニング」「スピーキング」「単語」のラベルで細かく記録すれば、トータル学習時間の達成感が継続力を生みます。',
+    useCase2Tag: '⏱ 毎日の積み上げを記録',
+    useCase3Title: 'デスクワーク・テレワーク',
+    useCase3Desc: '「会議資料」「コーディング」「メール対応」など、業務をラベルで分けるだけ。有料版のクラウド同期なら、オフィスでも在宅でも同じデータを引き継いで仕事のバランスを可視化できます。',
+    useCase3Tag: '✨ 有料版：複数デバイスで継続',
+    useCase4Title: '副業・クリエイティブ作業',
+    useCase4Desc: '本業の合間に進める副業やデザイン・執筆作業。「本業」「副業」「個人プロジェクト」でラベル分けすれば、限られた時間をどこに使っているかが明確になります。',
+    useCase4Tag: '🏷 ラベルで時間配分を管理',
     howTitle: '使い方はかんたん',
     step1Title: 'タイマーをスタート',
     step1Desc: '集中したい時間を設定して、スタートボタンを押すだけ。',
@@ -134,6 +148,20 @@ const translations = {
     feature5Desc: 'Theme switching (Light/Dark), alarm sounds, preset settings, and more. Make it yours.',
     feature6Title: 'Privacy First & Cloud Sync',
     feature6Desc: 'Free version keeps data on your device with no account needed. Paid plans include cloud sync to access your data across all your devices.',
+    useCasesTitle: 'Real Scenarios, Real Results',
+    useCasesSubtitle: 'PomoCare is designed for anyone who wants to focus better',
+    useCase1Title: 'Exam Prep & Studying',
+    useCase1Desc: 'Tackle your textbook 25 minutes at a time. Label sessions by subject — Math, English, Memorization — and instantly see how your study time is distributed. Plan your final push before exams.',
+    useCase1Tag: '📊 Visualize study time by subject',
+    useCase2Title: 'Language Learning',
+    useCase2Desc: 'Improving at English or any new language takes daily effort. Log sessions under Listening, Speaking, and Vocabulary labels to track your total hours and build the consistency that leads to real progress.',
+    useCase2Tag: '⏱ Track your daily accumulation',
+    useCase3Title: 'Office & Remote Work',
+    useCase3Desc: 'Label your sessions — Presentations, Coding, Email — to see exactly where your workday goes. With paid cloud sync, your data follows you between office and home so you never lose your work-life picture.',
+    useCase3Tag: '✨ Paid: sync across all devices',
+    useCase4Title: 'Side Projects & Creative Work',
+    useCase4Desc: 'Squeeze in your side hustle or creative work between your main job. Labeling Day Job, Side Project, and Personal helps you see at a glance how you\'re really spending your limited time.',
+    useCase4Tag: '🏷 Manage your time with labels',
     howTitle: 'How It Works',
     step1Title: 'Start the Timer',
     step1Desc: 'Set your focus duration and press start. That\'s it.',
@@ -232,9 +260,6 @@ function setLanguage(lang) {
     }
   });
   document.documentElement.lang = lang;
-  document.querySelectorAll('.lang-btn').forEach((btn) => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-  });
   localStorage.setItem('pomocare-lp-lang', lang);
 }
 
@@ -248,10 +273,4 @@ function detectLanguage() {
 document.addEventListener('DOMContentLoaded', () => {
   const lang = detectLanguage();
   setLanguage(lang);
-
-  document.querySelectorAll('.lang-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      setLanguage(btn.getAttribute('data-lang'));
-    });
-  });
 });

@@ -694,6 +694,9 @@ function AlarmSettingsPanel({
   digitalLabel,
   chimeLabel,
   kitchenLabel,
+  classicLabel,
+  gentleLabel,
+  softLabel,
   noneLabel,
 }: {
   sound: AlarmSound;
@@ -706,6 +709,9 @@ function AlarmSettingsPanel({
   digitalLabel: string;
   chimeLabel: string;
   kitchenLabel: string;
+  classicLabel: string;
+  gentleLabel: string;
+  softLabel: string;
   noneLabel: string;
 }) {
   const sounds: { value: AlarmSound; label: string }[] = [
@@ -713,6 +719,9 @@ function AlarmSettingsPanel({
     { value: 'digital', label: digitalLabel },
     { value: 'chime', label: chimeLabel },
     { value: 'kitchen', label: kitchenLabel },
+    { value: 'classic', label: classicLabel },
+    { value: 'gentle', label: gentleLabel },
+    { value: 'soft', label: softLabel },
     { value: 'none', label: noneLabel },
   ];
 
@@ -883,6 +892,9 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll }: Setting
               digitalLabel={t.alarmSoundDigital}
               chimeLabel={t.alarmSoundChime}
               kitchenLabel={t.alarmSoundKitchen}
+              classicLabel={t.alarmSoundClassic}
+              gentleLabel={t.alarmSoundGentle}
+              softLabel={t.alarmSoundSoft}
               noneLabel={t.alarmSoundNone}
             />
             <ThemeToggle

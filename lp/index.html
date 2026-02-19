@@ -17,12 +17,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Language Switcher -->
-  <div class="lang-switcher" id="langSwitcher">
-    <button class="lang-btn active" data-lang="ja">JP</button>
-    <button class="lang-btn" data-lang="en">EN</button>
-  </div>
-
   <!-- Header / Navigation -->
   <header class="header">
     <nav class="nav container">
@@ -37,8 +31,20 @@
         <li><a href="#features" data-i18n="navFeatures">機能</a></li>
         <li><a href="#pricing" data-i18n="navPricing">料金</a></li>
         <li><a href="#faq" data-i18n="navFaq">FAQ</a></li>
-        <li><a href="https://app.pomocare.com" class="btn btn-sm" data-i18n="navOpenApp">アプリを開く</a></li>
+        <li><a href="https://app.pomocare.com" class="btn btn-sm btn-primary" data-i18n="navOpenApp">アプリを開く</a></li>
       </ul>
+      <!-- Language dropdown — always visible in nav -->
+      <div class="lang-dropdown" id="langDropdown">
+        <button class="lang-dropdown-btn" id="langDropdownBtn" aria-haspopup="listbox" aria-expanded="false">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span id="langDropdownLabel">JP</span>
+          <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+        </button>
+        <ul class="lang-dropdown-menu" id="langDropdownMenu" role="listbox">
+          <li><button class="lang-option active" data-lang="ja" role="option">🇯🇵 日本語</button></li>
+          <li><button class="lang-option" data-lang="en" role="option">🇺🇸 English</button></li>
+        </ul>
+      </div>
       <button class="hamburger" id="hamburger" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -162,6 +168,45 @@
     </div>
   </section>
 
+  <!-- Use Cases Section -->
+  <section class="use-cases">
+    <div class="container">
+      <h2 class="section-title" data-i18n="useCasesTitle">こんな場面で活躍します</h2>
+      <p class="section-subtitle" data-i18n="useCasesSubtitle">PomoCareは、集中したいすべての人のために設計されています</p>
+      <div class="use-cases-grid">
+
+        <div class="use-case-card fade-in">
+          <div class="use-case-icon">📚</div>
+          <h3 data-i18n="useCase1Title">受験・学業</h3>
+          <p data-i18n="useCase1Desc">参考書1冊を25分ずつ。ラベルで「数学」「英語」「暗記」を分けて管理すれば、どの科目にどれだけ集中できたかが一目瞭然。試験前の追い込みも計画的に。</p>
+          <div class="use-case-tag" data-i18n="useCase1Tag">📊 科目別の学習時間を可視化</div>
+        </div>
+
+        <div class="use-case-card fade-in">
+          <div class="use-case-icon">🌍</div>
+          <h3 data-i18n="useCase2Title">語学習得</h3>
+          <p data-i18n="useCase2Desc">TOEICや英会話の上達に必要なのは、毎日の積み上げ。「リスニング」「スピーキング」「単語」のラベルで細かく記録すれば、トータル学習時間の達成感が継続力を生みます。</p>
+          <div class="use-case-tag" data-i18n="useCase2Tag">⏱ 毎日の積み上げを記録</div>
+        </div>
+
+        <div class="use-case-card fade-in">
+          <div class="use-case-icon">💻</div>
+          <h3 data-i18n="useCase3Title">デスクワーク・テレワーク</h3>
+          <p data-i18n="useCase3Desc">「会議資料」「コーディング」「メール対応」など、業務をラベルで分けるだけ。有料版のクラウド同期なら、オフィスでも在宅でも同じデータを引き継いで仕事のバランスを可視化できます。</p>
+          <div class="use-case-tag use-case-tag-paid" data-i18n="useCase3Tag">✨ 有料版：複数デバイスで継続</div>
+        </div>
+
+        <div class="use-case-card fade-in">
+          <div class="use-case-icon">🎨</div>
+          <h3 data-i18n="useCase4Title">副業・クリエイティブ作業</h3>
+          <p data-i18n="useCase4Desc">本業の合間に進める副業やデザイン・執筆作業。「本業」「副業」「個人プロジェクト」でラベル分けすれば、限られた時間をどこに使っているかが明確になります。</p>
+          <div class="use-case-tag" data-i18n="useCase4Tag">🏷 ラベルで時間配分を管理</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- How It Works -->
   <section class="how-it-works">
     <div class="container">
@@ -277,7 +322,9 @@
           <tbody>
             <!-- タイマー機能 -->
             <tr class="comp-category-row">
-              <td colspan="3" data-i18n="compCatTimer">⏱ タイマー機能</td>
+              <td data-i18n="compCatTimer">⏱ タイマー機能</td>
+              <td class="comp-free-col"></td>
+              <td class="comp-paid-col"></td>
             </tr>
             <tr>
               <td data-i18n="compR1">ポモドーロタイマー（集中・休憩・長休憩）</td>
@@ -306,7 +353,9 @@
             </tr>
             <!-- 統計・履歴 -->
             <tr class="comp-category-row">
-              <td colspan="3" data-i18n="compCatStats">📊 統計・履歴</td>
+              <td data-i18n="compCatStats">📊 統計・履歴</td>
+              <td class="comp-free-col"></td>
+              <td class="comp-paid-col"></td>
             </tr>
             <tr>
               <td data-i18n="compR6">今日・今週のセッション履歴</td>
@@ -330,7 +379,9 @@
             </tr>
             <!-- ラベル -->
             <tr class="comp-category-row">
-              <td colspan="3" data-i18n="compCatLabel">🏷 ラベル機能</td>
+              <td data-i18n="compCatLabel">🏷 ラベル機能</td>
+              <td class="comp-free-col"></td>
+              <td class="comp-paid-col"></td>
             </tr>
             <tr>
               <td data-i18n="compR10">ラベルでセッションを分類</td>
@@ -344,7 +395,9 @@
             </tr>
             <!-- クラウド・その他 -->
             <tr class="comp-category-row">
-              <td colspan="3" data-i18n="compCatCloud">☁️ クラウド・その他</td>
+              <td data-i18n="compCatCloud">☁️ クラウド・その他</td>
+              <td class="comp-free-col"></td>
+              <td class="comp-paid-col"></td>
             </tr>
             <tr>
               <td data-i18n="compR12">クラウド同期（複数デバイス対応）</td>

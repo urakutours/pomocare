@@ -1,4 +1,5 @@
 import type { AlarmSound } from '@/types/settings';
+import { classicWavB64, gentleWavB64, softWavB64 } from '@/assets/alarmWavData';
 
 /**
  * Generate alarm sound using Web Audio API (no external audio files needed)
@@ -199,6 +200,53 @@ function playChime(ctx: AudioContext, startTime: number): number {
   return notes.length * (noteDuration * 0.5 + noteGap) + noteDuration;
 }
 
+/**
+ * WAV (Base64) → AudioBuffer のキャッシュ
+ */
+const wavBufferCache: Partial<Record<AlarmSound, AudioBuffer | null>> = {};
+
+async function decodeWavB64(ctx: AudioContext, b64: string): Promise<AudioBuffer | null> {
+  try {
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return await ctx.decodeAudioData(bytes.buffer);
+  } catch {
+    return null;
+  }
+}
+
+const WAV_B64_MAP: Partial<Record<AlarmSound, string>> = {
+  classic: classicWavB64,
+  gentle:  gentleWavB64,
+  soft:    softWavB64,
+};
+
+/**
+ * WAVアラーム音を再生し、再生時間(秒)を返す
+ */
+async function playWavAlarm(
+  ctx: AudioContext,
+  sound: AlarmSound,
+  startTime: number,
+): Promise<number> {
+  const b64 = WAV_B64_MAP[sound];
+  if (!b64) return 0;
+
+  let buffer = wavBufferCache[sound];
+  if (buffer === undefined) {
+    buffer = await decodeWavB64(ctx, b64);
+    wavBufferCache[sound] = buffer;
+  }
+  if (!buffer) return 0;
+
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+  source.start(startTime);
+  return buffer.duration;
+}
+
 function playSingleAlarm(ctx: AudioContext, sound: AlarmSound, startTime: number): number {
   if (sound === 'bell') return playBell(ctx, startTime);
   if (sound === 'digital') return playDigital(ctx, startTime);
@@ -207,6 +255,9 @@ function playSingleAlarm(ctx: AudioContext, sound: AlarmSound, startTime: number
   return 0;
 }
 
+/** WAVベースサウンドかどうか */
+const WAV_SOUNDS: AlarmSound[] = ['classic', 'gentle', 'soft'];
+
 export function playAlarm(sound: AlarmSound, repeat: number): void {
   if (sound === 'none') return;
 
@@ -214,18 +265,32 @@ export function playAlarm(sound: AlarmSound, repeat: number): void {
   if (!ctx) return;
 
   const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
-  resume.then(() => {
-    const now = ctx.currentTime;
-    let cursor = now;
-    const gap = 0.4;
 
-    for (let i = 0; i < repeat; i++) {
-      const d = playSingleAlarm(ctx, sound, cursor);
-      cursor += d + gap;
-    }
+  if (WAV_SOUNDS.includes(sound)) {
+    // WAVベースのサウンドは非同期で順次スケジュール
+    resume.then(async () => {
+      const gap = 0.4;
+      let cursor = ctx.currentTime;
+      for (let i = 0; i < repeat; i++) {
+        const d = await playWavAlarm(ctx, sound, cursor);
+        cursor += d + gap;
+      }
+      setTimeout(() => ctx.close(), (cursor - ctx.currentTime + 1) * 1000);
+    });
+  } else {
+    resume.then(() => {
+      const now = ctx.currentTime;
+      let cursor = now;
+      const gap = 0.4;
 
-    setTimeout(() => ctx.close(), (cursor - now + 1) * 1000);
-  });
+      for (let i = 0; i < repeat; i++) {
+        const d = playSingleAlarm(ctx, sound, cursor);
+        cursor += d + gap;
+      }
+
+      setTimeout(() => ctx.close(), (cursor - now + 1) * 1000);
+    });
+  }
 }
 
 /** プレビュー: 指定の繰り返し回数で再生 */

@@ -38,6 +38,9 @@ export interface Translations {
   alarmSoundDigital: string;
   alarmSoundChime: string;
   alarmSoundKitchen: string;
+  alarmSoundClassic: string;
+  alarmSoundGentle: string;
+  alarmSoundSoft: string;
   alarmSoundNone: string;
   alarmRepeatLabel: string;
 

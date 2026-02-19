@@ -3,7 +3,7 @@ import type { LabelDefinition } from '@/types/session';
 
 export type ThemeMode = 'light' | 'dark';
 
-export type AlarmSound = 'bell' | 'digital' | 'chime' | 'kitchen' | 'none';
+export type AlarmSound = 'bell' | 'digital' | 'chime' | 'kitchen' | 'classic' | 'gentle' | 'soft' | 'none';
 
 export interface AlarmSettings {
   sound: AlarmSound;

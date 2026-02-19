@@ -192,8 +192,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     return <FocusMode timeLeft={timeLeft} onStop={handleFocusStop} />;
   }
 
-  // Break mode: running + break/longBreak → header + minimal break UI
-  const isBreakMode = isRunning && (mode === 'break' || mode === 'longBreak');
+  // Break mode: break/longBreak (running or paused) → header + minimal break UI
+  const isBreakMode = mode === 'break' || mode === 'longBreak';
 
   if (isBreakMode) {
     return (
@@ -209,7 +209,9 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
         <BreakMode
           timeLeft={timeLeft}
           mode={mode}
-          onStop={handleFocusStop}
+          isRunning={isRunning}
+          onToggle={toggle}
+          onReset={reset}
           displayMessage={displayMessage}
         />
       </AppShell>

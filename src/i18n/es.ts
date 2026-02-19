@@ -61,4 +61,7 @@ export const es: Translations = {
   days: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
   months: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
   defaultCustomMessage: 'Levántate, mira a lo lejos y haz un estiramiento ligero.',
+  sessionChangeLabel: 'Cambiar etiqueta',
+  sessionEditNote: 'Editar nota',
+  sessionDelete: 'Eliminar',
 };

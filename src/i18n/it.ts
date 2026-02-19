@@ -61,4 +61,7 @@ export const it: Translations = {
   days: ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'],
   months: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
   defaultCustomMessage: 'Alzati, guarda in lontananza e fai un leggero stretching.',
+  sessionChangeLabel: 'Cambia etichetta',
+  sessionEditNote: 'Modifica nota',
+  sessionDelete: 'Elimina',
 };

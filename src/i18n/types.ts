@@ -53,6 +53,11 @@ export interface Translations {
   activeLabelLabel: string;
   noLabel: string;
 
+  // Session edit menu
+  sessionChangeLabel: string;
+  sessionEditNote: string;
+  sessionDelete: string;
+
   // Stats
   weeklyStats: string;
   weekly: string;

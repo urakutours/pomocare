@@ -120,6 +120,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   const {
     sessions,
     addSession,
+    updateSession,
+    deleteSession,
     getTodayCount,
     getTodayTotalSeconds,
     getWeekCount,
@@ -197,6 +199,9 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
   // Focus mode: running + work mode → minimal UI (no header)
   const isFocusMode = isRunning && mode === 'work';
+
+  // Paused mid-session: timer was started but user pressed stop (not reset)
+  const isPaused = !isRunning && mode === 'work' && timeLeft < settings.workTime * 60;
 
   if (isFocusMode) {
     return <FocusMode timeLeft={timeLeft} onStop={handleFocusStop} onComplete={completeEarly} />;
@@ -287,6 +292,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             <TimerDisplay timeLeft={timeLeft} mode={mode} />
             <TimerControls isRunning={isRunning} onToggle={toggle} onReset={reset} />
           </div>
+          {!isPaused && (
           <div className="landscape:flex-1">
             <SessionSummary
               todayCount={getTodayCount()}
@@ -295,6 +301,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
               weekTotalSeconds={getWeekTotalSeconds()}
               sessions={sessions}
               labels={labels}
+              onUpdateSession={updateSession}
+              onDeleteSession={deleteSession}
             />
 
             {/* Label dropdown + memo */}
@@ -361,6 +369,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
               {displayMessage}
             </div>
           </div>
+          )}
         </div>
       )}
     </AppShell>

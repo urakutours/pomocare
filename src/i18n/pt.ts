@@ -61,4 +61,7 @@ export const pt: Translations = {
   days: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
   months: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
   defaultCustomMessage: 'Levante-se, olhe para longe e faça um alongamento leve.',
+  sessionChangeLabel: 'Alterar etiqueta',
+  sessionEditNote: 'Editar nota',
+  sessionDelete: 'Excluir',
 };

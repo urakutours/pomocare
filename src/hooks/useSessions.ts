@@ -35,6 +35,28 @@ export function useSessions(storage: StorageService, days: Translations['days'])
     [storage],
   );
 
+  const updateSession = useCallback(
+    async (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => {
+      setSessions((prev) => {
+        const updated = prev.map((s) => s.date === date ? { ...s, ...patch } : s);
+        storage.saveSessions(updated);
+        return updated;
+      });
+    },
+    [storage],
+  );
+
+  const deleteSession = useCallback(
+    async (date: string) => {
+      setSessions((prev) => {
+        const updated = prev.filter((s) => s.date !== date);
+        storage.saveSessions(updated);
+        return updated;
+      });
+    },
+    [storage],
+  );
+
   const getTodayCount = useCallback(() => {
     const today = new Date().toDateString();
     return sessions.filter((s) => new Date(s.date).toDateString() === today).length;
@@ -147,6 +169,8 @@ export function useSessions(storage: StorageService, days: Translations['days'])
   return {
     sessions,
     addSession,
+    updateSession,
+    deleteSession,
     getTodayCount,
     getTodayTotalSeconds,
     getWeekCount,

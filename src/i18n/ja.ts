@@ -61,4 +61,7 @@ export const ja: Translations = {
   days: ['月', '火', '水', '木', '金', '土', '日'],
   months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
   defaultCustomMessage: '立ち上がって遠くを見ながら、軽くストレッチしましょう',
+  sessionChangeLabel: 'ラベルの変更',
+  sessionEditNote: 'メモの修正',
+  sessionDelete: '削除',
 };

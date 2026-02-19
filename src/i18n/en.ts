@@ -61,4 +61,7 @@ export const en: Translations = {
   days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   defaultCustomMessage: 'Stand up, look into the distance, and do a light stretch.',
+  sessionChangeLabel: 'Change Label',
+  sessionEditNote: 'Edit Note',
+  sessionDelete: 'Delete',
 };

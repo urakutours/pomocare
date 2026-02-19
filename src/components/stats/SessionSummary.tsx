@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { X } from 'lucide-react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { X, MoreVertical, Tag, FileText, Trash2 } from 'lucide-react';
 import { getCurrentDayOfWeek } from '@/utils/date';
 import { useI18n } from '@/contexts/I18nContext';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
@@ -32,9 +32,12 @@ interface SessionSummaryProps {
   weekTotalSeconds: number;
   sessions: PomodoroSession[];
   labels: LabelDefinition[];
+  onUpdateSession: (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => void;
+  onDeleteSession: (date: string) => void;
 }
 
 type ModalType = 'today' | 'week' | null;
+type EditMode = 'label' | 'note' | 'delete' | null;
 
 export function SessionSummary({
   todayCount,
@@ -43,9 +46,39 @@ export function SessionSummary({
   weekTotalSeconds,
   sessions,
   labels,
+  onUpdateSession,
+  onDeleteSession,
 }: SessionSummaryProps) {
   const { t } = useI18n();
   const [modal, setModal] = useState<ModalType>(null);
+
+  // Three-dot menu state
+  const [openMenuDate, setOpenMenuDate] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState<EditMode>(null);
+  const [draftNote, setDraftNote] = useState('');
+  const [draftLabel, setDraftLabel] = useState<string | undefined>(undefined);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!openMenuDate) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuDate(null);
+        setEditMode(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openMenuDate]);
+
+  // Reset menu state when modal closes
+  useEffect(() => {
+    if (!modal) {
+      setOpenMenuDate(null);
+      setEditMode(null);
+    }
+  }, [modal]);
 
   const labelMap = useMemo(() => {
     const map: Record<string, LabelDefinition> = {};
@@ -89,16 +122,68 @@ export function SessionSummary({
   const modalSessions = modal === 'today' ? todaySessions : modal === 'week' ? weekSessions : [];
   const modalTitle = modal === 'today' ? t.today : t.thisWeek;
 
-  // Reusable session row
+  // Menu handlers
+  const handleOpenMenu = (date: string) => {
+    if (openMenuDate === date) {
+      setOpenMenuDate(null);
+      setEditMode(null);
+    } else {
+      setOpenMenuDate(date);
+      setEditMode(null);
+    }
+  };
+
+  const handleStartEditNote = (s: PomodoroSession) => {
+    setDraftNote(s.note ?? '');
+    setEditMode('note');
+  };
+
+  const handleStartEditLabel = (s: PomodoroSession) => {
+    setDraftLabel(s.label);
+    setEditMode('label');
+  };
+
+  const handleCommitNote = (date: string) => {
+    onUpdateSession(date, { note: draftNote.trim() || undefined });
+    setOpenMenuDate(null);
+    setEditMode(null);
+  };
+
+  const handleCommitLabel = (date: string) => {
+    onUpdateSession(date, { label: draftLabel || undefined });
+    setOpenMenuDate(null);
+    setEditMode(null);
+  };
+
+  const handleDelete = (date: string) => {
+    onDeleteSession(date);
+    setOpenMenuDate(null);
+    setEditMode(null);
+  };
+
+  const closeMenu = () => {
+    setOpenMenuDate(null);
+    setEditMode(null);
+  };
+
+  // Reusable session row with three-dot menu
   const renderRow = (s: PomodoroSession, i: number) => {
     const lbl = s.label ? labelMap[s.label] : null;
+    const isMenuOpen = openMenuDate === s.date;
+
     return (
-      <div key={i} className="flex items-start gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0">
+      <div
+        key={i}
+        className="relative group flex items-start gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0"
+      >
+        {/* Color dot */}
         {lbl ? (
           <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: lbl.color }} />
         ) : (
           <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1 bg-gray-200 dark:bg-neutral-600" />
         )}
+
+        {/* Main content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
@@ -108,8 +193,132 @@ export function SessionSummary({
               {formatTimeOfDay(s.date)} · {formatDuration(s.duration)}
             </span>
           </div>
-          {s.note && (
+
+          {/* Note — hidden when in note-edit mode for this row */}
+          {s.note && !(isMenuOpen && editMode === 'note') && (
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 text-left">{s.note}</p>
+          )}
+
+          {/* Inline edit: label picker */}
+          {isMenuOpen && editMode === 'label' && (
+            <div className="mt-1.5 flex flex-col gap-1.5">
+              <select
+                autoFocus
+                value={draftLabel ?? ''}
+                onChange={(e) => setDraftLabel(e.target.value === '' ? undefined : e.target.value)}
+                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200"
+              >
+                <option value="">{t.noLabel}</option>
+                {labels.map((l) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </select>
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => handleCommitLabel(s.date)}
+                  className="flex-1 py-1 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
+                >
+                  適用
+                </button>
+                <button
+                  onClick={closeMenu}
+                  className="flex-1 py-1 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
+                >
+                  キャンセル
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Inline edit: note input */}
+          {isMenuOpen && editMode === 'note' && (
+            <div className="mt-1.5 flex flex-col gap-1.5">
+              <input
+                autoFocus
+                type="text"
+                value={draftNote}
+                onChange={(e) => setDraftNote(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCommitNote(s.date);
+                  if (e.key === 'Escape') closeMenu();
+                }}
+                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200"
+              />
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => handleCommitNote(s.date)}
+                  className="flex-1 py-1 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
+                >
+                  適用
+                </button>
+                <button
+                  onClick={closeMenu}
+                  className="flex-1 py-1 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
+                >
+                  キャンセル
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Delete confirmation */}
+          {isMenuOpen && editMode === 'delete' && (
+            <div className="mt-1.5 flex gap-1.5">
+              <button
+                onClick={() => handleDelete(s.date)}
+                className="flex-1 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+              >
+                {t.sessionDelete}
+              </button>
+              <button
+                onClick={closeMenu}
+                className="flex-1 py-1 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
+              >
+                キャンセル
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Three-dot menu button + dropdown */}
+        <div
+          ref={isMenuOpen ? menuRef : undefined}
+          className="relative flex-shrink-0"
+        >
+          <button
+            onClick={() => handleOpenMenu(s.date)}
+            className={`p-0.5 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-opacity
+              md:opacity-0 md:group-hover:opacity-100
+              ${isMenuOpen ? 'md:opacity-100 text-gray-500 dark:text-gray-400' : ''}`}
+          >
+            <MoreVertical size={14} />
+          </button>
+
+          {/* Dropdown menu (shown only when no inline edit is active) */}
+          {isMenuOpen && editMode === null && (
+            <div className="absolute right-0 top-6 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden">
+              <button
+                onClick={() => handleStartEditLabel(s)}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left"
+              >
+                <Tag size={13} className="flex-shrink-0" />
+                <span>{t.sessionChangeLabel}</span>
+              </button>
+              <button
+                onClick={() => handleStartEditNote(s)}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left"
+              >
+                <FileText size={13} className="flex-shrink-0" />
+                <span>{t.sessionEditNote}</span>
+              </button>
+              <button
+                onClick={() => setEditMode('delete')}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 text-left"
+              >
+                <Trash2 size={13} className="flex-shrink-0" />
+                <span>{t.sessionDelete}</span>
+              </button>
+            </div>
           )}
         </div>
       </div>

@@ -25,8 +25,8 @@ export function SessionSummary({
   const { t } = useI18n();
 
   return (
-    <div className="pt-2">
-      <div className="grid grid-cols-2 gap-4 text-center">
+    <div className="pt-2 flex justify-center">
+      <div className="grid grid-cols-2 gap-8 text-center w-full max-w-[200px]">
         <div>
           <div className="text-3xl font-light text-gray-800 dark:text-gray-200">{todayCount}</div>
           <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.today}</div>

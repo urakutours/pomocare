@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, Palette } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
@@ -375,11 +375,24 @@ function LabelDotMenu({
   const [mode, setMode] = useState<EditMode>(null);
   const [editName, setEditName] = useState(label.name);
   const [editColor, setEditColor] = useState(label.color);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const close = () => { setOpen(false); setMode(null); };
 
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        close();
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
   return (
-    <div className="relative flex-shrink-0">
+    <div ref={menuRef} className="relative flex-shrink-0">
       <button
         onClick={() => setOpen((v) => !v)}
         className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"

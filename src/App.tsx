@@ -12,6 +12,7 @@ import { InstallBanner } from '@/components/layout/InstallBanner';
 import { TimerDisplay } from '@/components/timer/TimerDisplay';
 import { TimerControls } from '@/components/timer/TimerControls';
 import { FocusMode } from '@/components/timer/FocusMode';
+import { BreakMode } from '@/components/timer/BreakMode';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
 import { StatsChart } from '@/components/stats/StatsChart';
 import { SessionSummary } from '@/components/stats/SessionSummary';
@@ -184,11 +185,35 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
   const displayMessage = settings.customMessage || t.defaultCustomMessage;
 
-  // Focus mode: running + work mode → minimal UI
+  // Focus mode: running + work mode → minimal UI (no header)
   const isFocusMode = isRunning && mode === 'work';
 
   if (isFocusMode) {
     return <FocusMode timeLeft={timeLeft} onStop={handleFocusStop} />;
+  }
+
+  // Break mode: running + break/longBreak → header + minimal break UI
+  const isBreakMode = isRunning && (mode === 'break' || mode === 'longBreak');
+
+  if (isBreakMode) {
+    return (
+      <AppShell
+        header={
+          <Header
+            onLogoClick={() => setView('timer')}
+            onStatsClick={() => setView('stats')}
+            onSettingsClick={() => setView('settings')}
+          />
+        }
+      >
+        <BreakMode
+          timeLeft={timeLeft}
+          mode={mode}
+          onStop={handleFocusStop}
+          displayMessage={displayMessage}
+        />
+      </AppShell>
+    );
   }
 
   // Active label definition

@@ -15,76 +15,110 @@ function createAudioContext(): AudioContext | null {
 }
 
 /**
- * Bell: リアルなベル音 - 複数倍音 + ピッチ微下降
+ * Bell: ハンドベル音 - 打撃音 + 金属的倍音 + 急速アタック・長い余韻
+ * ハンドベルらしい「コーン」という澄んだ金属打撃音
  */
 function playBell(ctx: AudioContext, startTime: number): number {
-  const duration = 2.5;
+  const duration = 3.2;
 
-  const partials: { freq: number; gain: number; decay: number }[] = [
-    { freq: 440,  gain: 0.40, decay: duration },
-    { freq: 880,  gain: 0.20, decay: duration * 0.8 },
-    { freq: 1318, gain: 0.15, decay: duration * 0.6 },
-    { freq: 1760, gain: 0.10, decay: duration * 0.5 },
-    { freq: 2217, gain: 0.07, decay: duration * 0.4 },
-    { freq: 2637, gain: 0.05, decay: duration * 0.3 },
+  // ハンドベルの基本音 (E5 = 659Hz 付近)
+  // 非整数倍音が金属っぽさを生む
+  const partials: { freq: number; gain: number; decay: number; detune: number }[] = [
+    { freq: 659,   gain: 0.50, decay: duration,        detune: 0 },      // 基音
+    { freq: 1318,  gain: 0.18, decay: duration * 0.75, detune: 0 },      // 2倍音
+    { freq: 1976,  gain: 0.12, decay: duration * 0.55, detune: 5 },      // 3倍音 (少しシャープ)
+    { freq: 2794,  gain: 0.09, decay: duration * 0.40, detune: -8 },     // 非整数倍音
+    { freq: 3729,  gain: 0.06, decay: duration * 0.30, detune: 10 },     // 倍音
+    { freq: 5273,  gain: 0.04, decay: duration * 0.20, detune: -5 },     // 高倍音
   ];
 
-  partials.forEach(({ freq, gain, decay }) => {
+  partials.forEach(({ freq, gain, decay, detune }) => {
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     osc.connect(gainNode);
     gainNode.connect(ctx.destination);
 
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, startTime);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.98, startTime + duration);
+    const f = freq * Math.pow(2, detune / 1200); // cent detune
+    osc.frequency.setValueAtTime(f, startTime);
+    // ハンドベルは打撃後わずかにピッチが下がる
+    osc.frequency.exponentialRampToValueAtTime(f * 0.995, startTime + duration);
 
     gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.005);
+    // 非常に鋭いアタック (ハンドベルらしさ)
+    gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.003);
+    // 最初に素早く減衰してから長い余韻
+    gainNode.gain.exponentialRampToValueAtTime(gain * 0.3, startTime + 0.15);
     gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
 
     osc.start(startTime);
     osc.stop(startTime + decay);
   });
 
+  // 打撃音 (クリック成分 - ベルを叩く瞬間の音)
+  const clickOsc = ctx.createOscillator();
+  const clickGain = ctx.createGain();
+  const clickFilter = ctx.createBiquadFilter();
+  clickOsc.connect(clickFilter);
+  clickFilter.connect(clickGain);
+  clickGain.connect(ctx.destination);
+  clickFilter.type = 'bandpass';
+  clickFilter.frequency.setValueAtTime(4000, startTime);
+  clickFilter.Q.setValueAtTime(0.5, startTime);
+  clickOsc.type = 'square';
+  clickOsc.frequency.setValueAtTime(800, startTime);
+  clickGain.gain.setValueAtTime(0, startTime);
+  clickGain.gain.linearRampToValueAtTime(0.15, startTime + 0.002);
+  clickGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.04);
+  clickOsc.start(startTime);
+  clickOsc.stop(startTime + 0.05);
+
   return duration;
 }
 
 /**
- * Digital: 電子目覚ましアラーム - 矩形波パルスの連続ビープ
+ * Digital: 目覚まし時計風 - 「ピピピ、ピピピ、ピピピ」の3連パターン
  */
 function playDigital(ctx: AudioContext, startTime: number): number {
-  const beepFreq = 1040;
-  const pulseOn = 0.08;
-  const pulseOff = 0.04;
-  const cycleTime = pulseOn + pulseOff;
-  const totalBeeps = 8;
-  const totalDuration = totalBeeps * cycleTime;
+  // 3回の「ピピピ」を繰り返す
+  const beepFreq = 880;    // ピ の周波数
+  const beepOn   = 0.07;   // 1ビープのON時間
+  const beepOff  = 0.05;   // 1ビープ間のOFF
+  const burstSize = 3;     // 「ピピピ」の回数
+  const burstGap  = 0.20;  // 「ピピピ」間の沈黙
+  const totalBursts = 3;   // 3回繰り返す
 
-  for (let i = 0; i < totalBeeps; i++) {
-    const t = startTime + i * cycleTime;
+  const burstDuration = burstSize * (beepOn + beepOff) - beepOff; // 1バーストの長さ
+  const totalDuration = totalBursts * (burstDuration + burstGap) - burstGap;
 
-    const osc = ctx.createOscillator();
-    const filter = ctx.createBiquadFilter();
-    const gainNode = ctx.createGain();
+  for (let burst = 0; burst < totalBursts; burst++) {
+    const burstStart = startTime + burst * (burstDuration + burstGap);
+    for (let b = 0; b < burstSize; b++) {
+      const t = burstStart + b * (beepOn + beepOff);
 
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(3000, t);
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
 
-    osc.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(ctx.destination);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(2500, t);
 
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(i % 2 === 0 ? beepFreq * 1.06 : beepFreq, t);
+      osc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
 
-    gainNode.gain.setValueAtTime(0, t);
-    gainNode.gain.linearRampToValueAtTime(0.25, t + 0.005);
-    gainNode.gain.setValueAtTime(0.25, t + pulseOn - 0.01);
-    gainNode.gain.linearRampToValueAtTime(0, t + pulseOn);
+      osc.type = 'square';
+      // 最初のビープを少し高く (デジタル感)
+      osc.frequency.setValueAtTime(b === 0 ? beepFreq * 1.05 : beepFreq, t);
 
-    osc.start(t);
-    osc.stop(t + pulseOn);
+      gainNode.gain.setValueAtTime(0, t);
+      gainNode.gain.linearRampToValueAtTime(0.22, t + 0.004);
+      gainNode.gain.setValueAtTime(0.22, t + beepOn - 0.008);
+      gainNode.gain.linearRampToValueAtTime(0, t + beepOn);
+
+      osc.start(t);
+      osc.stop(t + beepOn + 0.01);
+    }
   }
 
   return totalDuration;

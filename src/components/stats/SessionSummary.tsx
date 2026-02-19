@@ -17,6 +17,14 @@ function formatTimeOfDay(iso: string): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+// Format date as "2/19（木）" style
+function formatDayHeader(date: Date, days: readonly string[]): string {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const dow = days[date.getDay() === 0 ? 6 : date.getDay() - 1];
+  return `${month}/${day}（${dow}）`;
+}
+
 interface SessionSummaryProps {
   todayCount: number;
   weekCount: number;
@@ -45,11 +53,12 @@ export function SessionSummary({
     return map;
   }, [labels]);
 
+  // Sort ascending (oldest → newest)
   const todaySessions = useMemo(() => {
     const today = new Date().toDateString();
     return sessions
       .filter((s) => new Date(s.date).toDateString() === today)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [sessions]);
 
   const weekSessions = useMemo(() => {
@@ -57,11 +66,55 @@ export function SessionSummary({
     weekAgo.setDate(weekAgo.getDate() - 7);
     return sessions
       .filter((s) => new Date(s.date) >= weekAgo)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [sessions]);
+
+  // Group week sessions by day
+  const weekSessionsByDay = useMemo(() => {
+    const groups: { dateLabel: string; sessions: PomodoroSession[] }[] = [];
+    let currentKey = '';
+    for (const s of weekSessions) {
+      const d = new Date(s.date);
+      const key = d.toDateString();
+      if (key !== currentKey) {
+        currentKey = key;
+        groups.push({ dateLabel: formatDayHeader(d, t.days), sessions: [s] });
+      } else {
+        groups[groups.length - 1].sessions.push(s);
+      }
+    }
+    return groups;
+  }, [weekSessions, t.days]);
 
   const modalSessions = modal === 'today' ? todaySessions : modal === 'week' ? weekSessions : [];
   const modalTitle = modal === 'today' ? t.today : t.thisWeek;
+
+  // Reusable session row
+  const renderRow = (s: PomodoroSession, i: number) => {
+    const lbl = s.label ? labelMap[s.label] : null;
+    return (
+      <div key={i} className="flex items-start gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0">
+        {lbl ? (
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: lbl.color }} />
+        ) : (
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1 bg-gray-200 dark:bg-neutral-600" />
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+              {lbl ? lbl.name : '—'}
+            </span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums whitespace-nowrap flex-shrink-0">
+              {formatTimeOfDay(s.date)} · {formatDuration(s.duration)}
+            </span>
+          </div>
+          {s.note && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 text-left">{s.note}</p>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -111,27 +164,25 @@ export function SessionSummary({
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {modalSessions.length === 0 ? (
                 <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">—</p>
+              ) : modal === 'today' ? (
+                /* Today: simple list, oldest first */
+                <div>{todaySessions.map((s, i) => renderRow(s, i))}</div>
               ) : (
-                <div className="space-y-1.5">
-                  {modalSessions.map((s, i) => {
-                    const lbl = s.label ? labelMap[s.label] : null;
-                    return (
-                      <div key={i} className="flex items-center gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0">
-                        {lbl ? (
-                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: lbl.color }} />
-                        ) : (
-                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-200 dark:bg-neutral-600" />
-                        )}
-                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 truncate">
-                          {lbl ? lbl.name : '—'}
-                          {s.note && <span className="text-gray-400 dark:text-gray-500 ml-1 text-xs">{s.note}</span>}
+                /* Week: grouped by day with divider, oldest first */
+                <div>
+                  {weekSessionsByDay.map((group, gi) => (
+                    <div key={gi} className="mb-1">
+                      {/* Day header */}
+                      <div className="flex items-center gap-2 py-1.5 sticky top-0 bg-white dark:bg-neutral-800 z-10">
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                          {group.dateLabel}
                         </span>
-                        <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums whitespace-nowrap">
-                          {formatTimeOfDay(s.date)} · {formatDuration(s.duration)}
-                        </span>
+                        <div className="flex-1 h-px bg-gray-100 dark:bg-neutral-700" />
                       </div>
-                    );
-                  })}
+                      {/* Sessions */}
+                      <div>{group.sessions.map((s, i) => renderRow(s, i))}</div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

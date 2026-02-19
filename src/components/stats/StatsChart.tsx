@@ -163,7 +163,8 @@ export function StatsChart({
       if (byLabel[l.id]) segs.push({ color: l.color, count: byLabel[l.id] });
     });
     if (byLabel['__none__']) segs.push({ color: '#9ca3af', count: byLabel['__none__'] });
-    return segs;
+    // flex-col-reverse renders last element at top, so reverse to match label list order (first label = top)
+    return segs.reverse();
   };
 
   // Filtered week data (for single-label mode)

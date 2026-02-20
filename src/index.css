@@ -31,6 +31,35 @@ html.dark #root {
   }
 }
 
+/*
+  landscape:* クラスをスマホ横向き（max-width: 767px）のみに限定する。
+  Tailwind v3 の組み込み landscape バリアントは @media(orientation:landscape) 固定のため、
+  PC 幅（768px 以上）では landscape スタイルをリセットする上書きルールを追加する。
+*/
+@media (orientation: landscape) and (min-width: 768px) {
+  /* 2カラムレイアウトを縦に戻す */
+  .landscape\:flex        { display: block !important; }
+  .landscape\:flex-1      { flex: none !important; }
+  .landscape\:items-center { align-items: initial !important; }
+  .landscape\:gap-8       { gap: 0 !important; }
+
+  /* パディング・マージン（PC ではデフォルト値に戻す） */
+  /* AppShell: landscape:p-3 → デフォルト p-4 */
+  .landscape\:p-3         { padding: 1rem !important; }
+  /* Header: landscape:mb-2 → デフォルト mb-8 */
+  .landscape\:mb-2        { margin-bottom: 2rem !important; }
+  /* TimerDisplay: landscape:mb-3 → デフォルト mb-8 */
+  .landscape\:mb-3        { margin-bottom: 2rem !important; }
+  /* TimerControls: landscape:mb-0 → デフォルト mb-6 */
+  .landscape\:mb-0        { margin-bottom: 1.5rem !important; }
+
+  /* タイマー文字サイズをポートレート値（text-7xl）に戻す */
+  .landscape\:text-6xl    { font-size: 4.5rem !important; line-height: 1 !important; }
+  /* ボタンサイズをポートレート値（w-16 h-16）に戻す */
+  .landscape\:w-14        { width: 4rem !important; }
+  .landscape\:h-14        { height: 4rem !important; }
+}
+
 /* Window Controls Overlay: titlebar drag region */
 .titlebar-drag {
   -webkit-app-region: drag;

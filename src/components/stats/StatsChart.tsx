@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Download, MoreVertical, Tag, FileText, Trash2 } from 'lucide-react';
 import type { DayData, MonthDayData } from '@/hooks/useSessions';
 import { useI18n } from '@/contexts/I18nContext';
@@ -140,6 +141,7 @@ function BarDetailModal({
 }) {
   const { t } = useI18n();
   const [openMenuDate, setOpenMenuDate] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
   const [editMode, setEditMode] = useState<'label' | 'note' | 'delete' | null>(null);
   const [draftNote, setDraftNote] = useState('');
   const [draftLabel, setDraftLabel] = useState<string | undefined>(undefined);
@@ -156,6 +158,7 @@ function BarDetailModal({
 
   const closeMenu = () => {
     setOpenMenuDate(null);
+    setMenuPos(null);
     setEditMode(null);
     setEditingSession(null);
   };
@@ -184,17 +187,17 @@ function BarDetailModal({
 
   const handleCommitLabel = (date: string) => {
     onUpdateSession(date, { label: draftLabel || undefined });
-    closeMenu();
+    setOpenMenuDate(null); setMenuPos(null); setEditMode(null); setEditingSession(null);
   };
 
   const handleCommitNote = (date: string) => {
     onUpdateSession(date, { note: draftNote.trim() || undefined });
-    closeMenu();
+    setOpenMenuDate(null); setMenuPos(null); setEditMode(null); setEditingSession(null);
   };
 
   const handleDelete = (date: string) => {
     onDeleteSession(date);
-    closeMenu();
+    setOpenMenuDate(null); setMenuPos(null); setEditMode(null); setEditingSession(null);
   };
 
   const sorted = [...modalSessions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -236,29 +239,20 @@ function BarDetailModal({
           </div>
           {s.note && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 text-left">{s.note}</p>}
         </div>
-        <div ref={isMenuOpen ? menuRef : undefined} className="relative flex-shrink-0">
+        <div ref={isMenuOpen ? menuRef : undefined} className="flex-shrink-0">
           <button
-            onClick={() => {
-              if (openMenuDate === s.date) { setOpenMenuDate(null); setEditMode(null); }
-              else { setOpenMenuDate(s.date); setEditMode(null); }
+            onClick={(e) => {
+              if (openMenuDate === s.date) { setOpenMenuDate(null); setMenuPos(null); setEditMode(null); }
+              else {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setMenuPos({ top: rect.top, right: window.innerWidth - rect.right });
+                setOpenMenuDate(s.date); setEditMode(null);
+              }
             }}
             className={`p-0.5 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-opacity opacity-100 ${isMenuOpen ? 'text-gray-500 dark:text-gray-400' : ''}`}
           >
             <MoreVertical size={14} />
           </button>
-          {isMenuOpen && editMode === null && (
-            <div className="absolute right-0 bottom-full mb-1 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden">
-              <button onClick={() => handleStartEditLabel(s)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left">
-                <Tag size={13} className="flex-shrink-0" /><span>{t.sessionChangeLabel}</span>
-              </button>
-              <button onClick={() => handleStartEditNote(s)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left">
-                <FileText size={13} className="flex-shrink-0" /><span>{t.sessionEditNote}</span>
-              </button>
-              <button onClick={() => { setEditMode('delete'); setEditingSession(s); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 text-left">
-                <Trash2 size={13} className="flex-shrink-0" /><span>{t.sessionDelete}</span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -347,6 +341,40 @@ function BarDetailModal({
           </div>
         )}
       </div>
+
+      {/* Fixed dropdown via portal — avoids overflow clipping from modal/scroll containers */}
+      {openMenuDate && editMode === null && menuPos && createPortal(
+        <div
+          ref={menuRef}
+          style={{
+            position: 'fixed',
+            top: menuPos.top,
+            right: menuPos.right,
+            transform: 'translateY(-100%)',
+            zIndex: 9999,
+          }}
+          className="bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden"
+        >
+          {(() => {
+            const s = sorted.find((x) => x.date === openMenuDate);
+            if (!s) return null;
+            return (
+              <>
+                <button onClick={() => handleStartEditLabel(s)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left">
+                  <Tag size={13} className="flex-shrink-0" /><span>{t.sessionChangeLabel}</span>
+                </button>
+                <button onClick={() => handleStartEditNote(s)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left">
+                  <FileText size={13} className="flex-shrink-0" /><span>{t.sessionEditNote}</span>
+                </button>
+                <button onClick={() => { setEditMode('delete'); setEditingSession(s); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 text-left">
+                  <Trash2 size={13} className="flex-shrink-0" /><span>{t.sessionDelete}</span>
+                </button>
+              </>
+            );
+          })()}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

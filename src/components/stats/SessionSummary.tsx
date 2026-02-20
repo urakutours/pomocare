@@ -1,4 +1,5 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, MoreVertical, Tag, FileText, Trash2 } from 'lucide-react';
 import { getCurrentDayOfWeek } from '@/utils/date';
 import { useI18n } from '@/contexts/I18nContext';
@@ -54,6 +55,7 @@ export function SessionSummary({
 
   // Three-dot menu state
   const [openMenuDate, setOpenMenuDate] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
   const [editMode, setEditMode] = useState<EditMode>(null);
   const [draftNote, setDraftNote] = useState('');
   const [draftLabel, setDraftLabel] = useState<string | undefined>(undefined);
@@ -83,6 +85,7 @@ export function SessionSummary({
   useEffect(() => {
     if (!modal) {
       setOpenMenuDate(null);
+      setMenuPos(null);
       setEditMode(null);
     }
   }, [modal]);
@@ -130,15 +133,19 @@ export function SessionSummary({
   const modalTitle = modal === 'today' ? t.today : t.thisWeek;
 
   // Menu handlers
-  const handleOpenMenu = (date: string) => {
+  const handleOpenMenu = useCallback((date: string, btn: HTMLButtonElement) => {
     if (openMenuDate === date) {
       setOpenMenuDate(null);
+      setMenuPos(null);
       setEditMode(null);
     } else {
+      const rect = btn.getBoundingClientRect();
+      // Show above button, aligned to right edge
+      setMenuPos({ top: rect.top, right: window.innerWidth - rect.right });
       setOpenMenuDate(date);
       setEditMode(null);
     }
-  };
+  }, [openMenuDate]);
 
   const handleStartEditNote = (s: PomodoroSession) => {
     setDraftNote(s.note ?? '');
@@ -155,6 +162,7 @@ export function SessionSummary({
   const handleCommitNote = (date: string) => {
     onUpdateSession(date, { note: draftNote.trim() || undefined });
     setOpenMenuDate(null);
+    setMenuPos(null);
     setEditMode(null);
     setEditingSession(null);
   };
@@ -162,6 +170,7 @@ export function SessionSummary({
   const handleCommitLabel = (date: string) => {
     onUpdateSession(date, { label: draftLabel || undefined });
     setOpenMenuDate(null);
+    setMenuPos(null);
     setEditMode(null);
     setEditingSession(null);
   };
@@ -169,15 +178,17 @@ export function SessionSummary({
   const handleDelete = (date: string) => {
     onDeleteSession(date);
     setOpenMenuDate(null);
+    setMenuPos(null);
     setEditMode(null);
     setEditingSession(null);
   };
 
-  const closeMenu = () => {
+  const closeMenu = useCallback(() => {
     setOpenMenuDate(null);
+    setMenuPos(null);
     setEditMode(null);
     setEditingSession(null);
-  };
+  }, []);
 
   // Reusable session row with three-dot menu
   const renderRow = (s: PomodoroSession, i: number) => {
@@ -213,46 +224,14 @@ export function SessionSummary({
           )}
         </div>
 
-        {/* Three-dot menu button + dropdown */}
-        <div
-          ref={isMenuOpen ? menuRef : undefined}
-          className="relative flex-shrink-0"
-        >
+        {/* Three-dot menu button */}
+        <div ref={isMenuOpen ? menuRef : undefined} className="flex-shrink-0">
           <button
-            onClick={() => handleOpenMenu(s.date)}
-            className={`p-0.5 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-opacity
-              opacity-100
-              ${isMenuOpen ? 'text-gray-500 dark:text-gray-400' : ''}`}
+            onClick={(e) => handleOpenMenu(s.date, e.currentTarget)}
+            className={`p-0.5 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-opacity opacity-100 ${isMenuOpen ? 'text-gray-500 dark:text-gray-400' : ''}`}
           >
             <MoreVertical size={14} />
           </button>
-
-          {/* Dropdown menu (shown only when no inline edit is active) */}
-          {isMenuOpen && editMode === null && (
-            <div className="absolute right-0 bottom-full mb-1 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden">
-              <button
-                onClick={() => handleStartEditLabel(s)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left"
-              >
-                <Tag size={13} className="flex-shrink-0" />
-                <span>{t.sessionChangeLabel}</span>
-              </button>
-              <button
-                onClick={() => handleStartEditNote(s)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left"
-              >
-                <FileText size={13} className="flex-shrink-0" />
-                <span>{t.sessionEditNote}</span>
-              </button>
-              <button
-                onClick={() => { setEditMode('delete'); setEditingSession(s); }}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 text-left"
-              >
-                <Trash2 size={13} className="flex-shrink-0" />
-                <span>{t.sessionDelete}</span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -411,6 +390,52 @@ export function SessionSummary({
             )}
           </div>
         </div>
+      )}
+
+      {/* Fixed dropdown via portal — avoids overflow clipping from modal/scroll containers */}
+      {openMenuDate && editMode === null && menuPos && createPortal(
+        <div
+          ref={menuRef}
+          style={{
+            position: 'fixed',
+            top: menuPos.top,
+            right: menuPos.right,
+            transform: 'translateY(-100%)',
+            zIndex: 9999,
+          }}
+          className="bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden"
+        >
+          {(() => {
+            const s = modalSessions.find((x) => x.date === openMenuDate);
+            if (!s) return null;
+            return (
+              <>
+                <button
+                  onClick={() => handleStartEditLabel(s)}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left"
+                >
+                  <Tag size={13} className="flex-shrink-0" />
+                  <span>{t.sessionChangeLabel}</span>
+                </button>
+                <button
+                  onClick={() => handleStartEditNote(s)}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left"
+                >
+                  <FileText size={13} className="flex-shrink-0" />
+                  <span>{t.sessionEditNote}</span>
+                </button>
+                <button
+                  onClick={() => { setEditMode('delete'); setEditingSession(s); }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 text-left"
+                >
+                  <Trash2 size={13} className="flex-shrink-0" />
+                  <span>{t.sessionDelete}</span>
+                </button>
+              </>
+            );
+          })()}
+        </div>,
+        document.body
       )}
     </>
   );

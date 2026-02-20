@@ -360,6 +360,103 @@ function AddLabelModal({
   );
 }
 
+// ---- CSV Import Modal ----
+function CsvImportModal({
+  onImport,
+  onClose,
+}: {
+  onImport: (file: File) => void;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleFile = (file: File | undefined) => {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.csv')) return;
+    onImport(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => setIsDragOver(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFile(e.target.files?.[0]);
+    e.target.value = '';
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl p-6 w-80 mx-4 flex flex-col gap-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-200">{t.csvImportTitle}</h4>
+          <button onClick={onClose}><X size={16} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" /></button>
+        </div>
+
+        {/* Drop zone */}
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed py-8 px-4 transition-colors cursor-default select-none ${
+            isDragOver
+              ? 'border-tiffany bg-tiffany/5'
+              : 'border-gray-300 dark:border-neutral-600 bg-gray-50 dark:bg-neutral-700/40'
+          }`}
+        >
+          <Upload size={28} className={isDragOver ? 'text-tiffany' : 'text-gray-300 dark:text-gray-500'} />
+          <p className={`text-sm text-center ${isDragOver ? 'text-tiffany font-medium' : 'text-gray-400 dark:text-gray-500'}`}>
+            {t.csvImportModalDropzone}
+          </p>
+          <p className="text-xs text-gray-300 dark:text-gray-600">{t.csvImportModalOr}</p>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
+          >
+            {t.csvImportModalSelectFile}
+          </button>
+        </div>
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="sr-only"
+        />
+
+        {/* Cancel button */}
+        <button
+          onClick={onClose}
+          className="w-full py-2 rounded-xl border border-gray-200 dark:border-neutral-600 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+        >
+          {t.csvImportModalCancel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ---- Shared confirm modal (same style as FocusMode) ----
 function ConfirmModal({
   message,
@@ -803,19 +900,18 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // CSV import
-  const importFileRef = useRef<HTMLInputElement>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [importStatus, setImportStatus] = useState<{ count: number; error?: string } | null>(null);
 
-  const handleImportCsv = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImportFile = (file: File) => {
+    setShowImportModal(false);
+    setImportStatus(null);
     const reader = new FileReader();
     reader.onload = async (ev) => {
       try {
         const text = ev.target?.result as string;
         const lines = text.split(/\r?\n/).filter((l) => l.trim());
         if (lines.length < 2) { setImportStatus({ count: 0, error: 'データが見つかりません' }); return; }
-        // Skip header row
         const dataLines = lines.slice(1);
         const currentLabels = externalLabels;
         const labelByName: Record<string, string> = {};
@@ -846,8 +942,6 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
       }
     };
     reader.readAsText(file, 'utf-8');
-    // Reset file input
-    e.target.value = '';
   };
 
   const handleApply = () => {
@@ -987,15 +1081,8 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
                 {t.csvImportDescription}
               </p>
-              <input
-                ref={importFileRef}
-                type="file"
-                accept=".csv"
-                onChange={handleImportCsv}
-                className="sr-only"
-              />
               <button
-                onClick={() => { setImportStatus(null); importFileRef.current?.click(); }}
+                onClick={() => { setImportStatus(null); setShowImportModal(true); }}
                 className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
               >
                 <Upload size={14} />
@@ -1077,6 +1164,14 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
           confirmClass="bg-red-500 hover:bg-red-600"
           onConfirm={() => { setShowResetConfirm(false); onClearAll(); }}
           onCancel={() => setShowResetConfirm(false)}
+        />
+      )}
+
+      {/* CSV import modal */}
+      {showImportModal && (
+        <CsvImportModal
+          onImport={handleImportFile}
+          onClose={() => setShowImportModal(false)}
         />
       )}
     </div>

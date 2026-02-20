@@ -65,6 +65,10 @@ export interface Translations {
   csvImportTitle: string;
   csvImportDescription: string;
   csvImportButton: string;
+  csvImportModalDropzone: string;
+  csvImportModalOr: string;
+  csvImportModalSelectFile: string;
+  csvImportModalCancel: string;
 
   // Data reset
   dataResetTitle: string;

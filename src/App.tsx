@@ -234,6 +234,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     getWeekData,
     getMonthData,
     getYearData,
+    importSessions,
   } = useSessions(storage, t.days);
 
   // Active label & note state
@@ -347,6 +348,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             onSave={handleSaveSettings}
             onClose={() => setView('timer')}
             onClearAll={handleClearAll}
+            onImportCsv={importSessions}
+            labels={labels}
           />
         )}
 
@@ -358,6 +361,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             getMonthData={getMonthData}
             getYearData={getYearData}
             onClose={() => setView('timer')}
+            onUpdateSession={updateSession}
+            onDeleteSession={deleteSession}
           />
         )}
 
@@ -391,6 +396,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           onSave={handleSaveSettings}
           onClose={() => setView('timer')}
           onClearAll={handleClearAll}
+          onImportCsv={importSessions}
+          labels={labels}
         />
       )}
 
@@ -402,6 +409,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           getMonthData={getMonthData}
           getYearData={getYearData}
           onClose={() => setView('timer')}
+          onUpdateSession={updateSession}
+          onDeleteSession={deleteSession}
         />
       )}
 
@@ -424,7 +433,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             />
 
             {/* Label dropdown + memo */}
-            <div className="mt-4 space-y-2 flex flex-col items-center">
+            <div className="mt-4 space-y-2 flex flex-col items-start w-full max-w-xs mx-auto">
               {/* Custom label selector with color dots */}
               <LabelSelect
                 labels={labels}

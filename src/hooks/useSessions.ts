@@ -166,6 +166,20 @@ export function useSessions(storage: StorageService, days: Translations['days'])
     [sessions],
   );
 
+  // Import sessions from CSV (merges with existing, deduplicates by date)
+  const importSessions = useCallback(
+    async (imported: PomodoroSession[]) => {
+      setSessions((prev) => {
+        const existingDates = new Set(prev.map((s) => s.date));
+        const newSessions = imported.filter((s) => !existingDates.has(s.date));
+        const updated = [...prev, ...newSessions];
+        storage.saveSessions(updated);
+        return updated;
+      });
+    },
+    [storage],
+  );
+
   return {
     sessions,
     addSession,
@@ -179,5 +193,6 @@ export function useSessions(storage: StorageService, days: Translations['days'])
     getMonthData,
     getYearData,
     getLabelTotalSeconds,
+    importSessions,
   };
 }

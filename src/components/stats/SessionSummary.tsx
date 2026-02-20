@@ -221,8 +221,8 @@ export function SessionSummary({
           <button
             onClick={() => handleOpenMenu(s.date)}
             className={`p-0.5 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-opacity
-              md:opacity-0 md:group-hover:opacity-100
-              ${isMenuOpen ? 'md:opacity-100 text-gray-500 dark:text-gray-400' : ''}`}
+              opacity-100 md:opacity-0 md:group-hover:opacity-100
+              ${isMenuOpen ? 'opacity-100 md:opacity-100 text-gray-500 dark:text-gray-400' : ''}`}
           >
             <MoreVertical size={14} />
           </button>

@@ -242,7 +242,7 @@ function BarDetailModal({
               if (openMenuDate === s.date) { setOpenMenuDate(null); setEditMode(null); }
               else { setOpenMenuDate(s.date); setEditMode(null); }
             }}
-            className={`p-0.5 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100 ${isMenuOpen ? 'opacity-100 md:opacity-100 text-gray-500 dark:text-gray-400' : ''}`}
+            className={`p-0.5 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-opacity opacity-100 ${isMenuOpen ? 'text-gray-500 dark:text-gray-400' : ''}`}
           >
             <MoreVertical size={14} />
           </button>

@@ -1,5 +1,5 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
-import { X, Download } from 'lucide-react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { X, Download, MoreVertical, Tag, FileText, Trash2 } from 'lucide-react';
 import type { DayData, MonthDayData } from '@/hooks/useSessions';
 import { useI18n } from '@/contexts/I18nContext';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
@@ -13,6 +13,8 @@ interface StatsChartProps {
   getMonthData: (offset: number) => MonthDayData[];
   getYearData: (offset: number) => { month: string; count: number; totalSeconds: number }[];
   onClose: () => void;
+  onUpdateSession: (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => void;
+  onDeleteSession: (date: string) => void;
 }
 
 function formatDuration(seconds: number): string {
@@ -30,19 +32,24 @@ function StackedBar({
   segments,
   totalSeconds,
   barHeight,
+  onClick,
 }: {
   total: number;
   maxCount: number;
   segments: { color: string; count: number }[];
   totalSeconds: number;
   barHeight: number;
+  onClick?: () => void;
 }) {
   const heightPx = total > 0 ? Math.max((total / maxCount) * barHeight, 6) : 0;
   return (
-    <div className="flex flex-col items-center flex-1 group relative">
+    <div
+      className={`flex flex-col items-center flex-1 group relative ${total > 0 && onClick ? 'cursor-pointer' : ''}`}
+      onClick={total > 0 ? onClick : undefined}
+    >
       <div className="w-full flex items-end justify-center" style={{ height: `${barHeight}px` }}>
         <div
-          className="w-full max-w-[28px] rounded-t overflow-hidden flex flex-col-reverse"
+          className={`w-full max-w-[28px] rounded-t overflow-hidden flex flex-col-reverse ${total > 0 && onClick ? 'hover:opacity-80 transition-opacity' : ''}`}
           style={{ height: `${heightPx}px` }}
         >
           {segments.filter((s) => s.count > 0).map((seg, i) => (
@@ -72,18 +79,23 @@ function Bar({
   totalSeconds,
   color,
   barHeight,
+  onClick,
 }: {
   ratio: number;
   count: number;
   totalSeconds: number;
   color?: string;
   barHeight: number;
+  onClick?: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center flex-1 group relative">
+    <div
+      className={`flex flex-col items-center flex-1 group relative ${count > 0 && onClick ? 'cursor-pointer' : ''}`}
+      onClick={count > 0 ? onClick : undefined}
+    >
       <div className="w-full flex items-end justify-center" style={{ height: `${barHeight}px` }}>
         <div
-          className="w-full max-w-[28px] rounded-t transition-all"
+          className={`w-full max-w-[28px] rounded-t transition-all ${count > 0 && onClick ? 'hover:opacity-80' : ''}`}
           style={{
             height: `${ratio * 100}%`,
             minHeight: count > 0 ? '6px' : '0',
@@ -100,6 +112,198 @@ function Bar({
   );
 }
 
+// ---- Bar detail modal (same look as SessionSummary modal) ----
+function BarDetailModal({
+  title,
+  modalSessions,
+  labels,
+  onClose,
+  onUpdateSession,
+  onDeleteSession,
+}: {
+  title: string;
+  modalSessions: PomodoroSession[];
+  labels: LabelDefinition[];
+  onClose: () => void;
+  onUpdateSession: (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => void;
+  onDeleteSession: (date: string) => void;
+}) {
+  const { t } = useI18n();
+  const [openMenuDate, setOpenMenuDate] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState<'label' | 'note' | 'delete' | null>(null);
+  const [draftNote, setDraftNote] = useState('');
+  const [draftLabel, setDraftLabel] = useState<string | undefined>(undefined);
+  const [editingSession, setEditingSession] = useState<PomodoroSession | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const labelMap = useMemo(() => {
+    const map: Record<string, LabelDefinition> = {};
+    labels.forEach((l) => { map[l.id] = l; });
+    return map;
+  }, [labels]);
+
+  const closeMenu = () => {
+    setOpenMenuDate(null);
+    setEditMode(null);
+    setEditingSession(null);
+  };
+
+  useEffect(() => {
+    if (!openMenuDate) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) closeMenu();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openMenuDate]);
+
+  const handleStartEditLabel = (s: PomodoroSession) => {
+    setDraftLabel(s.label);
+    setEditMode('label');
+    setEditingSession(s);
+  };
+
+  const handleStartEditNote = (s: PomodoroSession) => {
+    setDraftNote(s.note ?? '');
+    setEditMode('note');
+    setEditingSession(s);
+  };
+
+  const handleCommitLabel = (date: string) => {
+    onUpdateSession(date, { label: draftLabel || undefined });
+    closeMenu();
+  };
+
+  const handleCommitNote = (date: string) => {
+    onUpdateSession(date, { note: draftNote.trim() || undefined });
+    closeMenu();
+  };
+
+  const handleDelete = (date: string) => {
+    onDeleteSession(date);
+    closeMenu();
+  };
+
+  const sorted = [...modalSessions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const renderRow = (s: PomodoroSession, i: number) => {
+    const lbl = s.label ? labelMap[s.label] : null;
+    const isMenuOpen = openMenuDate === s.date;
+    return (
+      <div key={i} className="relative group flex items-start gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0">
+        {lbl ? (
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: lbl.color }} />
+        ) : (
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1 bg-gray-200 dark:bg-neutral-600" />
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{lbl ? lbl.name : '—'}</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums whitespace-nowrap flex-shrink-0">
+              {`${String(new Date(s.date).getHours()).padStart(2,'0')}:${String(new Date(s.date).getMinutes()).padStart(2,'0')}`} · {formatDuration(s.duration)}
+            </span>
+          </div>
+          {s.note && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 text-left">{s.note}</p>}
+        </div>
+        <div ref={isMenuOpen ? menuRef : undefined} className="relative flex-shrink-0">
+          <button
+            onClick={() => {
+              if (openMenuDate === s.date) { setOpenMenuDate(null); setEditMode(null); }
+              else { setOpenMenuDate(s.date); setEditMode(null); }
+            }}
+            className={`p-0.5 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-opacity md:opacity-0 md:group-hover:opacity-100 ${isMenuOpen ? 'md:opacity-100 text-gray-500 dark:text-gray-400' : ''}`}
+          >
+            <MoreVertical size={14} />
+          </button>
+          {isMenuOpen && editMode === null && (
+            <div className="absolute right-0 top-6 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden">
+              <button onClick={() => handleStartEditLabel(s)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left">
+                <Tag size={13} className="flex-shrink-0" /><span>{t.sessionChangeLabel}</span>
+              </button>
+              <button onClick={() => handleStartEditNote(s)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left">
+                <FileText size={13} className="flex-shrink-0" /><span>{t.sessionEditNote}</span>
+              </button>
+              <button onClick={() => { setEditMode('delete'); setEditingSession(s); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 text-left">
+                <Trash2 size={13} className="flex-shrink-0" /><span>{t.sessionDelete}</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div
+        className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl w-80 max-h-[70vh] mx-4 flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center p-4 pb-2 flex-shrink-0">
+          <h4 className="font-semibold text-gray-700 dark:text-gray-200">
+            {title}
+            <span className="ml-2 text-sm font-normal text-gray-400">
+              {modalSessions.length} · {formatDuration(modalSessions.reduce((s, sess) => s + sess.duration, 0))}
+            </span>
+          </h4>
+          <button onClick={onClose}><X size={16} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" /></button>
+        </div>
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {sorted.length === 0 ? (
+            <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">—</p>
+          ) : (
+            <div>{sorted.map((s, i) => renderRow(s, i))}</div>
+          )}
+        </div>
+        {editingSession && editMode === 'label' && (
+          <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-neutral-700 flex-shrink-0">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t.sessionChangeLabel}</p>
+            <select
+              autoFocus
+              value={draftLabel ?? ''}
+              onChange={(e) => setDraftLabel(e.target.value === '' ? undefined : e.target.value)}
+              className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 mb-2"
+            >
+              <option value="">{t.noLabel}</option>
+              {labels.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+            </select>
+            <div className="flex gap-1.5">
+              <button onClick={() => handleCommitLabel(editingSession.date)} className="flex-1 py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors">適用</button>
+              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">キャンセル</button>
+            </div>
+          </div>
+        )}
+        {editingSession && editMode === 'note' && (
+          <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-neutral-700 flex-shrink-0">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t.sessionEditNote}</p>
+            <input
+              autoFocus
+              type="text"
+              value={draftNote}
+              onChange={(e) => setDraftNote(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleCommitNote(editingSession.date); if (e.key === 'Escape') closeMenu(); }}
+              className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 mb-2"
+            />
+            <div className="flex gap-1.5">
+              <button onClick={() => handleCommitNote(editingSession.date)} className="flex-1 py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors">適用</button>
+              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">キャンセル</button>
+            </div>
+          </div>
+        )}
+        {editingSession && editMode === 'delete' && (
+          <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-neutral-700 flex-shrink-0">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{t.sessionDelete}しますか？</p>
+            <div className="flex gap-1.5">
+              <button onClick={() => handleDelete(editingSession.date)} className="flex-1 py-1.5 text-xs bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">{t.sessionDelete}</button>
+              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">キャンセル</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function StatsChart({
   sessions,
   labels,
@@ -107,11 +311,16 @@ export function StatsChart({
   getMonthData,
   getYearData,
   onClose,
+  onUpdateSession,
+  onDeleteSession,
 }: StatsChartProps) {
   const { t } = useI18n();
   const [tab, setTab] = useState<StatTab>('weekly');
   const [offset, setOffset] = useState(0);
   const [filterLabel, setFilterLabel] = useState<string | null>(null);
+
+  // Bar detail modal state
+  const [barModal, setBarModal] = useState<{ title: string; sessions: PomodoroSession[] } | null>(null);
 
   // Resizable bar chart height
   const [barHeight, setBarHeight] = useState(80);
@@ -372,13 +581,17 @@ export function StatsChart({
         {tab === 'weekly' && (
           <div>
             <div className="flex justify-between items-end mb-1">
-              {effectiveWeekData.map((data, i) =>
-                isAllMode && weekStackedData ? (
-                  <StackedBar key={i} total={data.count} maxCount={weekMaxCount} segments={(data as typeof weekStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} />
+              {effectiveWeekData.map((data, i) => {
+                const dayDate = weekDataRaw[i].date;
+                const daySessions = filteredSessions.filter((s) => new Date(s.date).toDateString() === dayDate.toDateString());
+                const title = `${dayDate.getMonth() + 1}/${dayDate.getDate()}（${weekDataRaw[i].day}）`;
+                const handleClick = () => setBarModal({ title, sessions: daySessions });
+                return isAllMode && weekStackedData ? (
+                  <StackedBar key={i} total={data.count} maxCount={weekMaxCount} segments={(data as typeof weekStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} onClick={handleClick} />
                 ) : (
-                  <Bar key={i} ratio={data.count / weekMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} />
-                )
-              )}
+                  <Bar key={i} ratio={data.count / weekMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} onClick={handleClick} />
+                );
+              })}
             </div>
             <div className="flex justify-between">
               {weekDataRaw.map((data, i) => (
@@ -392,13 +605,17 @@ export function StatsChart({
         {tab === 'monthly' && (
           <div>
             <div className="flex justify-between items-end mb-1 gap-px">
-              {effectiveMonthData.map((data, i) =>
-                isAllMode && monthStackedData ? (
-                  <StackedBar key={i} total={data.count} maxCount={monthMaxCount} segments={(data as typeof monthStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} />
+              {effectiveMonthData.map((data, i) => {
+                const dayDate = monthDataRaw[i].date;
+                const daySessions = filteredSessions.filter((s) => new Date(s.date).toDateString() === dayDate.toDateString());
+                const title = `${dayDate.getMonth() + 1}/${dayDate.getDate()}`;
+                const handleClick = () => setBarModal({ title, sessions: daySessions });
+                return isAllMode && monthStackedData ? (
+                  <StackedBar key={i} total={data.count} maxCount={monthMaxCount} segments={(data as typeof monthStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} onClick={handleClick} />
                 ) : (
-                  <Bar key={i} ratio={data.count / monthMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} />
-                )
-              )}
+                  <Bar key={i} ratio={data.count / monthMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} onClick={handleClick} />
+                );
+              })}
             </div>
             <div className="flex justify-between gap-px">
               {monthDataRaw.map((_, i) => (
@@ -414,13 +631,19 @@ export function StatsChart({
         {tab === 'yearly' && (
           <div>
             <div className="flex justify-between items-end mb-1">
-              {effectiveYearData.map((data, i) =>
-                isAllMode && yearStackedData ? (
-                  <StackedBar key={i} total={data.count} maxCount={yearMaxCount} segments={(data as typeof yearStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} />
+              {effectiveYearData.map((data, i) => {
+                const monthSessions = filteredSessions.filter((s) => {
+                  const d = new Date(s.date);
+                  return d.getFullYear() === targetYear && d.getMonth() === i;
+                });
+                const title = `${targetYear} ${t.months[i]}`;
+                const handleClick = () => setBarModal({ title, sessions: monthSessions });
+                return isAllMode && yearStackedData ? (
+                  <StackedBar key={i} total={data.count} maxCount={yearMaxCount} segments={(data as typeof yearStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} onClick={handleClick} />
                 ) : (
-                  <Bar key={i} ratio={data.count / yearMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} />
-                )
-              )}
+                  <Bar key={i} ratio={data.count / yearMaxCount} count={data.count} totalSeconds={data.totalSeconds} color={barColor} barHeight={barHeight} onClick={handleClick} />
+                );
+              })}
             </div>
             <div className="flex justify-between">
               {yearDataRaw.map((_, i) => (
@@ -503,6 +726,18 @@ export function StatsChart({
           {t.exportCsv}
         </button>
       </div>
+
+      {/* Bar detail modal */}
+      {barModal && (
+        <BarDetailModal
+          title={barModal.title}
+          modalSessions={barModal.sessions}
+          labels={labels}
+          onClose={() => setBarModal(null)}
+          onUpdateSession={onUpdateSession}
+          onDeleteSession={onDeleteSession}
+        />
+      )}
     </div>
   );
 }

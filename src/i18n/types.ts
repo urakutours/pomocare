@@ -61,6 +61,11 @@ export interface Translations {
   sessionEditNote: string;
   sessionDelete: string;
 
+  // CSV import
+  csvImportTitle: string;
+  csvImportDescription: string;
+  csvImportButton: string;
+
   // Data reset
   dataResetTitle: string;
   dataResetDescription: string;

@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, Palette, GripVertical } from 'lucide-react';
+import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, Palette, GripVertical, Upload } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
-import type { LabelDefinition } from '@/types/session';
+import type { LabelDefinition, PomodoroSession } from '@/types/session';
 import { useI18n } from '@/contexts/I18nContext';
 import { SUPPORTED_LANGUAGES, getTranslations } from '@/i18n';
 import type { Language } from '@/i18n';
@@ -13,6 +13,8 @@ interface SettingsPanelProps {
   onSave: (settings: PomodoroSettings) => void;
   onClose: () => void;
   onClearAll: () => void;
+  onImportCsv: (sessions: PomodoroSession[]) => Promise<void>;
+  labels: LabelDefinition[];
 }
 
 type SettingsTab = 'general' | 'labels' | 'presets';
@@ -777,7 +779,7 @@ function AlarmSettingsPanel({
   );
 }
 
-export function SettingsPanel({ settings, onSave, onClose, onClearAll }: SettingsPanelProps) {
+export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, labels: externalLabels }: SettingsPanelProps) {
   const { t } = useI18n();
   const [workTime, setWorkTime] = useState(settings.workTime);
   const [breakTime, setBreakTime] = useState(settings.breakTime);
@@ -799,6 +801,54 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll }: Setting
 
   // Data reset confirmation modal
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  // CSV import
+  const importFileRef = useRef<HTMLInputElement>(null);
+  const [importStatus, setImportStatus] = useState<{ count: number; error?: string } | null>(null);
+
+  const handleImportCsv = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const text = ev.target?.result as string;
+        const lines = text.split(/\r?\n/).filter((l) => l.trim());
+        if (lines.length < 2) { setImportStatus({ count: 0, error: 'データが見つかりません' }); return; }
+        // Skip header row
+        const dataLines = lines.slice(1);
+        const currentLabels = externalLabels;
+        const labelByName: Record<string, string> = {};
+        currentLabels.forEach((l) => { labelByName[l.name] = l.id; });
+        const imported: PomodoroSession[] = [];
+        for (const line of dataLines) {
+          const cols = line.split(',');
+          if (cols.length < 5) continue;
+          const [date, time, labelName, note, durationMinutes] = cols;
+          if (!date || !time) continue;
+          const dateStr = `${date}T${time}:00`;
+          const d = new Date(dateStr);
+          if (isNaN(d.getTime())) continue;
+          const mins = parseFloat(durationMinutes);
+          if (isNaN(mins)) continue;
+          const labelId = labelName ? (labelByName[labelName] ?? undefined) : undefined;
+          imported.push({
+            date: d.toISOString(),
+            duration: Math.round(mins * 60),
+            label: labelId,
+            note: note || undefined,
+          });
+        }
+        await onImportCsv(imported);
+        setImportStatus({ count: imported.length });
+      } catch {
+        setImportStatus({ count: 0, error: 'インポートに失敗しました' });
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+    // Reset file input
+    e.target.value = '';
+  };
 
   const handleApply = () => {
     onSave({
@@ -927,6 +977,35 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll }: Setting
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* CSV import */}
+            <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                {t.csvImportTitle}
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                {t.csvImportDescription}
+              </p>
+              <input
+                ref={importFileRef}
+                type="file"
+                accept=".csv"
+                onChange={handleImportCsv}
+                className="sr-only"
+              />
+              <button
+                onClick={() => { setImportStatus(null); importFileRef.current?.click(); }}
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+              >
+                <Upload size={14} />
+                {t.csvImportButton}
+              </button>
+              {importStatus && (
+                <p className={`mt-2 text-xs text-center ${importStatus.error ? 'text-red-500' : 'text-tiffany'}`}>
+                  {importStatus.error ?? `${importStatus.count}件のセッションをインポートしました`}
+                </p>
+              )}
             </div>
 
             {/* Data reset — at the bottom of General tab */}

@@ -247,7 +247,7 @@ function BarDetailModal({
             <MoreVertical size={14} />
           </button>
           {isMenuOpen && editMode === null && (
-            <div className="absolute right-0 top-6 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden">
+            <div className="absolute right-0 bottom-full mb-1 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden">
               <button onClick={() => handleStartEditLabel(s)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600 text-left">
                 <Tag size={13} className="flex-shrink-0" /><span>{t.sessionChangeLabel}</span>
               </button>

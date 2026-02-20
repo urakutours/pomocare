@@ -147,7 +147,7 @@ function LabelSelect({
   const selected = labels.find((l) => l.id === value) ?? null;
 
   return (
-    <div ref={ref} className="relative w-full max-w-xs">
+    <div ref={ref} className="relative w-full">
       {/* Trigger button */}
       <button
         type="button"
@@ -433,7 +433,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             />
 
             {/* Label dropdown + memo */}
-            <div className="mt-4 space-y-2 flex flex-col items-start w-full max-w-xs mx-auto">
+            <div className="mt-4 space-y-2 flex flex-col items-start w-full max-w-xs">
               {/* Custom label selector with color dots */}
               <LabelSelect
                 labels={labels}
@@ -456,7 +456,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
                   onChange={(e) => setActiveNote(e.target.value)}
                   placeholder={t.labelNotePlaceholder}
                   rows={2}
-                  className="w-full max-w-xs px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 resize-none"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 resize-none"
                 />
               )}
             </div>

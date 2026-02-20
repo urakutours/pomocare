@@ -61,10 +61,15 @@ export function SessionSummary({
   const [editingSession, setEditingSession] = useState<PomodoroSession | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // Close menu on outside click
+  // Close menu on outside click (only when dropdown is open, not when editing)
+  const editModeRef = useRef(editMode);
+  useEffect(() => { editModeRef.current = editMode; }, [editMode]);
+
   useEffect(() => {
     if (!openMenuDate) return;
     const handler = (e: MouseEvent) => {
+      // Don't close if we're in an edit mode (label/note/delete panel is shown)
+      if (editModeRef.current !== null) return;
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenMenuDate(null);
         setEditMode(null);
@@ -256,7 +261,7 @@ export function SessionSummary({
   return (
     <>
       <div className="pt-2 flex justify-center">
-        <div className="grid grid-cols-2 gap-8 text-center w-full max-w-[200px]">
+        <div className="grid grid-cols-2 gap-8 text-center w-full max-w-[200px] items-start">
           <button onClick={() => setModal('today')} className="hover:bg-gray-50 dark:hover:bg-neutral-700 rounded-lg py-1 -mx-1 transition-colors flex flex-col items-center">
             <div className="text-3xl font-light text-gray-800 dark:text-gray-200">{todayCount}</div>
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.today}</div>

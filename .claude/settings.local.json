@@ -36,7 +36,12 @@
       "Bash(powershell -Command:*)",
       "Bash(echo:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(grep:*)",
+      "Bash(python:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(Remove-Item -Recurse -Force C:tmppomodoro-builddist)",
+      "Bash(npm install:*)"
     ]
   }
 }

@@ -1,8 +1,9 @@
-import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FeatureProvider } from '@/contexts/FeatureContext';
 import { I18nProvider, useI18n } from '@/contexts/I18nContext';
-import { createStorageService } from '@/services/storage';
+import { useAuth } from '@/contexts/AuthContext';
+import { createStorageService, createFirestoreStorageService, LocalStorageAdapter } from '@/services/storage';
 import { useSettings } from '@/hooks/useSettings';
 import { useSessions } from '@/hooks/useSessions';
 import { useTimer } from '@/hooks/useTimer';
@@ -480,8 +481,75 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   );
 }
 
-function AppWithI18n() {
-  const storage = useMemo(() => createStorageService(), []);
+// ---- Storage switcher based on auth state ----
+// ログイン時: localStorage → Firestore マイグレーション後に切替
+// ログアウト時: ページリロードで localStorage に戻る（状態をクリーンにするため）
+function AppWithStorage() {
+  const { user, isLoading: authLoading } = useAuth();
+  // null = 切替中（ローディング）、非null = 使用するストレージ
+  const [storage, setStorage] = useState<StorageService | null>(null);
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    // 初回のみ実行
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const currentUid = user?.id ?? null;
+
+    if (currentUid) {
+      // ログイン済み → Firestore にマイグレーションしてから切替
+      const firestoreStorage = createFirestoreStorageService(currentUid);
+
+      const migrate = async () => {
+        try {
+          const localAdapter = new LocalStorageAdapter();
+          const firestoreSessions = await firestoreStorage.getSessions();
+
+          if (firestoreSessions.length === 0) {
+            // Firestore が空なら localStorage からマイグレーション
+            const [localSessions, localSettings] = await Promise.all([
+              localAdapter.getSessions(),
+              localAdapter.getSettings(),
+            ]);
+            if (localSessions.length > 0) {
+              await firestoreStorage.saveSessions(localSessions);
+            }
+            if (Object.keys(localSettings).length > 0) {
+              await firestoreStorage.saveSettings(localSettings);
+            }
+          }
+        } catch (e) {
+          console.warn('Migration failed:', e);
+        }
+        setStorage(firestoreStorage);
+      };
+
+      migrate();
+    } else {
+      // 未ログイン → localStorage をそのまま使用
+      setStorage(createStorageService());
+    }
+  }, [user, authLoading]);
+
+  // ログアウトを検知したらページリロード（クリーンな状態で localStorage に戻る）
+  const prevUserRef = useRef(user);
+  useEffect(() => {
+    if (!authLoading && prevUserRef.current !== null && prevUserRef.current !== undefined && user === null) {
+      window.location.reload();
+    }
+    prevUserRef.current = user;
+  }, [user, authLoading]);
+
+  // Firebase Auth 解決中 or ストレージ切替中は何も表示しない
+  if (authLoading || storage === null) return null;
+
+  return <AppWithI18n storage={storage} />;
+}
+
+function AppWithI18n({ storage }: { storage: StorageService }) {
   const { settings, updateSettings, isLoaded } = useSettings(storage);
 
   // Apply theme class to document
@@ -513,7 +581,7 @@ export default function App() {
   return (
     <AuthProvider>
       <FeatureProvider>
-        <AppWithI18n />
+        <AppWithStorage />
       </FeatureProvider>
     </AuthProvider>
   );

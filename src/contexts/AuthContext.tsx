@@ -23,7 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Firebase Auth のリアルタイム状態購読
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged((u) => {
       setUser(u);

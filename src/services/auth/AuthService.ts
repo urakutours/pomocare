@@ -48,7 +48,7 @@ export class AuthService {
     });
   }
 
-  /** Google ログイン */
+  /** Google ログイン（ポップアップ方式） */
   async signInWithGoogle(): Promise<User> {
     const result = await signInWithPopup(auth, googleProvider);
     return toUser(result.user);

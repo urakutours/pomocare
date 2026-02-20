@@ -35,7 +35,8 @@
       "Bash(powershell -Command \"\n$lines = @\\(\n  ''import { useState } from ''''react'''';'',\n  ''import { X, Download } from ''''lucide-react'''';'',\n  ''import type { DayData, MonthDayData } from ''''@/hooks/useSessions'''';'',\n  ''import { useI18n } from ''''@/contexts/I18nContext'''';'',\n  ''import type { PomodoroSession } from ''''@/types/session'''';'',\n  '''',\n  ''type StatTab = ''''weekly'''' | ''''monthly'''' | ''''yearly'''';'',\n  '''',\n  ''interface StatsChartProps {'',\n  ''  sessions: PomodoroSession[];'',\n  ''  getWeekData: \\(offset: number\\) => DayData[];'',\n  ''  getMonthData: \\(offset: number\\) => MonthDayData[];'',\n  ''  getYearData: \\(offset: number\\) => { month: string; count: number; totalSeconds: number }[];'',\n  ''  onClose: \\(\\) => void;'',\n  ''}'',\n  '''',\n  ''function formatDuration\\(seconds: number\\): string {'',\n  ''  if \\(seconds <= 0\\) return ''''0min'''';'',\n  ''  const h = Math.floor\\(seconds / 3600\\);'',\n  ''  const m = Math.floor\\(\\(seconds % 3600\\) / 60\\);'',\n  ''  if \\(h > 0\\) return h + ''''h '''' + m + ''''m'''';'',\n  ''  return m + ''''min'''';'',\n  ''}'',\n  ''''\n\\)\n$content = $lines -join \\\\`\\\\`n\n[System.IO.File]::WriteAllText\\(''C:\\\\tmp\\\\pomodoro-build\\\\src\\\\components\\\\stats\\\\StatsChart_part1.tsx'', $content, [System.Text.Encoding]::UTF8\\)\nWrite-Host ''part1 done, lines:'' $lines.Count\n\")",
       "Bash(powershell -Command:*)",
       "Bash(echo:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }

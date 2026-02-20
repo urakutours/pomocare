@@ -177,7 +177,7 @@ function LabelSelect({
           <button
             type="button"
             onClick={() => { onChange(''); setOpen(false); }}
-            className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-600 ${!value ? 'bg-tiffany/10' : ''}`}
+            className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-neutral-600 ${!value ? 'bg-tiffany/10' : ''}`}
           >
             <span className="w-3 h-3 rounded-full flex-shrink-0 border border-gray-300 dark:border-neutral-500" />
             <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>
@@ -189,7 +189,7 @@ function LabelSelect({
               key={l.id}
               type="button"
               onClick={() => { onChange(l.id); setOpen(false); }}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-600 ${value === l.id ? 'bg-tiffany/10' : ''}`}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-neutral-600 ${value === l.id ? 'bg-tiffany/10' : ''}`}
             >
               <span
                 className="w-3 h-3 rounded-full flex-shrink-0"
@@ -208,7 +208,7 @@ function LabelSelect({
           <button
             type="button"
             onClick={() => { onChange('__new__'); setOpen(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-tiffany hover:bg-tiffany/5 border-t border-gray-100 dark:border-neutral-600"
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-tiffany hover:bg-tiffany/5 border-t border-gray-100 dark:border-neutral-600"
           >
             <span className="w-3 h-3 rounded-full flex-shrink-0 border-2 border-dashed border-tiffany flex items-center justify-center">
             </span>
@@ -433,7 +433,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             />
 
             {/* Label dropdown + memo */}
-            <div className="mt-4 space-y-2 flex flex-col items-start w-full max-w-xs">
+            <div className="mt-4 space-y-2 flex flex-col items-start w-full max-w-xs mx-auto">
               {/* Custom label selector with color dots */}
               <LabelSelect
                 labels={labels}

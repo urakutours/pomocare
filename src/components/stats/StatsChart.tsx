@@ -112,6 +112,14 @@ function Bar({
   );
 }
 
+// Format date as "2/19（木）" style for day headers
+function formatDayHeader(date: Date, days: readonly string[]): string {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const dow = days[date.getDay() === 0 ? 6 : date.getDay() - 1];
+  return `${month}/${day}（${dow}）`;
+}
+
 // ---- Bar detail modal (same look as SessionSummary modal) ----
 function BarDetailModal({
   title,
@@ -120,6 +128,7 @@ function BarDetailModal({
   onClose,
   onUpdateSession,
   onDeleteSession,
+  groupByDay = false,
 }: {
   title: string;
   modalSessions: PomodoroSession[];
@@ -127,6 +136,7 @@ function BarDetailModal({
   onClose: () => void;
   onUpdateSession: (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => void;
   onDeleteSession: (date: string) => void;
+  groupByDay?: boolean;
 }) {
   const { t } = useI18n();
   const [openMenuDate, setOpenMenuDate] = useState<string | null>(null);
@@ -135,6 +145,8 @@ function BarDetailModal({
   const [draftLabel, setDraftLabel] = useState<string | undefined>(undefined);
   const [editingSession, setEditingSession] = useState<PomodoroSession | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const editModeRef = useRef(editMode);
+  useEffect(() => { editModeRef.current = editMode; }, [editMode]);
 
   const labelMap = useMemo(() => {
     const map: Record<string, LabelDefinition> = {};
@@ -151,6 +163,7 @@ function BarDetailModal({
   useEffect(() => {
     if (!openMenuDate) return;
     const handler = (e: MouseEvent) => {
+      if (editModeRef.current !== null) return;
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) closeMenu();
     };
     document.addEventListener('mousedown', handler);
@@ -185,6 +198,24 @@ function BarDetailModal({
   };
 
   const sorted = [...modalSessions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Group sessions by day for day-grouped display
+  const sessionsByDay = useMemo(() => {
+    if (!groupByDay) return null;
+    const groups: { dateLabel: string; sessions: PomodoroSession[] }[] = [];
+    let currentKey = '';
+    for (const s of sorted) {
+      const d = new Date(s.date);
+      const key = d.toDateString();
+      if (key !== currentKey) {
+        currentKey = key;
+        groups.push({ dateLabel: formatDayHeader(d, t.days), sessions: [s] });
+      } else {
+        groups[groups.length - 1].sessions.push(s);
+      }
+    }
+    return groups;
+  }, [sorted, groupByDay, t.days]);
 
   const renderRow = (s: PomodoroSession, i: number) => {
     const lbl = s.label ? labelMap[s.label] : null;
@@ -251,7 +282,23 @@ function BarDetailModal({
         <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {sorted.length === 0 ? (
             <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">—</p>
+          ) : groupByDay && sessionsByDay ? (
+            /* Day-grouped display */
+            <div>
+              {sessionsByDay.map((group, gi) => (
+                <div key={gi} className="mb-1">
+                  <div className="flex items-center gap-2 py-1.5 sticky top-0 bg-white dark:bg-neutral-800 z-10">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                      {group.dateLabel}
+                    </span>
+                    <div className="flex-1 h-px bg-gray-100 dark:bg-neutral-700" />
+                  </div>
+                  <div>{group.sessions.map((s, i) => renderRow(s, i))}</div>
+                </div>
+              ))}
+            </div>
           ) : (
+            /* Simple list display */
             <div>{sorted.map((s, i) => renderRow(s, i))}</div>
           )}
         </div>
@@ -320,7 +367,10 @@ export function StatsChart({
   const [filterLabel, setFilterLabel] = useState<string | null>(null);
 
   // Bar detail modal state
-  const [barModal, setBarModal] = useState<{ title: string; sessions: PomodoroSession[] } | null>(null);
+  const [barModal, setBarModal] = useState<{ title: string; sessions: PomodoroSession[]; groupByDay?: boolean } | null>(null);
+
+  // Label stat modal state (label name/bar click)
+  const [labelModal, setLabelModal] = useState<{ title: string; sessions: PomodoroSession[] } | null>(null);
 
   // Resizable bar chart height
   const [barHeight, setBarHeight] = useState(80);
@@ -637,7 +687,7 @@ export function StatsChart({
                   return d.getFullYear() === targetYear && d.getMonth() === i;
                 });
                 const title = `${targetYear} ${t.months[i]}`;
-                const handleClick = () => setBarModal({ title, sessions: monthSessions });
+                const handleClick = () => setBarModal({ title, sessions: monthSessions, groupByDay: true });
                 return isAllMode && yearStackedData ? (
                   <StackedBar key={i} total={data.count} maxCount={yearMaxCount} segments={(data as typeof yearStackedData[0]).segments} totalSeconds={data.totalSeconds} barHeight={barHeight} onClick={handleClick} />
                 ) : (
@@ -670,8 +720,14 @@ export function StatsChart({
             <div className="space-y-2.5">
               {labelStats.map(({ label, count, totalSeconds }) => {
                 const ratio = allTotalSeconds > 0 ? totalSeconds / allTotalSeconds : 0;
+                const labelSessions = sessions.filter((s) => s.label === label.id);
+                const handleLabelClick = () => setLabelModal({ title: label.name, sessions: labelSessions });
                 return (
-                  <div key={label.id}>
+                  <button
+                    key={label.id}
+                    className="w-full text-left hover:bg-gray-50 dark:hover:bg-neutral-700/50 rounded-lg px-1 py-0.5 -mx-1 transition-colors cursor-pointer"
+                    onClick={handleLabelClick}
+                  >
                     <div className="flex items-center gap-1.5 mb-1">
                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: label.color }} />
                       <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{label.name}</span>
@@ -680,14 +736,17 @@ export function StatsChart({
                     <div className="w-full h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${ratio * 100}%`, backgroundColor: label.color }} />
                     </div>
-                  </div>
+                  </button>
                 );
               })}
               {unlabeledSessions.length > 0 && (() => {
                 const unlabeledTotal = unlabeledSessions.reduce((s, sess) => s + sess.duration, 0);
                 const unlabeledRatio = allTotalSeconds > 0 ? unlabeledTotal / allTotalSeconds : 0;
                 return (
-                  <div>
+                  <button
+                    className="w-full text-left hover:bg-gray-50 dark:hover:bg-neutral-700/50 rounded-lg px-1 py-0.5 -mx-1 transition-colors cursor-pointer"
+                    onClick={() => setLabelModal({ title: t.noLabel, sessions: unlabeledSessions })}
+                  >
                     <div className="flex items-center gap-1.5 mb-1">
                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-neutral-600" />
                       <span className="text-sm text-gray-500 dark:text-gray-400 truncate">{t.noLabel}</span>
@@ -700,7 +759,7 @@ export function StatsChart({
                         style={{ width: `${unlabeledRatio * 100}%` }}
                       />
                     </div>
-                  </div>
+                  </button>
                 );
               })()}
             </div>
@@ -736,6 +795,20 @@ export function StatsChart({
           onClose={() => setBarModal(null)}
           onUpdateSession={onUpdateSession}
           onDeleteSession={onDeleteSession}
+          groupByDay={barModal.groupByDay ?? false}
+        />
+      )}
+
+      {/* Label stat modal (label name / bar click) */}
+      {labelModal && (
+        <BarDetailModal
+          title={labelModal.title}
+          modalSessions={labelModal.sessions}
+          labels={labels}
+          onClose={() => setLabelModal(null)}
+          onUpdateSession={onUpdateSession}
+          onDeleteSession={onDeleteSession}
+          groupByDay={true}
         />
       )}
     </div>

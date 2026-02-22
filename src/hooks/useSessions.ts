@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { PomodoroSession } from '@/types/session';
 import type { StorageService } from '@/services/storage/types';
 import type { Translations } from '@/i18n';
@@ -19,6 +19,9 @@ export interface MonthDayData {
 
 export function useSessions(storage: StorageService, days: Translations['days']) {
   const [sessions, setSessions] = useState<PomodoroSession[]>([]);
+  // Ref to avoid stale closures in callbacks — always holds the latest sessions
+  const sessionsRef = useRef(sessions);
+  sessionsRef.current = sessions;
 
   useEffect(() => {
     storage.getSessions().then(setSessions);
@@ -26,29 +29,29 @@ export function useSessions(storage: StorageService, days: Translations['days'])
 
   const addSession = useCallback(
     async (session: PomodoroSession) => {
-      const updated = [...sessions, session];
+      const updated = [...sessionsRef.current, session];
       setSessions(updated);
       await storage.saveSessions(updated);
     },
-    [storage, sessions],
+    [storage],
   );
 
   const updateSession = useCallback(
     async (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => {
-      const updated = sessions.map((s) => s.date === date ? { ...s, ...patch } : s);
+      const updated = sessionsRef.current.map((s) => s.date === date ? { ...s, ...patch } : s);
       setSessions(updated);
       await storage.saveSessions(updated);
     },
-    [storage, sessions],
+    [storage],
   );
 
   const deleteSession = useCallback(
     async (date: string) => {
-      const updated = sessions.filter((s) => s.date !== date);
+      const updated = sessionsRef.current.filter((s) => s.date !== date);
       setSessions(updated);
       await storage.saveSessions(updated);
     },
-    [storage, sessions],
+    [storage],
   );
 
   const getTodayCount = useCallback(() => {
@@ -161,13 +164,13 @@ export function useSessions(storage: StorageService, days: Translations['days'])
   // Import sessions from CSV (merges with existing, deduplicates by date)
   const importSessions = useCallback(
     async (imported: PomodoroSession[]) => {
-      const existingDates = new Set(sessions.map((s) => s.date));
+      const existingDates = new Set(sessionsRef.current.map((s) => s.date));
       const newSessions = imported.filter((s) => !existingDates.has(s.date));
-      const updated = [...sessions, ...newSessions];
+      const updated = [...sessionsRef.current, ...newSessions];
       setSessions(updated);
       await storage.saveSessions(updated);
     },
-    [storage, sessions],
+    [storage],
   );
 
   return {

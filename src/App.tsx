@@ -532,32 +532,8 @@ function AppWithStorage() {
 
     if (currentUid) {
       // ログイン済み → Firestore（単一ドキュメント方式）
-      const firestoreStorage = createFirestoreStorageService(currentUid);
-
-      // 初回ログイン時: 匿名 localStorage からマイグレーション
-      const migrate = async () => {
-        try {
-          const firestoreSessions = await firestoreStorage.getSessions();
-          if (firestoreSessions.length === 0) {
-            const anonAdapter = new LocalStorageAdapter();
-            const [anonSessions, anonSettings] = await Promise.all([
-              anonAdapter.getSessions(),
-              anonAdapter.getSettings(),
-            ]);
-            if (anonSessions.length > 0) {
-              await firestoreStorage.saveSessions(anonSessions);
-            }
-            if (Object.keys(anonSettings).length > 0) {
-              await firestoreStorage.saveSettings(anonSettings);
-            }
-          }
-        } catch (e) {
-          console.warn('Migration failed:', e);
-        }
-        setStorage(firestoreStorage);
-      };
-
-      migrate();
+      // 匿名データとは完全に分離し、各アカウント固有のデータのみ使用
+      setStorage(createFirestoreStorageService(currentUid));
     } else {
       // 未ログイン → 匿名 localStorage
       setStorage(createStorageService());

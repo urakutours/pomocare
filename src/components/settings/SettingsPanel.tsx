@@ -903,34 +903,18 @@ function AlarmSettingsPanel({
   );
 }
 
-// Detect Shift-JIS encoding by checking for common byte patterns
+// UTF-8 優先でデコード。不正バイト列があれば Shift-JIS にフォールバック
 function readFileWithEncoding(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const buf = ev.target?.result as ArrayBuffer;
-      const bytes = new Uint8Array(buf);
-      // Check for Shift-JIS patterns (0x80-0x9F or 0xE0-0xFC as lead bytes)
-      let sjisScore = 0;
-      for (let i = 0; i < Math.min(bytes.length, 1000); i++) {
-        const b = bytes[i];
-        if ((b >= 0x81 && b <= 0x9F) || (b >= 0xE0 && b <= 0xFC)) {
-          if (i + 1 < bytes.length) {
-            const next = bytes[i + 1];
-            if ((next >= 0x40 && next <= 0x7E) || (next >= 0x80 && next <= 0xFC)) {
-              sjisScore++;
-              i++;
-            }
-          }
-        }
-      }
-      // If we found significant Shift-JIS patterns, decode as Shift-JIS
-      if (sjisScore > 2) {
-        const decoder = new TextDecoder('shift-jis');
-        resolve(decoder.decode(buf));
-      } else {
-        const decoder = new TextDecoder('utf-8');
-        resolve(decoder.decode(buf));
+      try {
+        // fatal: true → 不正な UTF-8 バイト列があれば例外を投げる
+        resolve(new TextDecoder('utf-8', { fatal: true }).decode(buf));
+      } catch {
+        // UTF-8 でなければ Shift-JIS として読む
+        resolve(new TextDecoder('shift-jis').decode(buf));
       }
     };
     reader.onerror = () => reject(new Error('File read failed'));

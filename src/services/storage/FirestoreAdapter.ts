@@ -3,6 +3,7 @@ import { db } from '@/lib/firebase';
 import type { StorageService } from './types';
 import type { PomodoroSession } from '@/types/session';
 import type { PomodoroSettings } from '@/types/settings';
+import { DEFAULT_SETTINGS } from '@/types/settings';
 
 /**
  * 最適化版 Firestore ストレージアダプター
@@ -52,8 +53,8 @@ export class FirestoreAdapter implements StorageService {
   async getSettings(): Promise<PomodoroSettings> {
     const ref = doc(db, 'users', this.uid, 'data', 'settings');
     const snap = await getDoc(ref);
-    if (!snap.exists()) return {} as PomodoroSettings;
-    return snap.data() as PomodoroSettings;
+    if (!snap.exists()) return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, ...snap.data() } as PomodoroSettings;
   }
 
   async saveSettings(settings: PomodoroSettings): Promise<void> {

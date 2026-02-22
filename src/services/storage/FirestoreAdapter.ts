@@ -33,6 +33,11 @@ export class FirestoreAdapter implements StorageService {
     this.uid = uid;
   }
 
+  /** Firestore は undefined を受け付けないため除去する */
+  private sanitize<T>(data: T): T {
+    return JSON.parse(JSON.stringify(data));
+  }
+
   // ---- Sessions ----
 
   async getSessions(): Promise<PomodoroSession[]> {
@@ -45,7 +50,7 @@ export class FirestoreAdapter implements StorageService {
 
   async saveSessions(sessions: PomodoroSession[]): Promise<void> {
     const ref = doc(db, 'users', this.uid, 'data', 'sessions');
-    await setDoc(ref, { items: sessions });
+    await setDoc(ref, { items: this.sanitize(sessions) });
   }
 
   // ---- Settings ----
@@ -59,7 +64,7 @@ export class FirestoreAdapter implements StorageService {
 
   async saveSettings(settings: PomodoroSettings): Promise<void> {
     const ref = doc(db, 'users', this.uid, 'data', 'settings');
-    await setDoc(ref, settings);
+    await setDoc(ref, this.sanitize(settings));
   }
 
   // ---- Clear ----

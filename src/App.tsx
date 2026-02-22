@@ -301,6 +301,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
   const handleClearAll = async () => {
     await storage.clearAll();
+    // 匿名 localStorage もクリア（マイグレーションによる復元を防止）
+    await new LocalStorageAdapter().clearAll();
     window.location.reload();
   };
 
@@ -592,7 +594,8 @@ function AppWithStorage() {
     );
   }
 
-  return <AppWithI18n storage={storage} />;
+  // key にユーザーIDを使い、アカウント切替時にツリー全体をリマウント
+  return <AppWithI18n key={user?.id ?? 'anonymous'} storage={storage} />;
 }
 
 function AppWithI18n({ storage }: { storage: StorageService }) {

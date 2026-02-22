@@ -24,6 +24,7 @@ export function useSessions(storage: StorageService, days: Translations['days'])
   sessionsRef.current = sessions;
 
   useEffect(() => {
+    setSessions([]); // ストレージ切替時に旧データを即クリア
     storage.getSessions().then(setSessions);
   }, [storage]);
 

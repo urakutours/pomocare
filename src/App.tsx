@@ -507,41 +507,46 @@ function useFirebaseAction() {
 }
 
 // ---- Storage switcher based on auth state ----
+// ログイン済み → Firestore（単一ドキュメント方式）
+// 未ログイン   → localStorage
+// StorageService インターフェースを維持し、将来の Supabase 移行に対応
 function AppWithStorage() {
   const { user, isLoading: authLoading } = useAuth();
   const [storage, setStorage] = useState<StorageService | null>(null);
-  const initializedRef = useRef(false);
+  const prevUidRef = useRef<string | null | undefined>(undefined); // undefined = 未初期化
   const firebaseAction = useFirebaseAction();
 
   useEffect(() => {
     if (authLoading) return;
 
-    // 初回のみ実行
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-
     const currentUid = user?.id ?? null;
 
+    // 同じユーザーなら再初期化不要
+    if (prevUidRef.current === currentUid) return;
+    prevUidRef.current = currentUid;
+
+    // ストレージ切替中はローディング表示
+    setStorage(null);
+
     if (currentUid) {
-      // ログイン済み → Firestore にマイグレーションしてから切替
+      // ログイン済み → Firestore（単一ドキュメント方式）
       const firestoreStorage = createFirestoreStorageService(currentUid);
 
+      // 初回ログイン時: 匿名 localStorage からマイグレーション
       const migrate = async () => {
         try {
-          const localAdapter = new LocalStorageAdapter();
           const firestoreSessions = await firestoreStorage.getSessions();
-
           if (firestoreSessions.length === 0) {
-            // Firestore が空なら localStorage からマイグレーション
-            const [localSessions, localSettings] = await Promise.all([
-              localAdapter.getSessions(),
-              localAdapter.getSettings(),
+            const anonAdapter = new LocalStorageAdapter();
+            const [anonSessions, anonSettings] = await Promise.all([
+              anonAdapter.getSessions(),
+              anonAdapter.getSettings(),
             ]);
-            if (localSessions.length > 0) {
-              await firestoreStorage.saveSessions(localSessions);
+            if (anonSessions.length > 0) {
+              await firestoreStorage.saveSessions(anonSessions);
             }
-            if (Object.keys(localSettings).length > 0) {
-              await firestoreStorage.saveSettings(localSettings);
+            if (Object.keys(anonSettings).length > 0) {
+              await firestoreStorage.saveSettings(anonSettings);
             }
           }
         } catch (e) {
@@ -552,18 +557,9 @@ function AppWithStorage() {
 
       migrate();
     } else {
-      // 未ログイン → localStorage をそのまま使用
+      // 未ログイン → 匿名 localStorage
       setStorage(createStorageService());
     }
-  }, [user, authLoading]);
-
-  // ログアウトを検知したらページリロード（クリーンな状態で localStorage に戻る）
-  const prevUserRef = useRef(user);
-  useEffect(() => {
-    if (!authLoading && prevUserRef.current !== null && prevUserRef.current !== undefined && user === null) {
-      window.location.reload();
-    }
-    prevUserRef.current = user;
   }, [user, authLoading]);
 
   // Firebase auth action (email verify / password reset)

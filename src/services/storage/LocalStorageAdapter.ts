@@ -5,9 +5,22 @@ import { DEFAULT_SETTINGS } from '@/types/settings';
 import { STORAGE_KEYS } from '@/config/constants';
 
 export class LocalStorageAdapter implements StorageService {
+  private prefix: string;
+
+  /**
+   * @param uid ユーザーID（指定するとキーにプレフィックスを付けてユーザーごとにデータを分離）
+   */
+  constructor(uid?: string) {
+    this.prefix = uid ? `${uid}:` : '';
+  }
+
+  private key(base: string): string {
+    return this.prefix + base;
+  }
+
   async getSessions(): Promise<PomodoroSession[]> {
     try {
-      const raw = localStorage.getItem(STORAGE_KEYS.sessions);
+      const raw = localStorage.getItem(this.key(STORAGE_KEYS.sessions));
       return raw ? JSON.parse(raw) : [];
     } catch {
       console.error('セッションの読み込みに失敗しました');
@@ -17,7 +30,7 @@ export class LocalStorageAdapter implements StorageService {
 
   async saveSessions(sessions: PomodoroSession[]): Promise<void> {
     try {
-      localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(sessions));
+      localStorage.setItem(this.key(STORAGE_KEYS.sessions), JSON.stringify(sessions));
     } catch {
       console.error('セッションの保存に失敗しました');
     }
@@ -25,7 +38,7 @@ export class LocalStorageAdapter implements StorageService {
 
   async getSettings(): Promise<PomodoroSettings> {
     try {
-      const raw = localStorage.getItem(STORAGE_KEYS.settings);
+      const raw = localStorage.getItem(this.key(STORAGE_KEYS.settings));
       return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
     } catch {
       console.error('設定の読み込みに失敗しました');
@@ -35,7 +48,7 @@ export class LocalStorageAdapter implements StorageService {
 
   async saveSettings(settings: PomodoroSettings): Promise<void> {
     try {
-      localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings));
+      localStorage.setItem(this.key(STORAGE_KEYS.settings), JSON.stringify(settings));
     } catch {
       console.error('設定の保存に失敗しました');
     }
@@ -43,8 +56,8 @@ export class LocalStorageAdapter implements StorageService {
 
   async clearAll(): Promise<void> {
     try {
-      localStorage.removeItem(STORAGE_KEYS.sessions);
-      localStorage.removeItem(STORAGE_KEYS.settings);
+      localStorage.removeItem(this.key(STORAGE_KEYS.sessions));
+      localStorage.removeItem(this.key(STORAGE_KEYS.settings));
     } catch {
       console.error('データの初期化に失敗しました');
     }

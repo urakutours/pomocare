@@ -31,8 +31,8 @@ export const DEFAULT_REST_PRESETS = [0, 3, 5, 10];
 export const DEFAULT_SETTINGS: PomodoroSettings = {
   workTime: 25,
   breakTime: 5,
-  longBreakTime: 0,
-  longBreakInterval: 0,
+  longBreakTime: 20,
+  longBreakInterval: 4,
   customMessage: '',
   language: 'en',
   activePresets: DEFAULT_ACTIVE_PRESETS,

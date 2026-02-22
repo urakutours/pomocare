@@ -2,3 +2,4 @@ node_modules
 dist
 *.local
 nul
+.claude/settings.local.json

@@ -16,7 +16,6 @@ export default defineConfig({
       includeAssets: [
         'icons/*.svg',
         'icons/*.png',
-        'sounds/notification.wav',
         'favicon.svg',
         'favicon.ico',
       ],

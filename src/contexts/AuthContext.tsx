@@ -8,6 +8,9 @@ interface AuthContextValue {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resendVerificationEmail: () => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -17,6 +20,9 @@ const AuthContext = createContext<AuthContextValue>({
   signInWithEmail: async () => {},
   signUpWithEmail: async () => {},
   signOut: async () => {},
+  resendVerificationEmail: async () => {},
+  sendPasswordReset: async () => {},
+  deleteAccount: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -33,7 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     await authService.signInWithGoogle();
-    // onAuthStateChanged が自動的に user を更新する
   }, []);
 
   const signInWithEmail = useCallback(async (email: string, password: string) => {
@@ -48,8 +53,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authService.signOut();
   }, []);
 
+  const resendVerificationEmail = useCallback(async () => {
+    await authService.resendVerificationEmail();
+  }, []);
+
+  const sendPasswordReset = useCallback(async (email: string) => {
+    await authService.sendPasswordReset(email);
+  }, []);
+
+  const deleteAccount = useCallback(async () => {
+    await authService.deleteAccount();
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut }}>
+    <AuthContext.Provider value={{
+      user, isLoading,
+      signInWithGoogle, signInWithEmail, signUpWithEmail, signOut,
+      resendVerificationEmail, sendPasswordReset, deleteAccount,
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -111,4 +111,56 @@ export interface Translations {
 
   // Default custom message
   defaultCustomMessage: string;
+
+  // Auth
+  authLogin: string;
+  authSignup: string;
+  authLogout: string;
+  authLoginWithGoogle: string;
+  authOr: string;
+  authEmail: string;
+  authPassword: string;
+  authForgotPassword: string;
+  authCreateAccount: string;
+  authProcessing: string;
+  authErrorInvalidCredential: string;
+  authErrorEmailInUse: string;
+  authErrorWeakPassword: string;
+  authErrorInvalidEmail: string;
+  authErrorLoginFailed: string;
+  authErrorSignupFailed: string;
+  authVerificationSentTitle: string;
+  authVerificationSentMessage: string;
+  authVerificationConfirm: string;
+  authUnverifiedTitle: string;
+  authUnverifiedMessage: string;
+  authResendEmail: string;
+  authClose: string;
+  authForgotPasswordTitle: string;
+  authForgotPasswordMessage: string;
+  authSendResetEmail: string;
+  authResetEmailSent: string;
+  authEmailVerifiedTitle: string;
+  authEmailVerifiedMessage: string;
+  authOpenApp: string;
+  authPasswordResetDoneTitle: string;
+  authPasswordResetDoneMessage: string;
+  authDeleteAccount: string;
+  authDeleteAccountConfirm: string;
+  authDeleteAccountSuccess: string;
+
+  // Loading
+  loadingMessage: string;
+
+  // Label menu
+  labelChangeColor: string;
+  labelRename: string;
+  labelDelete: string;
+
+  // Label creation
+  labelNamePlaceholder: string;
+
+  // Stats display mode
+  statsSets: string;
+  statsTime: string;
 }

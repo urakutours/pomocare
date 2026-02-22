@@ -3,6 +3,7 @@ import { BarChart3, Settings, LogOut } from 'lucide-react';
 import logoSvg from '/icons/logo.svg';
 import logoDarkSvg from '/icons/logo_dark.svg';
 import { useAuth } from '@/contexts/AuthContext';
+import { useI18n } from '@/contexts/I18nContext';
 import { LoginModal } from '@/components/auth/LoginModal';
 
 interface HeaderProps {
@@ -13,6 +14,7 @@ interface HeaderProps {
 
 export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderProps) {
   const { user, signOut } = useAuth();
+  const { t } = useI18n();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -64,9 +66,9 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                   <div className="absolute right-0 top-full mt-2 z-50 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-48 overflow-hidden">
                     <div className="px-3 py-2 border-b border-gray-100 dark:border-neutral-600">
                       <p className="text-xs font-medium text-gray-700 dark:text-gray-200 truncate">
-                        {user.displayName ?? 'ユーザー'}
+                        {user.displayName ?? user.email ?? 'User'}
                       </p>
-                      {user.email && (
+                      {user.email && user.displayName && (
                         <p className="text-xs text-gray-400 dark:text-gray-400 truncate">{user.email}</p>
                       )}
                     </div>
@@ -75,7 +77,7 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                       className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
                     >
                       <LogOut size={14} />
-                      ログアウト
+                      {t.authLogout}
                     </button>
                   </div>
                 </>
@@ -86,7 +88,7 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
               onClick={() => setShowLoginModal(true)}
               className="titlebar-no-drag px-3 py-1.5 text-xs font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
             >
-              ログイン
+              {t.authLogin}
             </button>
           )}
         </div>

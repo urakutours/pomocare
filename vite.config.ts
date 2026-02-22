@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/pomocare/',
+  base: '/',
   resolve: {
     alias: {
       '@': '/src',
@@ -24,8 +24,8 @@ export default defineConfig({
         name: 'PomoCare',
         short_name: 'PomoCare',
         description: 'A focus timer for deep work sessions',
-        start_url: '/pomocare/',
-        scope: '/pomocare/',
+        start_url: '/',
+        scope: '/',
         display: 'standalone',
         display_override: ['window-controls-overlay', 'standalone'],
         orientation: 'any',

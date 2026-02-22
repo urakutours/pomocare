@@ -6,6 +6,7 @@ import { useI18n } from '@/contexts/I18nContext';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
 
 type StatTab = 'weekly' | 'monthly' | 'yearly';
+type StatsDisplayMode = 'sets' | 'time';
 
 interface StatsChartProps {
   sessions: PomodoroSession[];
@@ -309,8 +310,8 @@ function BarDetailModal({
               {labels.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
             </select>
             <div className="flex gap-1.5">
-              <button onClick={() => handleCommitLabel(editingSession.date)} className="flex-1 py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors">適用</button>
-              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">キャンセル</button>
+              <button onClick={() => handleCommitLabel(editingSession.date)} className="flex-1 py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors">OK</button>
+              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">{t.dataResetCancel}</button>
             </div>
           </div>
         )}
@@ -326,17 +327,17 @@ function BarDetailModal({
               className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 mb-2"
             />
             <div className="flex gap-1.5">
-              <button onClick={() => handleCommitNote(editingSession.date)} className="flex-1 py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors">適用</button>
-              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">キャンセル</button>
+              <button onClick={() => handleCommitNote(editingSession.date)} className="flex-1 py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors">OK</button>
+              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">{t.dataResetCancel}</button>
             </div>
           </div>
         )}
         {editingSession && editMode === 'delete' && (
           <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-neutral-700 flex-shrink-0">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{t.sessionDelete}しますか？</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{t.sessionDelete}?</p>
             <div className="flex gap-1.5">
               <button onClick={() => handleDelete(editingSession.date)} className="flex-1 py-1.5 text-xs bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">{t.sessionDelete}</button>
-              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">キャンセル</button>
+              <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">{t.dataResetCancel}</button>
             </div>
           </div>
         )}
@@ -393,6 +394,7 @@ export function StatsChart({
   const [tab, setTab] = useState<StatTab>('weekly');
   const [offset, setOffset] = useState(0);
   const [filterLabel, setFilterLabel] = useState<string | null>(null);
+  const [displayMode, setDisplayMode] = useState<StatsDisplayMode>('sets');
 
   // Bar detail modal state
   const [barModal, setBarModal] = useState<{ title: string; sessions: PomodoroSession[]; groupByDay?: boolean } | null>(null);
@@ -571,17 +573,47 @@ export function StatsChart({
     URL.revokeObjectURL(url);
   };
 
+  // Get sessions for current period for label stats
+  const periodSessions = useMemo(() => {
+    if (tab === 'weekly') {
+      const start = weekDataRaw[0].date;
+      const end = new Date(weekDataRaw[6].date);
+      end.setHours(23, 59, 59, 999);
+      return sessions.filter((s) => {
+        const d = new Date(s.date);
+        return d >= start && d <= end;
+      });
+    } else if (tab === 'monthly') {
+      const monthDateVal = monthDataRaw[0]?.date ?? new Date();
+      const yr = monthDateVal.getFullYear();
+      const mo = monthDateVal.getMonth();
+      return sessions.filter((s) => {
+        const d = new Date(s.date);
+        return d.getFullYear() === yr && d.getMonth() === mo;
+      });
+    } else {
+      const yr = new Date().getFullYear() - offset;
+      return sessions.filter((s) => new Date(s.date).getFullYear() === yr);
+    }
+  }, [tab, offset, sessions, weekDataRaw, monthDataRaw]);
+
   const labelStats = useMemo(() => {
     return labels
       .map((l) => {
-        const ls = sessions.filter((s) => s.label === l.id);
+        const ls = periodSessions.filter((s) => s.label === l.id);
         return { label: l, count: ls.length, totalSeconds: ls.reduce((sum, s) => sum + s.duration, 0) };
       })
       .filter((ls) => ls.count > 0);
-  }, [labels, sessions]);
+  }, [labels, periodSessions]);
 
-  const unlabeledSessions = useMemo(() => sessions.filter((s) => !s.label), [sessions]);
-  const allTotalSeconds = useMemo(() => sessions.reduce((s, sess) => s + sess.duration, 0), [sessions]);
+  const unlabeledPeriodSessions = useMemo(() => periodSessions.filter((s) => !s.label), [periodSessions]);
+  const maxLabelSeconds = useMemo(() => {
+    const vals = labelStats.map((ls) => ls.totalSeconds);
+    if (unlabeledPeriodSessions.length > 0) {
+      vals.push(unlabeledPeriodSessions.reduce((s, sess) => s + sess.duration, 0));
+    }
+    return Math.max(...vals, 1);
+  }, [labelStats, unlabeledPeriodSessions]);
 
   const tabClass = (active: boolean) =>
     `flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors ${
@@ -638,16 +670,22 @@ export function StatsChart({
       )}
 
       <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {/* Summary cards */}
+        {/* Summary cards with Sets/Time toggle */}
         <div className="flex gap-3 mb-3 text-center">
-          <div className="flex-1 bg-gray-50 dark:bg-neutral-800 rounded-lg py-2">
+          <button
+            onClick={() => setDisplayMode('sets')}
+            className={`flex-1 rounded-lg py-2 transition-colors ${displayMode === 'sets' ? 'bg-tiffany/10 ring-1 ring-tiffany' : 'bg-gray-50 dark:bg-neutral-800'}`}
+          >
             <div className="text-lg font-light text-gray-800 dark:text-gray-200">{totalSessions}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">{t.sessions}</div>
-          </div>
-          <div className="flex-1 bg-gray-50 dark:bg-neutral-800 rounded-lg py-2">
+            <div className="text-xs text-gray-500 dark:text-gray-400">{t.statsSets}</div>
+          </button>
+          <button
+            onClick={() => setDisplayMode('time')}
+            className={`flex-1 rounded-lg py-2 transition-colors ${displayMode === 'time' ? 'bg-tiffany/10 ring-1 ring-tiffany' : 'bg-gray-50 dark:bg-neutral-800'}`}
+          >
             <div className="text-lg font-light text-gray-800 dark:text-gray-200">{formatDuration(totalSecs)}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">{t.totalTime}</div>
-          </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{t.statsTime}</div>
+          </button>
         </div>
 
         {/* Period label */}
@@ -741,14 +779,14 @@ export function StatsChart({
           <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-neutral-600 group-hover:bg-gray-300 dark:group-hover:bg-neutral-500 transition-colors" />
         </div>
 
-        {/* Per-label aggregation section */}
-        {(labelStats.length > 0 || unlabeledSessions.length > 0) && (
+        {/* Per-label aggregation section (filtered by current period) */}
+        {(labelStats.length > 0 || unlabeledPeriodSessions.length > 0) && (
           <div className="mt-5">
             <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{t.labelStats}</h4>
             <div className="space-y-2.5">
               {labelStats.map(({ label, count, totalSeconds }) => {
-                const ratio = allTotalSeconds > 0 ? totalSeconds / allTotalSeconds : 0;
-                const labelSessions = sessions.filter((s) => s.label === label.id);
+                const ratio = maxLabelSeconds > 0 ? totalSeconds / maxLabelSeconds : 0;
+                const labelSessions = periodSessions.filter((s) => s.label === label.id);
                 const handleLabelClick = () => setLabelModal({ title: label.name, sessions: labelSessions });
                 return (
                   <button
@@ -767,19 +805,19 @@ export function StatsChart({
                   </button>
                 );
               })}
-              {unlabeledSessions.length > 0 && (() => {
-                const unlabeledTotal = unlabeledSessions.reduce((s, sess) => s + sess.duration, 0);
-                const unlabeledRatio = allTotalSeconds > 0 ? unlabeledTotal / allTotalSeconds : 0;
+              {unlabeledPeriodSessions.length > 0 && (() => {
+                const unlabeledTotal = unlabeledPeriodSessions.reduce((s, sess) => s + sess.duration, 0);
+                const unlabeledRatio = maxLabelSeconds > 0 ? unlabeledTotal / maxLabelSeconds : 0;
                 return (
                   <button
                     className="w-full text-left hover:bg-gray-50 dark:hover:bg-neutral-700/50 rounded-lg px-1 py-0.5 -mx-1 transition-colors cursor-pointer"
-                    onClick={() => setLabelModal({ title: t.noLabel, sessions: unlabeledSessions })}
+                    onClick={() => setLabelModal({ title: t.noLabel, sessions: unlabeledPeriodSessions })}
                   >
                     <div className="flex items-center gap-1.5 mb-1">
                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-neutral-600" />
                       <span className="text-sm text-gray-500 dark:text-gray-400 truncate">{t.noLabel}</span>
                       <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums whitespace-nowrap">
-                        {unlabeledSessions.length} &middot; {formatDuration(unlabeledTotal)}
+                        {unlabeledPeriodSessions.length} &middot; {formatDuration(unlabeledTotal)}
                       </span>
                     </div>
                     <div className="w-full h-1.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">

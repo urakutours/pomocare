@@ -26,35 +26,29 @@ export function useSessions(storage: StorageService, days: Translations['days'])
 
   const addSession = useCallback(
     async (session: PomodoroSession) => {
-      setSessions((prev) => {
-        const updated = [...prev, session];
-        storage.saveSessions(updated);
-        return updated;
-      });
+      const updated = [...sessions, session];
+      setSessions(updated);
+      await storage.saveSessions(updated);
     },
-    [storage],
+    [storage, sessions],
   );
 
   const updateSession = useCallback(
     async (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => {
-      setSessions((prev) => {
-        const updated = prev.map((s) => s.date === date ? { ...s, ...patch } : s);
-        storage.saveSessions(updated);
-        return updated;
-      });
+      const updated = sessions.map((s) => s.date === date ? { ...s, ...patch } : s);
+      setSessions(updated);
+      await storage.saveSessions(updated);
     },
-    [storage],
+    [storage, sessions],
   );
 
   const deleteSession = useCallback(
     async (date: string) => {
-      setSessions((prev) => {
-        const updated = prev.filter((s) => s.date !== date);
-        storage.saveSessions(updated);
-        return updated;
-      });
+      const updated = sessions.filter((s) => s.date !== date);
+      setSessions(updated);
+      await storage.saveSessions(updated);
     },
-    [storage],
+    [storage, sessions],
   );
 
   const getTodayCount = useCallback(() => {
@@ -104,7 +98,6 @@ export function useSessions(storage: StorageService, days: Translations['days'])
   );
 
   // Returns data for each day of a given month
-  // monthOffset: 0 = current month, 1 = last month, etc.
   const getMonthData = useCallback(
     (monthOffset: number): MonthDayData[] => {
       const now = new Date();
@@ -134,7 +127,6 @@ export function useSessions(storage: StorageService, days: Translations['days'])
   );
 
   // Returns an array of 12 months' aggregated data for a given year
-  // yearOffset: 0 = current year, 1 = last year, etc.
   const getYearData = useCallback(
     (yearOffset: number): { month: string; count: number; totalSeconds: number }[] => {
       const targetYear = new Date().getFullYear() - yearOffset;
@@ -144,7 +136,7 @@ export function useSessions(storage: StorageService, days: Translations['days'])
           return d.getFullYear() === targetYear && d.getMonth() === m;
         });
         return {
-          month: String(m), // month index as string; display name handled in component
+          month: String(m),
           count: monthSessions.length,
           totalSeconds: monthSessions.reduce((sum, s) => sum + s.duration, 0),
         };
@@ -169,15 +161,13 @@ export function useSessions(storage: StorageService, days: Translations['days'])
   // Import sessions from CSV (merges with existing, deduplicates by date)
   const importSessions = useCallback(
     async (imported: PomodoroSession[]) => {
-      setSessions((prev) => {
-        const existingDates = new Set(prev.map((s) => s.date));
-        const newSessions = imported.filter((s) => !existingDates.has(s.date));
-        const updated = [...prev, ...newSessions];
-        storage.saveSessions(updated);
-        return updated;
-      });
+      const existingDates = new Set(sessions.map((s) => s.date));
+      const newSessions = imported.filter((s) => !existingDates.has(s.date));
+      const updated = [...sessions, ...newSessions];
+      setSessions(updated);
+      await storage.saveSessions(updated);
     },
-    [storage],
+    [storage, sessions],
   );
 
   return {

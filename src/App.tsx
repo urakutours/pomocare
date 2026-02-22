@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FeatureProvider } from '@/contexts/FeatureContext';
 import { I18nProvider, useI18n } from '@/contexts/I18nContext';
@@ -17,6 +17,7 @@ import { BreakMode } from '@/components/timer/BreakMode';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
 import { StatsChart } from '@/components/stats/StatsChart';
 import { SessionSummary } from '@/components/stats/SessionSummary';
+import { EmailActionHandler } from '@/components/auth/EmailActionHandler';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
 import type { PomodoroSettings } from '@/types/settings';
 import type { StorageService } from '@/services/storage/types';
@@ -40,10 +41,14 @@ function QuickLabelModal({
   onAdd,
   onClose,
   addNewLabel,
+  labelNamePlaceholder,
+  addButtonText,
 }: {
   onAdd: (label: LabelDefinition) => void;
   onClose: () => void;
   addNewLabel: string;
+  labelNamePlaceholder: string;
+  addButtonText: string;
 }) {
   const [name, setName] = useState('');
   const [color, setColor] = useState(QUICK_COLORS[10]); // tiffany default
@@ -76,7 +81,7 @@ function QuickLabelModal({
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="ラベル名"
+          placeholder={labelNamePlaceholder}
           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 mb-3"
         />
         <div className="flex flex-wrap gap-1.5">
@@ -109,7 +114,7 @@ function QuickLabelModal({
           disabled={!name.trim()}
           className="mt-4 w-full py-2 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg disabled:opacity-40 transition-colors"
         >
-          追加
+          {addButtonText}
         </button>
       </div>
     </div>
@@ -288,6 +293,12 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     reset();
   };
 
+  // Immediately persist labels without closing settings
+  const handleSaveLabels = useCallback((newLabels: LabelDefinition[]) => {
+    setLabels(newLabels);
+    updateSettings({ ...settings, labels: newLabels, activeLabel });
+  }, [settings, activeLabel, updateSettings]);
+
   const handleClearAll = async () => {
     await storage.clearAll();
     window.location.reload();
@@ -351,6 +362,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             onClearAll={handleClearAll}
             onImportCsv={importSessions}
             labels={labels}
+            onSaveLabels={handleSaveLabels}
           />
         )}
 
@@ -468,6 +480,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
                 onAdd={handleAddLabelInline}
                 onClose={() => setShowLabelCreator(false)}
                 addNewLabel={t.addNewLabel}
+                labelNamePlaceholder={t.labelNamePlaceholder}
+                addButtonText={t.addLabel}
               />
             )}
 
@@ -481,14 +495,23 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   );
 }
 
+// ---- Parse Firebase auth action URL params ----
+function useFirebaseAction() {
+  return useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const oobCode = params.get('oobCode');
+    if (mode && oobCode) return { mode, actionCode: oobCode };
+    return null;
+  }, []);
+}
+
 // ---- Storage switcher based on auth state ----
-// ログイン時: localStorage → Firestore マイグレーション後に切替
-// ログアウト時: ページリロードで localStorage に戻る（状態をクリーンにするため）
 function AppWithStorage() {
   const { user, isLoading: authLoading } = useAuth();
-  // null = 切替中（ローディング）、非null = 使用するストレージ
   const [storage, setStorage] = useState<StorageService | null>(null);
   const initializedRef = useRef(false);
+  const firebaseAction = useFirebaseAction();
 
   useEffect(() => {
     if (authLoading) return;
@@ -543,8 +566,35 @@ function AppWithStorage() {
     prevUserRef.current = user;
   }, [user, authLoading]);
 
-  // Firebase Auth 解決中 or ストレージ切替中は何も表示しない
-  if (authLoading || storage === null) return null;
+  // Firebase auth action (email verify / password reset)
+  if (firebaseAction) {
+    const handleActionDone = () => {
+      // Remove query params and reload
+      window.history.replaceState({}, '', window.location.pathname);
+      window.location.reload();
+    };
+    return (
+      <I18nProvider language="en">
+        <EmailActionHandler
+          mode={firebaseAction.mode}
+          actionCode={firebaseAction.actionCode}
+          onDone={handleActionDone}
+        />
+      </I18nProvider>
+    );
+  }
+
+  // Loading state
+  if (authLoading || storage === null) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-neutral-900">
+        <div className="text-center">
+          <div className="w-10 h-10 mx-auto mb-3 border-4 border-tiffany border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return <AppWithI18n storage={storage} />;
 }

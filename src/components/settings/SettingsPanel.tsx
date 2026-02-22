@@ -4,6 +4,7 @@ import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
 import { useI18n } from '@/contexts/I18nContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { SUPPORTED_LANGUAGES, getTranslations } from '@/i18n';
 import type { Language } from '@/i18n';
 import { previewAlarm } from '@/utils/alarm';
@@ -15,6 +16,7 @@ interface SettingsPanelProps {
   onClearAll: () => void;
   onImportCsv: (sessions: PomodoroSession[]) => Promise<void>;
   labels: LabelDefinition[];
+  onSaveLabels?: (labels: LabelDefinition[]) => void;
 }
 
 type SettingsTab = 'general' | 'labels' | 'presets';
@@ -462,12 +464,14 @@ function ConfirmModal({
   message,
   confirmLabel,
   confirmClass,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: {
   message: string;
   confirmLabel: string;
   confirmClass?: string;
+  cancelLabel: string;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -488,7 +492,7 @@ function ConfirmModal({
             onClick={onCancel}
             className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-neutral-600 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
           >
-            キャンセル
+            {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
@@ -510,11 +514,19 @@ function LabelDotMenu({
   onChangeColor,
   onChangeName,
   onDelete,
+  changeColorLabel,
+  renameLabel,
+  deleteLabel,
+  cancelLabel,
 }: {
   label: LabelDefinition;
   onChangeColor: (id: string, color: string) => void;
   onChangeName: (id: string, name: string) => void;
   onDelete: (id: string) => void;
+  changeColorLabel: string;
+  renameLabel: string;
+  deleteLabel: string;
+  cancelLabel: string;
 }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<EditMode>(null);
@@ -542,9 +554,10 @@ function LabelDotMenu({
       {/* Delete confirm modal — rendered outside the dropdown so it overlays everything */}
       {showDeleteConfirm && (
         <ConfirmModal
-          message={`「${label.name}」を削除しますか？`}
-          confirmLabel="削除"
+          message={`${label.name}`}
+          confirmLabel={deleteLabel}
           confirmClass="bg-red-500 hover:bg-red-600"
+          cancelLabel={cancelLabel}
           onConfirm={() => { setShowDeleteConfirm(false); onDelete(label.id); }}
           onCancel={() => setShowDeleteConfirm(false)}
         />
@@ -566,37 +579,37 @@ function LabelDotMenu({
                   onClick={() => setMode('color')}
                   className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
                 >
-                  <Palette size={13} /> 色を変更
+                  <Palette size={13} /> {changeColorLabel}
                 </button>
                 <button
                   onClick={() => { setEditName(label.name); setMode('name'); }}
                   className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
                 >
-                  <Pencil size={13} /> 名前を変更
+                  <Pencil size={13} /> {renameLabel}
                 </button>
                 <button
                   onClick={() => { close(); setShowDeleteConfirm(true); }}
                   className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
                 >
-                  <Trash2 size={13} /> 削除
+                  <Trash2 size={13} /> {deleteLabel}
                 </button>
               </>
             )}
             {mode === 'color' && (
               <div className="p-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">色を選択</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{changeColorLabel}</p>
                 <ColorPicker value={editColor} onChange={(c) => setEditColor(c)} />
                 <button
                   onClick={() => { onChangeColor(label.id, editColor); close(); }}
                   className="mt-3 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
                 >
-                  適用
+                  OK
                 </button>
               </div>
             )}
             {mode === 'name' && (
               <div className="p-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">名前を変更</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{renameLabel}</p>
                 <input
                   autoFocus
                   type="text"
@@ -612,7 +625,7 @@ function LabelDotMenu({
                   onClick={() => { if (editName.trim()) { onChangeName(label.id, editName.trim()); close(); } }}
                   className="mt-2 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
                 >
-                  適用
+                  OK
                 </button>
               </div>
             )}
@@ -628,10 +641,20 @@ function LabelManager({
   labels,
   onChange,
   addLabel,
+  changeColorLabel,
+  renameLabel,
+  deleteLabel,
+  cancelLabel,
+  noLabelsText,
 }: {
   labels: LabelDefinition[];
   onChange: (labels: LabelDefinition[]) => void;
   addLabel: string;
+  changeColorLabel: string;
+  renameLabel: string;
+  deleteLabel: string;
+  cancelLabel: string;
+  noLabelsText: string;
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -733,7 +756,7 @@ function LabelManager({
       {/* Label list */}
       <div className="space-y-1">
         {labels.length === 0 && (
-          <p className="text-sm text-gray-400 dark:text-gray-500 py-2">ラベルがありません</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 py-2">{noLabelsText}</p>
         )}
         {labels.map((l, i) => (
           <div
@@ -765,6 +788,10 @@ function LabelManager({
               onChangeColor={handleChangeColor}
               onChangeName={handleChangeName}
               onDelete={handleDelete}
+              changeColorLabel={changeColorLabel}
+              renameLabel={renameLabel}
+              deleteLabel={deleteLabel}
+              cancelLabel={cancelLabel}
             />
           </div>
         ))}
@@ -876,8 +903,44 @@ function AlarmSettingsPanel({
   );
 }
 
-export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, labels: externalLabels }: SettingsPanelProps) {
+// Detect Shift-JIS encoding by checking for common byte patterns
+function readFileWithEncoding(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const buf = ev.target?.result as ArrayBuffer;
+      const bytes = new Uint8Array(buf);
+      // Check for Shift-JIS patterns (0x80-0x9F or 0xE0-0xFC as lead bytes)
+      let sjisScore = 0;
+      for (let i = 0; i < Math.min(bytes.length, 1000); i++) {
+        const b = bytes[i];
+        if ((b >= 0x81 && b <= 0x9F) || (b >= 0xE0 && b <= 0xFC)) {
+          if (i + 1 < bytes.length) {
+            const next = bytes[i + 1];
+            if ((next >= 0x40 && next <= 0x7E) || (next >= 0x80 && next <= 0xFC)) {
+              sjisScore++;
+              i++;
+            }
+          }
+        }
+      }
+      // If we found significant Shift-JIS patterns, decode as Shift-JIS
+      if (sjisScore > 2) {
+        const decoder = new TextDecoder('shift-jis');
+        resolve(decoder.decode(buf));
+      } else {
+        const decoder = new TextDecoder('utf-8');
+        resolve(decoder.decode(buf));
+      }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, labels: externalLabels, onSaveLabels }: SettingsPanelProps) {
   const { t } = useI18n();
+  const { user, deleteAccount } = useAuth();
   const [workTime, setWorkTime] = useState(settings.workTime);
   const [breakTime, setBreakTime] = useState(settings.breakTime);
   const [longBreakTime, setLongBreakTime] = useState(settings.longBreakTime ?? 0);
@@ -899,49 +962,86 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
   // Data reset confirmation modal
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
+  // Account delete
+  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
+
   // CSV import
   const [showImportModal, setShowImportModal] = useState(false);
   const [importStatus, setImportStatus] = useState<{ count: number; error?: string } | null>(null);
 
-  const handleImportFile = (file: File) => {
+  // Immediately persist label changes
+  const handleLabelsChange = (newLabels: LabelDefinition[]) => {
+    setLabels(newLabels);
+    if (onSaveLabels) {
+      onSaveLabels(newLabels);
+    }
+  };
+
+  const handleImportFile = async (file: File) => {
     setShowImportModal(false);
     setImportStatus(null);
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      try {
-        const text = ev.target?.result as string;
-        const lines = text.split(/\r?\n/).filter((l) => l.trim());
-        if (lines.length < 2) { setImportStatus({ count: 0, error: 'データが見つかりません' }); return; }
-        const dataLines = lines.slice(1);
-        const currentLabels = externalLabels;
-        const labelByName: Record<string, string> = {};
-        currentLabels.forEach((l) => { labelByName[l.name] = l.id; });
-        const imported: PomodoroSession[] = [];
-        for (const line of dataLines) {
-          const cols = line.split(',');
-          if (cols.length < 5) continue;
-          const [date, time, labelName, note, durationMinutes] = cols;
-          if (!date || !time) continue;
-          const dateStr = `${date}T${time}:00`;
-          const d = new Date(dateStr);
-          if (isNaN(d.getTime())) continue;
-          const mins = parseFloat(durationMinutes);
-          if (isNaN(mins)) continue;
-          const labelId = labelName ? (labelByName[labelName] ?? undefined) : undefined;
-          imported.push({
-            date: d.toISOString(),
-            duration: Math.round(mins * 60),
-            label: labelId,
-            note: note || undefined,
-          });
+    try {
+      const text = await readFileWithEncoding(file);
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) { setImportStatus({ count: 0, error: t.csvImportModalCancel }); return; }
+      const dataLines = lines.slice(1);
+      const currentLabels = [...externalLabels];
+      const labelByName: Record<string, string> = {};
+      currentLabels.forEach((l) => { labelByName[l.name] = l.id; });
+      const newLabelsToCreate: LabelDefinition[] = [];
+      const imported: PomodoroSession[] = [];
+      for (const line of dataLines) {
+        const cols = line.split(',');
+        if (cols.length < 5) continue;
+        const [date, time, labelName, note, durationMinutes] = cols;
+        if (!date || !time) continue;
+        const dateStr = `${date}T${time}:00`;
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) continue;
+        const mins = parseFloat(durationMinutes);
+        if (isNaN(mins)) continue;
+        let labelId: string | undefined;
+        if (labelName) {
+          if (labelByName[labelName]) {
+            labelId = labelByName[labelName];
+          } else {
+            // Auto-create missing label
+            const newId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+            const newLabel: LabelDefinition = { id: newId, name: labelName, color: '#0abab5' };
+            newLabelsToCreate.push(newLabel);
+            labelByName[labelName] = newId;
+            labelId = newId;
+          }
         }
-        await onImportCsv(imported);
-        setImportStatus({ count: imported.length });
-      } catch {
-        setImportStatus({ count: 0, error: 'インポートに失敗しました' });
+        imported.push({
+          date: d.toISOString(),
+          duration: Math.round(mins * 60),
+          label: labelId,
+          note: note || undefined,
+        });
       }
-    };
-    reader.readAsText(file, 'utf-8');
+      // Add auto-created labels
+      if (newLabelsToCreate.length > 0) {
+        const updatedLabels = [...currentLabels, ...newLabelsToCreate];
+        setLabels(updatedLabels);
+        if (onSaveLabels) {
+          onSaveLabels(updatedLabels);
+        }
+      }
+      await onImportCsv(imported);
+      setImportStatus({ count: imported.length });
+    } catch {
+      setImportStatus({ count: 0, error: t.authErrorLoginFailed });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setShowDeleteAccountConfirm(false);
+    try {
+      await deleteAccount();
+    } catch {
+      // ignore
+    }
   };
 
   const handleApply = () => {
@@ -1090,7 +1190,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               </button>
               {importStatus && (
                 <p className={`mt-2 text-xs text-center ${importStatus.error ? 'text-red-500' : 'text-tiffany'}`}>
-                  {importStatus.error ?? `${importStatus.count}件のセッションをインポートしました`}
+                  {importStatus.error ?? `${importStatus.count} ${t.sessions}`}
                 </p>
               )}
             </div>
@@ -1110,6 +1210,18 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
                 {t.dataResetButton}
               </button>
             </div>
+
+            {/* Account deletion (only for logged-in users) */}
+            {user && (
+              <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
+                <button
+                  onClick={() => setShowDeleteAccountConfirm(true)}
+                  className="w-full py-2 rounded-lg border border-red-300 dark:border-red-700 text-red-500 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  {t.authDeleteAccount}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -1118,8 +1230,13 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
           <div className="p-1">
             <LabelManager
               labels={labels}
-              onChange={setLabels}
+              onChange={handleLabelsChange}
               addLabel={t.addLabel}
+              changeColorLabel={t.labelChangeColor}
+              renameLabel={t.labelRename}
+              deleteLabel={t.labelDelete}
+              cancelLabel={t.dataResetCancel}
+              noLabelsText={t.noLabel}
             />
           </div>
         )}
@@ -1162,8 +1279,21 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
           message={t.dataResetConfirm1}
           confirmLabel={t.dataResetConfirm2}
           confirmClass="bg-red-500 hover:bg-red-600"
+          cancelLabel={t.dataResetCancel}
           onConfirm={() => { setShowResetConfirm(false); onClearAll(); }}
           onCancel={() => setShowResetConfirm(false)}
+        />
+      )}
+
+      {/* Account delete confirm modal */}
+      {showDeleteAccountConfirm && (
+        <ConfirmModal
+          message={t.authDeleteAccountConfirm}
+          confirmLabel={t.authDeleteAccount}
+          confirmClass="bg-red-500 hover:bg-red-600"
+          cancelLabel={t.dataResetCancel}
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setShowDeleteAccountConfirm(false)}
         />
       )}
 

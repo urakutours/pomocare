@@ -25,6 +25,8 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
 });
 
 // ---------- Currency helpers ----------
+// 多通貨Price（JPY/USD/EUR が1つのprice_idに統合されている）を使用するため、
+// price_id は plan ごとに1つ。言語に応じた通貨を checkout session に指定する。
 type Currency = "jpy" | "usd" | "eur";
 
 function getCurrency(language: string): Currency {
@@ -33,8 +35,9 @@ function getCurrency(language: string): Currency {
   return "usd";
 }
 
-function getPriceId(plan: "standard" | "pro", currency: Currency): string {
-  const key = `STRIPE_PRICE_${plan.toUpperCase()}_${currency.toUpperCase()}`;
+function getPriceId(plan: "standard" | "pro"): string {
+  // STRIPE_PRICE_STANDARD / STRIPE_PRICE_PRO の2つだけ用意すればOK
+  const key = `STRIPE_PRICE_${plan.toUpperCase()}`;
   const id = Deno.env.get(key);
   if (!id) throw new Error(`Missing env var: ${key}`);
   return id;
@@ -129,8 +132,9 @@ serve(async (req: Request) => {
     }
 
     // ---- 通貨・Price ID決定 ----
+    // 多通貨Priceを使用: price_id は1つ、currency で通貨を指定
     const currency = getCurrency(language);
-    const priceId = getPriceId(plan, currency);
+    const priceId = getPriceId(plan);
 
     // ---- Stripe Checkout Session作成 ----
     const isSubscription = plan === "standard";
@@ -138,6 +142,8 @@ serve(async (req: Request) => {
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: isSubscription ? "subscription" : "payment",
+      // 多通貨Priceに設定された通貨のうち、言語に対応する通貨を指定
+      currency,
       success_url: `https://app.pomocare.com/?payment=success&plan=${plan}`,
       cancel_url: "https://app.pomocare.com/?payment=cancelled",
       metadata: {

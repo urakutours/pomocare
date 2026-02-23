@@ -32,10 +32,23 @@
   .cta-platforms {
     display: flex;
     justify-content: center;
-    gap: $space-6;
+    gap: $space-8;
     margin-top: $space-8;
     font-size: $text-sm;
-    opacity: 0.8;
+    opacity: 0.85;
+
+    span {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: $space-2;
+
+      svg {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+      }
+    }
   }
 
   .btn-white {
@@ -45,4 +58,36 @@
       box-shadow: $shadow-xl;
     }
   }
+}
+
+// ----- メインCTAボタン（パルスグロー） -----
+.btn-cta-main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 56px;
+  font-size: 1.125rem;
+  font-weight: $font-bold;
+  color: $color-primary;
+  background: $white;
+  border: none;
+  border-radius: $radius-full;
+  cursor: pointer;
+  text-decoration: none;
+  margin-bottom: $space-6;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  @include transition(transform, box-shadow, color);
+  animation: cta-glow 2.5s ease-in-out infinite;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.25), 0 0 0 5px rgba(255, 255, 255, 0.2);
+    color: #088f8b;
+    animation-play-state: paused;
+  }
+}
+
+@keyframes cta-glow {
+  0%, 100% { box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(255, 255, 255, 0.4); }
+  50%       { box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 0 12px rgba(255, 255, 255, 0); }
 }

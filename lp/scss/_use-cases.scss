@@ -6,6 +6,7 @@
 .use-cases {
   @include section-padding;
   background: var(--surface-bg);
+  overflow-x: hidden; // タブナビ横スクロールをページに伝播させない
 }
 
 // ----- タブコンテンツ -----

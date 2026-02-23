@@ -57,6 +57,12 @@
   color: $color-primary;
 }
 
+.logo-img {
+  height: 20px;
+  width: auto;
+  display: block;
+}
+
 // ----- デスクトップナビリンク -----
 .nav-links {
   display: flex;
@@ -178,7 +184,21 @@
     border-top: 1px solid var(--border-color);
   }
 
-  // ----- モバイルメニュー内言語切替 -----
+  // ----- モバイルメニュー内言語切替ラッパー -----
+  .mobile-nav-lang-wrap {
+    display: flex;
+    justify-content: center;
+    padding-top: $space-4;
+    border-top: 1px solid var(--border-color);
+
+    // ドロップダウンメニューは上方向に開く
+    .lang-dropdown-menu {
+      bottom: calc(100% + 6px);
+      top: auto;
+    }
+  }
+
+  // ----- モバイルメニュー内言語切替（旧: pill型、後方互換） -----
   .mobile-lang-row {
     display: flex;
     justify-content: center;

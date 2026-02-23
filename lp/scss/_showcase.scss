@@ -6,6 +6,7 @@
 .showcase {
   @include section-padding;
   background: var(--surface-sunken);
+  overflow-x: hidden; // タブナビ横スクロールをページに伝播させない
 }
 
 .showcase-content {

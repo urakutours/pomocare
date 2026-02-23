@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   initLangDropdown('langDropdown', 'langDropdownBtn', 'langDropdownMenu');
   initLangDropdown('footerLangDropdown', 'footerLangBtn', 'footerLangMenu');
+  initLangDropdown('mobileLangDropdown', 'mobileLangDropdownBtn', 'mobileLangDropdownMenu');
 
   // Mobile nav language buttons
   var mobileLangRow = document.getElementById('mobileLangRow');

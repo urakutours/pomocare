@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Download, MoreVertical, Tag, FileText, Trash2, Lock } from 'lucide-react';
+import { X, MoreVertical, Tag, FileText, Trash2, Lock } from 'lucide-react';
 import type { DayData, MonthDayData } from '@/hooks/useSessions';
 import { useI18n } from '@/contexts/I18nContext';
 import { useFeatures } from '@/contexts/FeatureContext';
@@ -573,28 +573,6 @@ export function StatsChart({
     setOffset(0);
   };
 
-  const handleExportCsv = () => {
-    const header = 'date,time,label,note,duration_minutes';
-    const rows = filteredSessions.map((s) => {
-      const d = new Date(s.date);
-      const date = d.toISOString().slice(0, 10);
-      const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-      const labelDef = s.label ? labels.find((l) => l.id === s.label) : null;
-      const label = labelDef ? labelDef.name : '';
-      const note = (s.note ?? '').replace(/,/g, ' ');
-      const mins = Math.round(s.duration / 60);
-      return `${date},${time},${label},${note},${mins}`;
-    });
-    const csv = [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `pomodoro-sessions-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   // Get sessions for current period for label stats
   const periodSessions = useMemo(() => {
     if (tab === 'weekly') {
@@ -718,6 +696,16 @@ export function StatsChart({
           >
             <div className="text-lg font-light text-gray-800 dark:text-gray-200">{formatDuration(totalSecs)}</div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{t.statsTime}</div>
+          </button>
+        </div>
+
+        {/* Navigation buttons */}
+        <div className="flex gap-2 mb-3">
+          <button onClick={() => setOffset(offset + 1)} className={navButtonClass}>
+            {tab === 'weekly' ? t.previousWeek : tab === 'monthly' ? t.previousMonth : t.previousYear}
+          </button>
+          <button onClick={() => setOffset(Math.max(0, offset - 1))} disabled={offset === 0} className={navButtonClass}>
+            {tab === 'weekly' ? t.nextWeek : tab === 'monthly' ? t.nextMonth : t.nextYear}
           </button>
         </div>
 
@@ -868,25 +856,6 @@ export function StatsChart({
             </div>
           </div>
         )}
-      </div>
-
-      {/* Navigation + Export */}
-      <div className="flex-shrink-0 mt-3 space-y-2">
-        <div className="flex gap-2">
-          <button onClick={() => setOffset(offset + 1)} className={navButtonClass}>
-            {tab === 'weekly' ? t.previousWeek : tab === 'monthly' ? t.previousMonth : t.previousYear}
-          </button>
-          <button onClick={() => setOffset(Math.max(0, offset - 1))} disabled={offset === 0} className={navButtonClass}>
-            {tab === 'weekly' ? t.nextWeek : tab === 'monthly' ? t.nextMonth : t.nextYear}
-          </button>
-        </div>
-        <button
-          onClick={features.exportData ? handleExportCsv : () => setShowUpgrade(true)}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
-        >
-          {features.exportData ? <Download size={14} /> : <Lock size={14} />}
-          {t.exportCsv}
-        </button>
       </div>
 
       {/* Bar detail modal */}

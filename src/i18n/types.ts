@@ -30,6 +30,7 @@ export interface Translations {
   restOffLabel: string;
   themeLabel: string;
   themeLight: string;
+  themeGray: string;
   themeDark: string;
 
   // Alarm settings
@@ -94,6 +95,8 @@ export interface Translations {
   previousYear: string;
   nextYear: string;
   exportCsv: string;
+  csvExportTitle: string;
+  csvExportDescription: string;
 
   // Settings tabs
   settingsTabGeneral: string;

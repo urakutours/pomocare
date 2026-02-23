@@ -415,6 +415,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             onClose={() => setView('timer')}
             onClearAll={handleClearAll}
             onImportCsv={importSessions}
+            sessions={sessions}
             labels={labels}
             onSaveLabels={handleSaveLabels}
           />
@@ -467,6 +468,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           onClose={() => setView('timer')}
           onClearAll={handleClearAll}
           onImportCsv={importSessions}
+          sessions={sessions}
           labels={labels}
           onSaveLabels={handleSaveLabels}
         />
@@ -635,11 +637,14 @@ function AppWithI18n({ storage }: { storage: StorageService }) {
   // Apply theme class to document
   useEffect(() => {
     const theme = settings.theme ?? 'light';
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    const isDark = theme === 'gray' || theme === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.setAttribute('data-theme', theme);
     // Update theme-color meta tag for PWA titlebar
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute('content', theme === 'dark' ? '#333333' : '#0abab5');
+      const colors: Record<string, string> = { light: '#0abab5', gray: '#333333', dark: '#13171b' };
+      meta.setAttribute('content', colors[theme] || '#0abab5');
     }
   }, [settings.theme]);
 

@@ -9,6 +9,13 @@ export function useSettings(storage: StorageService) {
 
   useEffect(() => {
     storage.getSettings().then((s) => {
+      // Migrate old 'dark' theme to 'gray' (one-time, v2 theme system)
+      const migrationKey = 'pomocare-theme-v2-migrated';
+      if (!localStorage.getItem(migrationKey) && s.theme === 'dark') {
+        s = { ...s, theme: 'gray' };
+        storage.saveSettings(s);
+      }
+      localStorage.setItem(migrationKey, '1');
       setSettings(s);
       setIsLoaded(true);
     });

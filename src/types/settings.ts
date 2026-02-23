@@ -1,7 +1,7 @@
 import type { Language } from '@/i18n';
 import type { LabelDefinition } from '@/types/session';
 
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = 'light' | 'gray' | 'dark';
 
 export type AlarmSound = 'bell' | 'digital' | 'chime' | 'kitchen' | 'classic' | 'gentle' | 'soft' | 'none';
 

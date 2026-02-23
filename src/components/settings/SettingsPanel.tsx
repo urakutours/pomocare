@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Lock } from 'lucide-react';
+import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Download, Lock } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
@@ -18,6 +18,7 @@ interface SettingsPanelProps {
   onClose: () => void;
   onClearAll: () => void;
   onImportCsv: (sessions: PomodoroSession[]) => Promise<void>;
+  sessions: PomodoroSession[];
   labels: LabelDefinition[];
   onSaveLabels?: (labels: LabelDefinition[]) => void;
 }
@@ -227,12 +228,14 @@ function ThemeToggle({
   value,
   onChange,
   lightLabel,
+  grayLabel,
   darkLabel,
 }: {
   label: string;
   value: ThemeMode;
   onChange: (v: ThemeMode) => void;
   lightLabel: string;
+  grayLabel: string;
   darkLabel: string;
 }) {
   return (
@@ -241,24 +244,36 @@ function ThemeToggle({
       <div className="flex gap-2">
         <button
           onClick={() => onChange('light')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm transition-colors ${
             value === 'light'
               ? 'border-tiffany bg-white text-tiffany font-medium ring-2 ring-tiffany'
               : 'border-gray-300 dark:border-neutral-500 bg-white text-gray-600 hover:bg-gray-50'
           }`}
         >
-          <Sun size={16} />
+          <Sun size={14} />
           {lightLabel}
         </button>
         <button
-          onClick={() => onChange('dark')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${
-            value === 'dark'
+          onClick={() => onChange('gray')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm transition-colors ${
+            value === 'gray'
               ? 'border-tiffany bg-neutral-700 text-tiffany font-medium ring-2 ring-tiffany'
               : 'border-gray-300 dark:border-neutral-600 bg-neutral-700 text-gray-300 hover:bg-neutral-600'
           }`}
         >
-          <Moon size={16} />
+          <Moon size={14} />
+          {grayLabel}
+        </button>
+        <button
+          onClick={() => onChange('dark')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm transition-colors ${
+            value === 'dark'
+              ? 'border-tiffany font-medium ring-2 ring-tiffany'
+              : 'border-gray-300 dark:border-neutral-600 text-gray-300 hover:bg-neutral-600'
+          }`}
+          style={{ backgroundColor: value === 'dark' ? 'rgb(44, 47, 50)' : 'rgb(30, 33, 37)' }}
+        >
+          <Moon size={14} />
           {darkLabel}
         </button>
       </div>
@@ -913,7 +928,7 @@ function readFileWithEncoding(file: File): Promise<string> {
   });
 }
 
-export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, labels: externalLabels, onSaveLabels }: SettingsPanelProps) {
+export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, sessions, labels: externalLabels, onSaveLabels }: SettingsPanelProps) {
   const { t } = useI18n();
   const { user, deleteAccount } = useAuth();
   const features = useFeatures();
@@ -1021,6 +1036,28 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
     }
   };
 
+  const handleExportCsv = () => {
+    const header = 'date,time,label,note,duration_minutes';
+    const rows = sessions.map((s) => {
+      const d = new Date(s.date);
+      const date = d.toISOString().slice(0, 10);
+      const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      const labelDef = s.label ? externalLabels.find((l) => l.id === s.label) : null;
+      const label = labelDef ? labelDef.name : '';
+      const note = (s.note ?? '').replace(/,/g, ' ');
+      const mins = Math.round(s.duration / 60);
+      return `${date},${time},${label},${note},${mins}`;
+    });
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pomodoro-sessions-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleApply = () => {
     onSave({
       workTime,
@@ -1122,6 +1159,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               value={theme}
               onChange={setTheme}
               lightLabel={t.themeLight}
+              grayLabel={t.themeGray}
               darkLabel={t.themeDark}
             />
             <div>
@@ -1169,6 +1207,23 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
                   {importStatus.error ?? `${importStatus.count} ${t.sessions}`}
                 </p>
               )}
+            </div>
+
+            {/* CSV export */}
+            <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                {t.csvExportTitle}
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                {t.csvExportDescription}
+              </p>
+              <button
+                onClick={features.exportData ? handleExportCsv : () => setShowUpgrade(true)}
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+              >
+                {features.exportData ? <Download size={14} /> : <Lock size={14} />}
+                {t.exportCsv}
+              </button>
             </div>
 
             {/* Data reset — at the bottom of General tab */}

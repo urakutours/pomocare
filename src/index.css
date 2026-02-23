@@ -21,6 +21,70 @@ html.dark #root {
   background-color: #262626;
 }
 
+/* --- Dark theme (deeper dark) overrides --- */
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] #root {
+  background-color: rgb(19, 23, 27);
+}
+
+/* Panel / modal backgrounds */
+html[data-theme="dark"] .dark\:bg-neutral-800 {
+  background-color: rgb(19, 23, 27) !important;
+}
+
+/* Input / select / interactive area backgrounds */
+html[data-theme="dark"] .dark\:bg-neutral-700 {
+  background-color: rgb(44, 47, 50) !important;
+}
+html[data-theme="dark"] .dark\:bg-neutral-700\/40 {
+  background-color: rgba(44, 47, 50, 0.4) !important;
+}
+
+/* Hover backgrounds */
+html[data-theme="dark"] .dark\:hover\:bg-neutral-600:hover {
+  background-color: rgb(55, 58, 62) !important;
+}
+html[data-theme="dark"] .dark\:hover\:bg-neutral-700:hover {
+  background-color: rgb(50, 53, 57) !important;
+}
+
+/* Remove borders on inputs */
+html[data-theme="dark"] .dark\:border-neutral-600 {
+  border-color: transparent !important;
+}
+html[data-theme="dark"] .dark\:border-neutral-500 {
+  border-color: transparent !important;
+}
+
+/* Separator borders stay visible but subtle */
+html[data-theme="dark"] .dark\:border-neutral-700 {
+  border-color: rgb(40, 43, 47) !important;
+}
+
+/* Tiffany → muted teal for dark theme */
+html[data-theme="dark"] .bg-tiffany {
+  background-color: #59a8a5 !important;
+}
+html[data-theme="dark"] .hover\:bg-tiffany-hover:hover {
+  background-color: #4d9694 !important;
+}
+html[data-theme="dark"] .bg-tiffany\/10 {
+  background-color: rgba(89, 168, 165, 0.1) !important;
+}
+html[data-theme="dark"] .border-tiffany {
+  border-color: #59a8a5 !important;
+}
+html[data-theme="dark"] .text-tiffany {
+  color: #59a8a5 !important;
+}
+html[data-theme="dark"] .ring-tiffany {
+  --tw-ring-color: #59a8a5 !important;
+}
+html[data-theme="dark"] .focus\:ring-tiffany:focus {
+  --tw-ring-color: #59a8a5 !important;
+}
+
 /* Safe area padding for standalone PWA (notch devices etc.) */
 @supports (padding: env(safe-area-inset-top)) {
   body {

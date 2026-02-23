@@ -136,4 +136,13 @@ export const en: Translations = {
   planStandard: 'Standard',
   planPro: 'Pro',
   upgradeCta: 'Learn more',
+
+  // Payment / Checkout
+  paymentSuccess: 'Payment successful!',
+  paymentSuccessStandard: 'Welcome to Standard plan! All features are now unlocked.',
+  paymentSuccessPro: 'Welcome to Pro plan! All features are now unlocked.',
+  paymentCancelled: 'Payment cancelled.',
+  checkoutLoginRequired: 'Please log in to purchase.',
+  checkoutProcessing: 'Redirecting to checkout...',
+  checkoutError: 'Checkout failed. Please try again.',
 };

@@ -128,12 +128,21 @@ export const fr: Translations = {
   upgradeDescription: 'Cette fonctionnalité nécessite un plan Standard ou supérieur.',
   upgradeStandard: 'Standard',
   upgradePro: 'Pro',
-  upgradeStandardPrice: '2,49 $/mois',
-  upgradeProPrice: '39,99 $ (paiement unique)',
+  upgradeStandardPrice: '2,29 €/mois',
+  upgradeProPrice: '36,99 € (paiement unique)',
   upgradeRequired: 'Mise à niveau requise',
   freeLabelLimit: 'Le plan gratuit autorise 2 étiquettes maximum',
   planFree: 'Free',
   planStandard: 'Standard',
   planPro: 'Pro',
   upgradeCta: 'En savoir plus',
+
+  // Payment / Checkout
+  paymentSuccess: 'Paiement réussi !',
+  paymentSuccessStandard: 'Bienvenue dans le plan Standard ! Toutes les fonctionnalités sont débloquées.',
+  paymentSuccessPro: 'Bienvenue dans le plan Pro ! Toutes les fonctionnalités sont débloquées.',
+  paymentCancelled: 'Paiement annulé.',
+  checkoutLoginRequired: 'Veuillez vous connecter pour acheter.',
+  checkoutProcessing: 'Redirection vers le paiement...',
+  checkoutError: 'Échec du paiement. Veuillez réessayer.',
 };

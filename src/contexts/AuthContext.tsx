@@ -14,6 +14,8 @@ interface AuthContextValue {
   sendPasswordReset: (email: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   clearPasswordRecovery: () => void;
+  /** 決済完了後などに呼ぶ: Supabaseからtierを再取得してuserステートを更新する */
+  refreshTier: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -28,6 +30,7 @@ const AuthContext = createContext<AuthContextValue>({
   sendPasswordReset: async () => {},
   deleteAccount: async () => {},
   clearPasswordRecovery: () => {},
+  refreshTier: async () => {},
 });
 
 async function fetchUserTier(userId: string): Promise<UserTier> {
@@ -126,11 +129,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsPasswordRecovery(false);
   }, []);
 
+  const refreshTier = useCallback(async () => {
+    const { data: { user: sbUser } } = await supabase.auth.getUser();
+    if (!sbUser) return;
+    const tier = await fetchUserTier(sbUser.id);
+    setUser(prev => prev ? { ...prev, tier } : prev);
+  }, []);
+
   return (
     <AuthContext.Provider value={{
       user, isLoading, isPasswordRecovery,
       signInWithGoogle, signInWithEmail, signUpWithEmail, signOut,
       resendVerificationEmail, sendPasswordReset, deleteAccount, clearPasswordRecovery,
+      refreshTier,
     }}>
       {children}
     </AuthContext.Provider>

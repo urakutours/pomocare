@@ -177,4 +177,13 @@ export interface Translations {
   planStandard: string;
   planPro: string;
   upgradeCta: string;
+
+  // Payment / Checkout
+  paymentSuccess: string;
+  paymentSuccessStandard: string;
+  paymentSuccessPro: string;
+  paymentCancelled: string;
+  checkoutLoginRequired: string;
+  checkoutProcessing: string;
+  checkoutError: string;
 }

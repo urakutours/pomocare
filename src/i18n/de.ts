@@ -128,12 +128,21 @@ export const de: Translations = {
   upgradeDescription: 'Diese Funktion erfordert einen Standard- oder höheren Plan.',
   upgradeStandard: 'Standard',
   upgradePro: 'Pro',
-  upgradeStandardPrice: '$2.49/Monat',
-  upgradeProPrice: '$39.99 (einmalig)',
+  upgradeStandardPrice: '€2,29/Monat',
+  upgradeProPrice: '€36,99 (einmalig)',
   upgradeRequired: 'Upgrade erforderlich',
   freeLabelLimit: 'Im Free-Plan sind bis zu 2 Labels möglich',
   planFree: 'Free',
   planStandard: 'Standard',
   planPro: 'Pro',
   upgradeCta: 'Mehr erfahren',
+
+  // Payment / Checkout
+  paymentSuccess: 'Zahlung erfolgreich!',
+  paymentSuccessStandard: 'Willkommen im Standard-Plan! Alle Funktionen sind jetzt freigeschaltet.',
+  paymentSuccessPro: 'Willkommen im Pro-Plan! Alle Funktionen sind jetzt freigeschaltet.',
+  paymentCancelled: 'Zahlung abgebrochen.',
+  checkoutLoginRequired: 'Bitte melde dich an, um zu kaufen.',
+  checkoutProcessing: 'Weiterleitung zum Checkout...',
+  checkoutError: 'Zahlung fehlgeschlagen. Bitte versuche es erneut.',
 };

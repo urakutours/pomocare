@@ -128,12 +128,21 @@ export const it: Translations = {
   upgradeDescription: 'Questa funzione richiede un piano Standard o superiore.',
   upgradeStandard: 'Standard',
   upgradePro: 'Pro',
-  upgradeStandardPrice: '$2,49/mese',
-  upgradeProPrice: '$39,99 (una tantum)',
+  upgradeStandardPrice: '€2,29/mese',
+  upgradeProPrice: '€36,99 (una tantum)',
   upgradeRequired: 'Aggiornamento necessario',
   freeLabelLimit: 'Il piano gratuito consente fino a 2 etichette',
   planFree: 'Free',
   planStandard: 'Standard',
   planPro: 'Pro',
   upgradeCta: 'Scopri di più',
+
+  // Payment / Checkout
+  paymentSuccess: 'Pagamento riuscito!',
+  paymentSuccessStandard: 'Benvenuto nel piano Standard! Tutte le funzionalità sono sbloccate.',
+  paymentSuccessPro: 'Benvenuto nel piano Pro! Tutte le funzionalità sono sbloccate.',
+  paymentCancelled: 'Pagamento annullato.',
+  checkoutLoginRequired: 'Accedi per acquistare.',
+  checkoutProcessing: 'Reindirizzamento al pagamento...',
+  checkoutError: 'Pagamento fallito. Riprova.',
 };

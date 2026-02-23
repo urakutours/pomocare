@@ -136,4 +136,13 @@ export const pt: Translations = {
   planStandard: 'Standard',
   planPro: 'Pro',
   upgradeCta: 'Saiba mais',
+
+  // Payment / Checkout
+  paymentSuccess: 'Pagamento concluído!',
+  paymentSuccessStandard: 'Bem-vindo ao plano Standard! Todos os recursos estão desbloqueados.',
+  paymentSuccessPro: 'Bem-vindo ao plano Pro! Todos os recursos estão desbloqueados.',
+  paymentCancelled: 'Pagamento cancelado.',
+  checkoutLoginRequired: 'Faça login para comprar.',
+  checkoutProcessing: 'Redirecionando para o pagamento...',
+  checkoutError: 'Falha no pagamento. Tente novamente.',
 };

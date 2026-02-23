@@ -136,4 +136,13 @@ export const ja: Translations = {
   planStandard: 'Standard',
   planPro: 'Pro',
   upgradeCta: '詳しく見る',
+
+  // Payment / Checkout
+  paymentSuccess: 'お支払いが完了しました！',
+  paymentSuccessStandard: 'Standardプランへようこそ！すべての機能が解放されました。',
+  paymentSuccessPro: 'Proプランへようこそ！すべての機能が解放されました。',
+  paymentCancelled: 'お支払いがキャンセルされました。',
+  checkoutLoginRequired: '購入にはログインが必要です。',
+  checkoutProcessing: '決済ページへ移動中...',
+  checkoutError: '決済処理に失敗しました。もう一度お試しください。',
 };

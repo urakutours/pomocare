@@ -7,7 +7,9 @@ import { I18nProvider, useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { createStorageService, createSupabaseStorageService, LocalStorageAdapter } from '@/services/storage';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
+import { PaymentSuccessToast } from '@/components/shared/PaymentSuccessToast';
 import { AdBanner } from '@/components/ads/AdBanner';
+import type { CheckoutPlan } from '@/services/stripe/StripeService';
 import { useSettings } from '@/hooks/useSettings';
 import { useSessions } from '@/hooks/useSessions';
 import { useTimer } from '@/hooks/useTimer';
@@ -627,6 +629,8 @@ function AppWithStorage() {
 
 function AppWithI18n({ storage }: { storage: StorageService }) {
   const { settings, updateSettings, isLoaded } = useSettings(storage);
+  const { refreshTier } = useAuth();
+  const [paymentSuccessPlan, setPaymentSuccessPlan] = useState<CheckoutPlan | null>(null);
 
   // Apply theme class to document
   useEffect(() => {
@@ -639,6 +643,32 @@ function AppWithI18n({ storage }: { storage: StorageService }) {
     }
   }, [settings.theme]);
 
+  // 決済完了後の URL パラメータ処理
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentResult = params.get('payment');
+    const plan = params.get('plan') as CheckoutPlan | null;
+
+    if (paymentResult === 'success' && plan) {
+      // URL をクリア（ブラウザ履歴に残さない）
+      window.history.replaceState({}, '', window.location.pathname);
+
+      // Webhookの到達を待ちながらtierを再取得（1.5秒・3.5秒・5.5秒 の3回リトライ）
+      const delays = [1500, 2000, 2000];
+      let cumulative = 0;
+      delays.forEach((delay) => {
+        cumulative += delay;
+        setTimeout(() => void refreshTier(), cumulative);
+      });
+
+      setPaymentSuccessPlan(plan);
+    } else if (paymentResult === 'cancelled') {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    // マウント時のみ実行
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (!isLoaded) return null;
 
   return (
@@ -649,6 +679,12 @@ function AppWithI18n({ storage }: { storage: StorageService }) {
         settings={settings}
         updateSettings={updateSettings}
       />
+      {paymentSuccessPlan && (
+        <PaymentSuccessToast
+          plan={paymentSuccessPlan}
+          onClose={() => setPaymentSuccessPlan(null)}
+        />
+      )}
     </I18nProvider>
   );
 }

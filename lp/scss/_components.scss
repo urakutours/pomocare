@@ -94,21 +94,26 @@
     right: 0;
     top: 0;
     bottom: 0;
-    width: 32px;
+    width: 48px;
     display: none;
     align-items: center;
     justify-content: flex-end;
     padding-right: $space-1;
-    color: #9ca3afa8;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.12) 70%);
+    color: var(--surface-bg);
     font-size: 1.4rem;
     pointer-events: none;
     opacity: 1;
     @include transition(opacity);
   }
 
-  // モバイルのみ "›" を表示
+  // モバイルのみ "›" を表示、画面端に配置
   @include mq-down(md) {
-    &::after { display: flex; }
+    overflow: visible;
+    &::after {
+      display: flex;
+      right: calc(-1 * clamp(16px, 5vw, 40px));
+    }
   }
 
   // 末端まで到達したら非表示
@@ -126,12 +131,16 @@
   justify-content: center;
   overflow-x: hidden;
 
-  // ----- モバイル: 左寄せ・横スクロール・ページスクロール防止 -----
+  // ----- モバイル: 左寄せ・横スクロール・画面端まで伸ばす -----
   @include mq-down(md) {
     justify-content: flex-start;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
+    margin-left: calc(-1 * clamp(16px, 5vw, 40px));
+    margin-right: calc(-1 * clamp(16px, 5vw, 40px));
+    padding-left: clamp(16px, 5vw, 40px);
+    padding-right: clamp(16px, 5vw, 40px);
   }
 }
 

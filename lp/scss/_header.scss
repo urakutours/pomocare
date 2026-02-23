@@ -45,6 +45,11 @@
   @include transition(opacity);
 
   &:hover { opacity: 0.8; }
+
+  // PC: ロゴエリアを広げてナビリンクとの間を確保
+  @include mq(lg) {
+    margin-right: $space-8;
+  }
 }
 
 .logo-icon {

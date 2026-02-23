@@ -57,6 +57,13 @@
 // ----- リンクカラム -----
 .footer-columns {
   // モバイル (below md): Product+Resources左列 / Legal右列 の2列
+  // タブレット・モバイルでは左に余白を設ける（PCはgridのgapで制御）
+  padding-left: $space-6;
+
+  @include mq(lg) {
+    padding-left: 0;
+  }
+
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;

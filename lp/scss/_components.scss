@@ -81,27 +81,57 @@
 }
 
 // ----- タブナビ -----
+// ----- タブナビラッパー（>オーバーフロー指示子） -----
+.tab-nav-wrapper {
+  position: relative;
+  margin-bottom: $space-10;
+
+  // スクロール可能時に右端にフェード + "›" を表示
+  &::after {
+    content: '›';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: $space-2;
+    background: linear-gradient(to right, transparent, var(--surface-bg) 65%);
+    color: var(--text-secondary);
+    font-size: 1.4rem;
+    pointer-events: none;
+    opacity: 1;
+    @include transition(opacity);
+  }
+
+  // 末端まで到達したら非表示
+  &.at-end::after { opacity: 0; }
+
+  // showcase セクション内は背景色を合わせる
+  .showcase & {
+    &::after { background: linear-gradient(to right, transparent, var(--surface-sunken) 65%); }
+  }
+}
+
 .tab-nav {
   display: flex;
   gap: $space-2;
-  justify-content: center;
-  margin-bottom: $space-10;
-  flex-wrap: wrap;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-left: $space-1;
+  // スクロールバー非表示
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
 
-  // ----- モバイル: 横スクロール・画面端まで -----
+  // ----- モバイル: コンテナのpadding分を打ち消して画面端まで伸ばす -----
   @include mq-down(md) {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    justify-content: flex-start;
-    // コンテナのpadding分を打ち消して画面端まで伸ばす
     margin-left: calc(-1 * clamp(16px, 5vw, 40px));
     margin-right: calc(-1 * clamp(16px, 5vw, 40px));
     padding-left: clamp(16px, 5vw, 40px);
     padding-right: clamp(16px, 5vw, 40px);
-    // スクロールバー非表示
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-    // スクロールスナップ
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }

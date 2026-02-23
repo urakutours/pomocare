@@ -200,6 +200,23 @@ document.addEventListener('DOMContentLoaded', function () {
   initTabs('useCaseTabs');
 
   // ================================================================
+  // Tab nav overflow indicator ("›")
+  // ================================================================
+  document.querySelectorAll('.tab-nav').forEach(function (nav) {
+    var wrapper = nav.closest('.tab-nav-wrapper');
+    if (!wrapper) return;
+
+    function checkOverflow() {
+      var atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 4;
+      wrapper.classList.toggle('at-end', atEnd);
+    }
+
+    nav.addEventListener('scroll', checkOverflow, { passive: true });
+    // Initial check (run after layout)
+    setTimeout(checkOverflow, 0);
+  });
+
+  // ================================================================
   // Comparison table toggle
   // ================================================================
   var compToggle = document.getElementById('compToggle');

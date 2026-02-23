@@ -20,27 +20,27 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  // ----- デスクトップ: 4カラム Bento Grid -----
+  // ----- デスクトップ: 6カラム Bento Grid -----
   @include mq(lg) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
 
-    // カード1: ポモドーロタイマー（左半分）
-    .feature-card:nth-child(1) { grid-column: 1 / 3; }
+    // 上段: ポモドーロタイマー（左半分）
+    .feature-card:nth-child(1) { grid-column: 1 / 4; }
 
-    // カード2: ラベル管理（右半分）
-    .feature-card:nth-child(2) { grid-column: 3 / 5; }
+    // 上段: ラベル管理（右半分）
+    .feature-card:nth-child(2) { grid-column: 4 / 7; }
 
-    // カード3: 統計・分析（左半分、2行分）
-    .feature-card:nth-child(3) { grid-column: 1 / 3; grid-row: span 2; }
+    // 下段: 統計・分析（3分の1）
+    .feature-card:nth-child(3) { grid-column: 1 / 3; }
 
-    // カード4: マルチプラットフォーム（右上4分の1）
-    .feature-card:nth-child(4) { grid-column: 3 / 4; }
+    // 下段: マルチプラットフォーム（3分の1）
+    .feature-card:nth-child(4) { grid-column: 3 / 5; }
 
-    // カード5: カスタマイズ（右上4分の1）
-    .feature-card:nth-child(5) { grid-column: 4 / 5; }
+    // 下段: カスタマイズ（3分の1）
+    .feature-card:nth-child(5) { grid-column: 5 / 7; }
 
-    // カード6: プライバシー（右下半分）
-    .feature-card:nth-child(6) { grid-column: 3 / 5; }
+    // プライバシー（全幅）
+    .feature-card:nth-child(6) { grid-column: 1 / 7; }
   }
 }
 

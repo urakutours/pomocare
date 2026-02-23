@@ -240,15 +240,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var COOKIE_KEY = 'pomocare-cookie-consent';
 
+  // Detect relative path to privacy page
+  var privacyPath = (function () {
+    var path = window.location.pathname;
+    // If we're in a subdir (e.g. /terms/, /support/), use ../privacy/
+    if (/\/[^/]+\/[^/]*$/.test(path) && !/\/(index\.html)?$/.test(path.replace(/\/[^/]+\/[^/]*$/, ''))) {
+      return '../privacy/';
+    }
+    // Check if we're at root level (e.g. / or /index.html)
+    var segments = path.replace(/\/+$/, '').split('/').filter(Boolean);
+    return segments.length > 1 ? '../privacy/' : 'privacy/';
+  })();
+
   function updateCookieBannerText(lang) {
     if (!cookieBannerText) return;
-    var privacyHref = cookieBannerText.querySelector('a');
     if (lang === 'en') {
-      cookieBannerText.innerHTML = 'We use cookies and local storage to improve our service. See our <a href="privacy/">Privacy Policy</a> for details.';
+      cookieBannerText.innerHTML = 'We use cookies and local storage to improve our service. See our <a href="' + privacyPath + '">Privacy Policy</a> for details.';
       if (cookieAccept) cookieAccept.textContent = 'Accept';
       if (cookieDecline) cookieDecline.textContent = 'Decline';
     } else {
-      cookieBannerText.innerHTML = '当サイトはサービス改善のためCookieおよびローカルストレージを使用します。詳細は<a href="privacy/">プライバシーポリシー</a>をご覧ください。';
+      cookieBannerText.innerHTML = '当サイトはサービス改善のためCookieおよびローカルストレージを使用します。詳細は<a href="' + privacyPath + '">プライバシーポリシー</a>をご覧ください。';
       if (cookieAccept) cookieAccept.textContent = '同意する';
       if (cookieDecline) cookieDecline.textContent = '拒否する';
     }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Manual - PomoCare</title>
+  <title>ユーザーマニュアル - PomoCare</title>
   <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -188,7 +188,6 @@
         <img src="../images/app-overview.svg" alt="アプリ画面概要">
       </div>
     </div>
-    <div class="screenshot-slot" data-screenshot="home-screen-ja">ホーム画面（タイマー画面）のスクリーンショット</div>
   </section>
   </div>
 
@@ -224,7 +223,6 @@
         <img src="../images/timer-controls.svg" alt="タイマーコントロール">
       </div>
     </div>
-    <div class="screenshot-slot" data-screenshot="timer-running-ja">タイマー実行中のスクリーンショット</div>
   </section>
   </div>
 
@@ -460,7 +458,7 @@
         <h3>データの保存先</h3>
         <table class="info-table">
           <tr><th>未ログイン</th><td>ブラウザのローカルストレージ（そのブラウザでのみ利用可能）</td></tr>
-          <tr><th>ログイン済み</th><td>クラウド（Firestore）に同期 → 複数デバイスで利用可能</td></tr>
+          <tr><th>ログイン済み</th><td>クラウドに同期 → 複数デバイスで利用可能</td></tr>
         </table>
         <p>未ログインの状態で記録したデータは、初回ログイン時に自動的にクラウドへ移行されます。</p>
       </div>
@@ -468,7 +466,6 @@
         <img src="../images/cloud-sync.svg" alt="クラウド同期">
       </div>
     </div>
-    <div class="screenshot-slot" data-screenshot="login-ja">ログイン画面のスクリーンショット</div>
   </section>
   </div>
 
@@ -673,7 +670,6 @@
         <img src="../images/app-overview.svg" alt="App Overview">
       </div>
     </div>
-    <div class="screenshot-slot" data-screenshot="home-screen-en">Home screen (Timer) screenshot</div>
   </section>
   </div>
 
@@ -709,7 +705,6 @@
         <img src="../images/timer-controls.svg" alt="Timer Controls">
       </div>
     </div>
-    <div class="screenshot-slot" data-screenshot="timer-running-en">Timer running screenshot</div>
   </section>
   </div>
 
@@ -945,7 +940,7 @@
         <h3>Data Storage</h3>
         <table class="info-table">
           <tr><th>Not logged in</th><td>Browser local storage (available on that browser only)</td></tr>
-          <tr><th>Logged in</th><td>Cloud (Firestore) sync — available on multiple devices</td></tr>
+          <tr><th>Logged in</th><td>Cloud sync — available on multiple devices</td></tr>
         </table>
         <p>Data recorded while not logged in is automatically migrated to the cloud on your first login.</p>
       </div>
@@ -953,7 +948,6 @@
         <img src="../images/cloud-sync.svg" alt="Cloud Sync">
       </div>
     </div>
-    <div class="screenshot-slot" data-screenshot="login-en">Login screen screenshot</div>
   </section>
   </div>
 
@@ -1093,6 +1087,17 @@
       </div>
     </div>
   </footer>
+
+  <!-- Cookie Consent Banner -->
+  <div id="cookieBanner" class="cookie-banner">
+    <div class="cookie-banner__inner">
+      <div id="cookieBannerText" class="cookie-banner__text"></div>
+      <div class="cookie-banner__actions">
+        <button id="cookieDecline" class="btn btn-sm btn-outline">拒否する</button>
+        <button id="cookieAccept" class="btn btn-sm btn-primary">同意する</button>
+      </div>
+    </div>
+  </div>
 
   <script src="../js/i18n.js"></script>
   <script src="../js/theme.js"></script>

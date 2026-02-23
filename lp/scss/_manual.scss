@@ -33,7 +33,7 @@
 
 // ----- 目次 -----
 .manual-toc {
-  max-width: 760px;
+  max-width: min(760px, 92%);
   margin: -30px auto 0;
   padding: $space-6 $space-8;
   background: var(--surface-raised);
@@ -223,17 +223,16 @@
     margin: 0;
 
     li {
-      padding: $space-2 0;
-      display: flex;
-      align-items: flex-start;
-      gap: $space-2;
+      padding: $space-2 0 $space-2 $space-5;
+      position: relative;
       margin: 0;
 
       &::before {
         content: '✓';
         color: $color-primary;
         font-weight: $font-bold;
-        flex-shrink: 0;
+        position: absolute;
+        left: 0;
       }
     }
   }
@@ -268,24 +267,53 @@
   p { font-size: $text-sm; color: var(--text-secondary); line-height: $leading-normal; margin: 0; }
 }
 
-// ----- 対象ユーザーピル -----
+// ----- 対象ユーザーカード -----
 .manual-section .audience-list {
   list-style: none;
   padding: 0;
   margin: $space-5 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
 
   li {
-    padding: $space-3 0;
-    font-size: $text-base;
-    color: var(--text-secondary);
-    line-height: $leading-relaxed;
-    border-bottom: 1px solid var(--border-light);
-    background: none;
-    border-radius: 0;
+    padding: $space-3 $space-5;
+    font-size: $text-sm;
+    color: var(--text-primary);
+    line-height: $leading-normal;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-lg;
     font-weight: $font-normal;
     margin: 0;
+    @include transition(transform, border-color, box-shadow);
 
-    &:last-child { border-bottom: none; }
+    &:hover {
+      border-color: $color-primary;
+      transform: translateY(-2px);
+      box-shadow: $shadow-sm;
+    }
+
+    &:nth-child(2n) { margin-top: $space-2; }
+    &:nth-child(3) { margin-top: -$space-1; }
+  }
+}
+
+// ----- ポモドーロフロー -----
+.pomodoro-flow {
+  margin: $space-4 0;
+
+  > p {
+    color: var(--text-secondary);
+    font-size: $text-base;
+    line-height: $leading-relaxed;
+    margin: 0;
+  }
+
+  .flow-arrow {
+    text-align: center;
+    padding: $space-1 0;
+    line-height: 1;
   }
 }
 

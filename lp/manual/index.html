@@ -107,11 +107,13 @@
     <h3>ポモドーロテクニックとは？</h3>
     <p>ポモドーロテクニックは、1980年代にイタリアの Francesco Cirillo（フランチェスコ・シリロ）によって考案された時間管理術です。名前の由来は、彼が学生時代に使っていたトマト（イタリア語で pomodoro）型のキッチンタイマーから来ています。</p>
     <p>基本的な考え方はとてもシンプルです。</p>
-    <ol class="manual-steps">
-      <li><strong>25分間</strong> 集中して作業する（= 1ポモドーロ）</li>
-      <li><strong>5分間</strong> の短い休憩を取る</li>
-      <li><strong>4ポモドーロ</strong>が完了したら、<strong>15〜30分</strong>の長い休憩を取る</li>
-    </ol>
+    <div class="pomodoro-flow">
+      <p><strong>25分間</strong> 集中して作業する（= 1ポモドーロ）</p>
+      <div class="flow-arrow" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M10 10L2 2h16z" fill="#0abab5" opacity="0.5"/></svg></div>
+      <p><strong>5分間</strong> の短い休憩を取る</p>
+      <div class="flow-arrow" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M10 10L2 2h16z" fill="#0abab5" opacity="0.5"/></svg></div>
+      <p><strong>4ポモドーロ</strong>が完了したら、<strong>15〜30分</strong>の長い休憩を取る</p>
+    </div>
     <div class="content-illust-full">
       <img src="../images/pomodoro-cycle.svg" alt="ポモドーロサイクル図">
     </div>
@@ -120,7 +122,7 @@
     <div class="benefit-cards">
       <div class="benefit-card">
         <div class="bc-illust">
-          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28 42v-8" stroke="#0abab5" stroke-width="2" stroke-linecap="round"/><path d="M20 34c-5 0-9-4-9-9 0-4 2.5-7.3 6-8.5C18.5 12.2 22.8 9 28 9s9.5 3.2 11 7.5c3.5 1.2 6 4.5 6 8.5 0 5-4 9-9 9H20z" stroke="#0abab5" stroke-width="2" fill="rgba(10,186,181,0.08)"/><path d="M24 34v4h8v-4" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="42" cy="14" r="2" fill="#0abab5" opacity="0.4"/><circle cx="46" cy="20" r="1.5" fill="#0abab5" opacity="0.25"/></svg>
+          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 38c-5-1-8-5-8-11 0-3 1.5-6 4-7.5-.5-2.5.5-5 3-6s5 0 6.5 2c.5-.3 1-.5 1.5-.5s1 .2 1.5.5c1.5-2 4-3 6.5-2s3.5 3.5 3 6c2.5 1.5 4 4.5 4 7.5 0 6-3 10-8 11" stroke="#0abab5" stroke-width="2" fill="rgba(10,186,181,0.06)" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 14v24" stroke="#0abab5" stroke-width="1.5" opacity="0.2"/><path d="M28 38v6" stroke="#0abab5" stroke-width="2" stroke-linecap="round"/><path d="M12 18l2 2-2 2-2-2z" fill="#0abab5" opacity="0.4"/><path d="M46 16l1.5 1.5-1.5 1.5-1.5-1.5z" fill="#0abab5" opacity="0.3"/><circle cx="10" cy="28" r="1" fill="#0abab5" opacity="0.25"/><circle cx="48" cy="26" r="1.5" fill="#0abab5" opacity="0.35"/></svg>
         </div>
         <h4>「短い集中」が脳に優しい</h4>
         <p>25分という短い区切りにすることで、「あと少しだけ頑張ろう」と感じられる適度なプレッシャーが生まれます。無理なく高い集中力を維持できるのがポイントです。</p>
@@ -446,30 +448,26 @@
       <span class="section-num">11</span>
       <h2>アカウントとデータ同期</h2>
     </div>
-    <div class="content-row">
-      <div class="content-text">
-        <h3>ログイン方法</h3>
-        <table class="info-table">
-          <tr><th>Google</th><td>Googleアカウントでワンタップログイン</td></tr>
-          <tr><th>メール</th><td>メールアドレスとパスワードで新規登録またはログイン</td></tr>
-        </table>
-        <h3>アカウント作成の流れ</h3>
-        <ol class="manual-steps">
-          <li>メールアドレスとパスワードを入力して<strong>サインアップ</strong></li>
-          <li>確認メールが届くので、メール内のリンクをクリック</li>
-          <li>メール認証完了。すべての機能が利用可能に</li>
-        </ol>
-        <h3>データの保存先</h3>
-        <table class="info-table">
-          <tr><th>未ログイン</th><td>ブラウザのローカルストレージ（そのブラウザでのみ利用可能）</td></tr>
-          <tr><th>ログイン済み</th><td>クラウドに同期 → 複数デバイスで利用可能</td></tr>
-        </table>
-        <p>未ログインの状態で記録したデータは、初回ログイン時に自動的にクラウドへ移行されます。</p>
-      </div>
-      <div class="content-illust">
-        <img src="../images/cloud-sync.svg" alt="クラウド同期">
-      </div>
+    <div class="content-illust-full">
+      <img src="../images/cloud-sync.svg" alt="クラウド同期">
     </div>
+    <h3>ログイン方法</h3>
+    <table class="info-table">
+      <tr><th>Google</th><td>Googleアカウントでワンタップログイン</td></tr>
+      <tr><th>メール</th><td>メールアドレスとパスワードで新規登録またはログイン</td></tr>
+    </table>
+    <h3>アカウント作成の流れ</h3>
+    <ol class="manual-steps">
+      <li>メールアドレスとパスワードを入力して<strong>サインアップ</strong></li>
+      <li>確認メールが届くので、メール内のリンクをクリック</li>
+      <li>メール認証完了。すべての機能が利用可能に</li>
+    </ol>
+    <h3>データの保存先</h3>
+    <table class="info-table">
+      <tr><th>未ログイン</th><td>ブラウザのローカルストレージ（そのブラウザでのみ利用可能）</td></tr>
+      <tr><th>ログイン済み</th><td>クラウドに同期 → 複数デバイスで利用可能</td></tr>
+    </table>
+    <p>未ログインの状態で記録したデータは、初回ログイン時に自動的にクラウドへ移行されます。</p>
   </section>
   </div>
 
@@ -593,11 +591,13 @@
     <h3>What is the Pomodoro Technique?</h3>
     <p>The Pomodoro Technique is a time management method developed in the 1980s by Italian Francesco Cirillo. The name comes from the tomato-shaped kitchen timer (pomodoro means "tomato" in Italian) he used as a university student.</p>
     <p>The basic concept is very simple:</p>
-    <ol class="manual-steps">
-      <li>Work with full focus for <strong>25 minutes</strong> (= 1 Pomodoro)</li>
-      <li>Take a short <strong>5-minute</strong> break</li>
-      <li>After completing <strong>4 Pomodoros</strong>, take a longer break of <strong>15 to 30 minutes</strong></li>
-    </ol>
+    <div class="pomodoro-flow">
+      <p>Work with full focus for <strong>25 minutes</strong> (= 1 Pomodoro)</p>
+      <div class="flow-arrow" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M10 10L2 2h16z" fill="#0abab5" opacity="0.5"/></svg></div>
+      <p>Take a short <strong>5-minute</strong> break</p>
+      <div class="flow-arrow" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M10 10L2 2h16z" fill="#0abab5" opacity="0.5"/></svg></div>
+      <p>After completing <strong>4 Pomodoros</strong>, take a longer break of <strong>15 to 30 minutes</strong></p>
+    </div>
     <div class="content-illust-full">
       <img src="../images/pomodoro-cycle.svg" alt="Pomodoro Cycle Diagram">
     </div>
@@ -606,7 +606,7 @@
     <div class="benefit-cards">
       <div class="benefit-card">
         <div class="bc-illust">
-          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28 42v-8" stroke="#0abab5" stroke-width="2" stroke-linecap="round"/><path d="M20 34c-5 0-9-4-9-9 0-4 2.5-7.3 6-8.5C18.5 12.2 22.8 9 28 9s9.5 3.2 11 7.5c3.5 1.2 6 4.5 6 8.5 0 5-4 9-9 9H20z" stroke="#0abab5" stroke-width="2" fill="rgba(10,186,181,0.08)"/><path d="M24 34v4h8v-4" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="42" cy="14" r="2" fill="#0abab5" opacity="0.4"/><circle cx="46" cy="20" r="1.5" fill="#0abab5" opacity="0.25"/></svg>
+          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 38c-5-1-8-5-8-11 0-3 1.5-6 4-7.5-.5-2.5.5-5 3-6s5 0 6.5 2c.5-.3 1-.5 1.5-.5s1 .2 1.5.5c1.5-2 4-3 6.5-2s3.5 3.5 3 6c2.5 1.5 4 4.5 4 7.5 0 6-3 10-8 11" stroke="#0abab5" stroke-width="2" fill="rgba(10,186,181,0.06)" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 14v24" stroke="#0abab5" stroke-width="1.5" opacity="0.2"/><path d="M28 38v6" stroke="#0abab5" stroke-width="2" stroke-linecap="round"/><path d="M12 18l2 2-2 2-2-2z" fill="#0abab5" opacity="0.4"/><path d="M46 16l1.5 1.5-1.5 1.5-1.5-1.5z" fill="#0abab5" opacity="0.3"/><circle cx="10" cy="28" r="1" fill="#0abab5" opacity="0.25"/><circle cx="48" cy="26" r="1.5" fill="#0abab5" opacity="0.35"/></svg>
         </div>
         <h4>Short Bursts Are Brain-Friendly</h4>
         <p>Breaking work into 25-minute intervals creates just the right amount of pressure, making it easier to stay focused without feeling overwhelmed.</p>
@@ -932,30 +932,26 @@
       <span class="section-num">11</span>
       <h2>Account & Data Sync</h2>
     </div>
-    <div class="content-row">
-      <div class="content-text">
-        <h3>Login Methods</h3>
-        <table class="info-table">
-          <tr><th>Google</th><td>One-tap login with Google account</td></tr>
-          <tr><th>Email</th><td>Sign up or log in with email and password</td></tr>
-        </table>
-        <h3>Creating an Account</h3>
-        <ol class="manual-steps">
-          <li>Enter your email and password, then <strong>Sign Up</strong></li>
-          <li>Check your email and click the confirmation link</li>
-          <li>Verification complete — all features unlocked</li>
-        </ol>
-        <h3>Data Storage</h3>
-        <table class="info-table">
-          <tr><th>Not logged in</th><td>Browser local storage (available on that browser only)</td></tr>
-          <tr><th>Logged in</th><td>Cloud sync — available on multiple devices</td></tr>
-        </table>
-        <p>Data recorded while not logged in is automatically migrated to the cloud on your first login.</p>
-      </div>
-      <div class="content-illust">
-        <img src="../images/cloud-sync.svg" alt="Cloud Sync">
-      </div>
+    <div class="content-illust-full">
+      <img src="../images/cloud-sync.svg" alt="Cloud Sync">
     </div>
+    <h3>Login Methods</h3>
+    <table class="info-table">
+      <tr><th>Google</th><td>One-tap login with Google account</td></tr>
+      <tr><th>Email</th><td>Sign up or log in with email and password</td></tr>
+    </table>
+    <h3>Creating an Account</h3>
+    <ol class="manual-steps">
+      <li>Enter your email and password, then <strong>Sign Up</strong></li>
+      <li>Check your email and click the confirmation link</li>
+      <li>Verification complete — all features unlocked</li>
+    </ol>
+    <h3>Data Storage</h3>
+    <table class="info-table">
+      <tr><th>Not logged in</th><td>Browser local storage (available on that browser only)</td></tr>
+      <tr><th>Logged in</th><td>Cloud sync — available on multiple devices</td></tr>
+    </table>
+    <p>Data recorded while not logged in is automatically migrated to the cloud on your first login.</p>
   </section>
   </div>
 

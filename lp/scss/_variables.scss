@@ -62,9 +62,9 @@ $color-error:    #ef4444;
 }
 
 // =============================================
-// テーマ — Dark
+// テーマ — Gray（旧 Dark）
 // =============================================
-[data-theme="dark"] {
+[data-theme="gray"] {
   --surface-bg:       #{$color-gray-950};
   --surface-raised:   #151c2c;
   --surface-overlay:  rgba(15, 20, 35, 0.85);
@@ -77,6 +77,24 @@ $color-error:    #ef4444;
 
   --border-color:    #{$color-gray-700};
   --border-light:    #{$color-gray-800};
+}
+
+// =============================================
+// テーマ — Dark（新規追加）
+// =============================================
+[data-theme="dark"] {
+  --surface-bg:       #13171b;
+  --surface-raised:   #2c2f32;
+  --surface-overlay:  rgba(19, 23, 27, 0.90);
+  --surface-sunken:   #1a1d20;
+
+  --text-primary:    #{$color-gray-100};
+  --text-secondary:  #{$color-gray-400};
+  --text-tertiary:   #{$color-gray-500};
+  --text-inverse:    #{$color-gray-900};
+
+  --border-color:    transparent;
+  --border-light:    transparent;
 }
 
 // =============================================

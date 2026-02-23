@@ -122,4 +122,18 @@ export const pt: Translations = {
   labelNamePlaceholder: 'Nome do rótulo',
   statsSets: 'Sets',
   statsTime: 'Tempo',
+
+  // Upgrade / Tier
+  upgradeTitle: 'Atualize seu plano',
+  upgradeDescription: 'Este recurso requer um plano Standard ou superior.',
+  upgradeStandard: 'Standard',
+  upgradePro: 'Pro',
+  upgradeStandardPrice: '$2.49/mês',
+  upgradeProPrice: '$39.99 (pagamento único)',
+  upgradeRequired: 'Atualização necessária',
+  freeLabelLimit: 'O plano gratuito permite até 2 rótulos',
+  planFree: 'Free',
+  planStandard: 'Standard',
+  planPro: 'Pro',
+  upgradeCta: 'Saiba mais',
 };

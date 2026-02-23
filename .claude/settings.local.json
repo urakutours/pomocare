@@ -66,7 +66,14 @@
       "Bash(ls:*)",
       "Bash(curl:*)",
       "Bash(npm uninstall:*)",
-      "Bash(npx gh-pages:*)"
+      "Bash(npx gh-pages:*)",
+      "Bash(gh run list:*)",
+      "Bash(npx wrangler pages deploy:*)",
+      "Bash(cat:*)",
+      "Read(//c/tmp/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\tmp\\pomodoro-build"
     ]
   }
 }

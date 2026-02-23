@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { authService, type User } from '@/services/auth/AuthService';
+import { authService, type User, type UserTier } from '@/services/auth/AuthService';
 import { supabase } from '@/lib/supabase';
 
 interface AuthContextValue {
@@ -30,34 +30,65 @@ const AuthContext = createContext<AuthContextValue>({
   clearPasswordRecovery: () => {},
 });
 
+async function fetchUserTier(userId: string): Promise<UserTier> {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('tier')
+    .eq('user_id', userId)
+    .single();
+
+  if (error || !data) {
+    // Row doesn't exist yet — insert a free row
+    await supabase.from('user_profiles').insert({ user_id: userId, tier: 'free' });
+    return 'free';
+  }
+  return (data.tier as UserTier) ?? 'free';
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   useEffect(() => {
-    // Listen for auth state changes including PASSWORD_RECOVERY event
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (event === 'PASSWORD_RECOVERY') {
           setIsPasswordRecovery(true);
         }
-        setUser(session?.user ? {
-          id: session.user.id,
-          email: session.user.email ?? null,
+
+        if (!session?.user) {
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
+        const sbUser = session.user;
+
+        // Build user with free tier first for quick render
+        const baseUser: User = {
+          id: sbUser.id,
+          email: sbUser.email ?? null,
           displayName:
-            session.user.user_metadata?.full_name ??
-            session.user.user_metadata?.name ??
+            sbUser.user_metadata?.full_name ??
+            sbUser.user_metadata?.name ??
             null,
           photoURL:
-            session.user.user_metadata?.avatar_url ??
-            session.user.user_metadata?.picture ??
+            sbUser.user_metadata?.avatar_url ??
+            sbUser.user_metadata?.picture ??
             null,
           tier: 'free',
           isAnonymous: false,
-          emailVerified: session.user.email_confirmed_at != null,
-        } : null);
+          emailVerified: sbUser.email_confirmed_at != null,
+        };
+        setUser(baseUser);
         setIsLoading(false);
+
+        // Fetch actual tier asynchronously
+        const tier = await fetchUserTier(sbUser.id);
+        if (tier !== 'free') {
+          setUser(prev => prev ? { ...prev, tier } : prev);
+        }
       },
     );
     return () => subscription.unsubscribe();

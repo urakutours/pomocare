@@ -1,8 +1,10 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Download, MoreVertical, Tag, FileText, Trash2 } from 'lucide-react';
+import { X, Download, MoreVertical, Tag, FileText, Trash2, Lock } from 'lucide-react';
 import type { DayData, MonthDayData } from '@/hooks/useSessions';
 import { useI18n } from '@/contexts/I18nContext';
+import { useFeatures } from '@/contexts/FeatureContext';
+import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
 
 type StatTab = 'weekly' | 'monthly' | 'yearly';
@@ -399,10 +401,12 @@ export function StatsChart({
   onDeleteSession,
 }: StatsChartProps) {
   const { t } = useI18n();
+  const features = useFeatures();
   const [tab, setTab] = useState<StatTab>('weekly');
   const [offset, setOffset] = useState(0);
   const [filterLabel, setFilterLabel] = useState<string | null>(null);
   const [displayMode, setDisplayMode] = useState<StatsDisplayMode>('sets');
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   // Bar detail modal state
   const [barModal, setBarModal] = useState<{ title: string; sessions: PomodoroSession[]; groupByDay?: boolean } | null>(null);
@@ -560,7 +564,14 @@ export function StatsChart({
   const yearTotalSessions = effectiveYearData.reduce((s, d) => s + d.count, 0);
   const targetYear = new Date().getFullYear() - offset;
 
-  const handleTabChange = (next: StatTab) => { setTab(next); setOffset(0); };
+  const handleTabChange = (next: StatTab) => {
+    if (!features.advancedStats && (next === 'monthly' || next === 'yearly')) {
+      setShowUpgrade(true);
+      return;
+    }
+    setTab(next);
+    setOffset(0);
+  };
 
   const handleExportCsv = () => {
     const header = 'date,time,label,note,duration_minutes';
@@ -658,8 +669,12 @@ export function StatsChart({
         {/* Tab switcher */}
         <div className="flex gap-1 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1 mb-3">
           <button className={tabClass(tab === 'weekly')}  onClick={() => handleTabChange('weekly')}>{t.weekly}</button>
-          <button className={tabClass(tab === 'monthly')} onClick={() => handleTabChange('monthly')}>{t.monthly}</button>
-          <button className={tabClass(tab === 'yearly')}  onClick={() => handleTabChange('yearly')}>{t.yearly}</button>
+          <button className={tabClass(tab === 'monthly')} onClick={() => handleTabChange('monthly')}>
+            <span className="inline-flex items-center gap-1">{t.monthly}{!features.advancedStats && <Lock size={11} />}</span>
+          </button>
+          <button className={tabClass(tab === 'yearly')}  onClick={() => handleTabChange('yearly')}>
+            <span className="inline-flex items-center gap-1">{t.yearly}{!features.advancedStats && <Lock size={11} />}</span>
+          </button>
         </div>
 
         {/* Label filter dropdown */}
@@ -866,10 +881,10 @@ export function StatsChart({
           </button>
         </div>
         <button
-          onClick={handleExportCsv}
+          onClick={features.exportData ? handleExportCsv : () => setShowUpgrade(true)}
           className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
         >
-          <Download size={14} />
+          {features.exportData ? <Download size={14} /> : <Lock size={14} />}
           {t.exportCsv}
         </button>
       </div>
@@ -899,6 +914,9 @@ export function StatsChart({
           groupByDay={true}
         />
       )}
+
+      {/* Upgrade prompt modal */}
+      {showUpgrade && <UpgradePrompt onClose={() => setShowUpgrade(false)} />}
     </div>
   );
 }

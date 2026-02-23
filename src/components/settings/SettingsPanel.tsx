@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload } from 'lucide-react';
+import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Lock } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
 import { useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFeatures } from '@/contexts/FeatureContext';
+import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 import { SUPPORTED_LANGUAGES, getTranslations } from '@/i18n';
 import type { Language } from '@/i18n';
 import { previewAlarm } from '@/utils/alarm';
@@ -616,6 +618,9 @@ function LabelManager({
   noLabelsText,
   labelNamePlaceholder,
   saveLabel,
+  maxLabels,
+  limitMessage,
+  onUpgrade,
 }: {
   labels: LabelDefinition[];
   onChange: (labels: LabelDefinition[]) => void;
@@ -626,8 +631,12 @@ function LabelManager({
   noLabelsText: string;
   labelNamePlaceholder: string;
   saveLabel: string;
+  maxLabels: number;
+  limitMessage?: string;
+  onUpgrade?: () => void;
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const atLimit = labels.length >= maxLabels;
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
 
@@ -712,13 +721,28 @@ function LabelManager({
   return (
     <div>
       {/* Add button at top */}
-      <button
-        onClick={() => setShowAddModal(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 mb-4 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
-      >
-        <Plus size={14} />
-        {addLabel}
-      </button>
+      {atLimit ? (
+        <div className="mb-4">
+          <button
+            onClick={onUpgrade}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-neutral-700 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-neutral-600 transition-colors"
+          >
+            <Lock size={14} />
+            {addLabel}
+          </button>
+          {limitMessage && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{limitMessage}</p>
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 mb-4 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
+        >
+          <Plus size={14} />
+          {addLabel}
+        </button>
+      )}
 
       {/* Label list */}
       <div className="space-y-1">
@@ -892,6 +916,8 @@ function readFileWithEncoding(file: File): Promise<string> {
 export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, labels: externalLabels, onSaveLabels }: SettingsPanelProps) {
   const { t } = useI18n();
   const { user, deleteAccount } = useAuth();
+  const features = useFeatures();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [workTime, setWorkTime] = useState(settings.workTime);
   const [breakTime, setBreakTime] = useState(settings.breakTime);
   const [longBreakTime, setLongBreakTime] = useState(settings.longBreakTime ?? 0);
@@ -1188,6 +1214,9 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               noLabelsText={t.noLabel}
               labelNamePlaceholder={t.labelNamePlaceholder}
               saveLabel="OK"
+              maxLabels={features.maxLabels}
+              limitMessage={!features.unlimitedLabels ? t.freeLabelLimit : undefined}
+              onUpgrade={() => setShowUpgrade(true)}
             />
           </div>
         )}
@@ -1255,6 +1284,9 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
           onClose={() => setShowImportModal(false)}
         />
       )}
+
+      {/* Upgrade prompt modal */}
+      {showUpgrade && <UpgradePrompt onClose={() => setShowUpgrade(false)} />}
     </div>
   );
 }

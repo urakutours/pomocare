@@ -122,4 +122,18 @@ export const fr: Translations = {
   labelNamePlaceholder: "Nom de l'étiquette",
   statsSets: 'Sets',
   statsTime: 'Temps',
+
+  // Upgrade / Tier
+  upgradeTitle: 'Mettre à niveau',
+  upgradeDescription: 'Cette fonctionnalité nécessite un plan Standard ou supérieur.',
+  upgradeStandard: 'Standard',
+  upgradePro: 'Pro',
+  upgradeStandardPrice: '2,49 $/mois',
+  upgradeProPrice: '39,99 $ (paiement unique)',
+  upgradeRequired: 'Mise à niveau requise',
+  freeLabelLimit: 'Le plan gratuit autorise 2 étiquettes maximum',
+  planFree: 'Free',
+  planStandard: 'Standard',
+  planPro: 'Pro',
+  upgradeCta: 'En savoir plus',
 };

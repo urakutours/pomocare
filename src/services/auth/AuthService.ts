@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-export type UserTier = 'free' | 'pro';
+export type UserTier = 'free' | 'standard' | 'pro';
 
 export interface User {
   id: string;
@@ -13,7 +13,7 @@ export interface User {
   emailVerified: boolean;
 }
 
-function toUser(sbUser: SupabaseUser): User {
+function toUser(sbUser: SupabaseUser, tier: UserTier = 'free'): User {
   return {
     id: sbUser.id,
     email: sbUser.email ?? null,
@@ -25,7 +25,7 @@ function toUser(sbUser: SupabaseUser): User {
       sbUser.user_metadata?.avatar_url ??
       sbUser.user_metadata?.picture ??
       null,
-    tier: 'free',
+    tier,
     isAnonymous: false,
     emailVerified: sbUser.email_confirmed_at != null,
   };

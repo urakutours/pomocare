@@ -122,4 +122,18 @@ export const ja: Translations = {
   labelNamePlaceholder: 'ラベル名',
   statsSets: 'セット',
   statsTime: '時間',
+
+  // Upgrade / Tier
+  upgradeTitle: 'プランをアップグレード',
+  upgradeDescription: 'この機能を使うにはStandard以上のプランが必要です。',
+  upgradeStandard: 'Standard',
+  upgradePro: 'Pro',
+  upgradeStandardPrice: '¥250/月',
+  upgradeProPrice: '¥5,000（買い切り）',
+  upgradeRequired: 'アップグレードが必要です',
+  freeLabelLimit: 'Freeプランではラベルは2個までです',
+  planFree: 'Free',
+  planStandard: 'Standard',
+  planPro: 'Pro',
+  upgradeCta: '詳しく見る',
 };

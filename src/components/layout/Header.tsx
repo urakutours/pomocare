@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { BarChart3, Settings, LogOut } from 'lucide-react';
+import { BarChart3, Settings, LogOut, Crown } from 'lucide-react';
 import logoSvg from '/icons/logo.svg';
 import logoDarkSvg from '/icons/logo_dark.svg';
 import { useAuth } from '@/contexts/AuthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import { LoginModal } from '@/components/auth/LoginModal';
+import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 
 interface HeaderProps {
   onLogoClick: () => void;
@@ -17,6 +18,10 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
   const { t } = useI18n();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
+  const tierLabel = user?.tier === 'pro' ? t.planPro : user?.tier === 'standard' ? t.planStandard : t.planFree;
+  const isPaid = user?.tier === 'standard' || user?.tier === 'pro';
 
   const handleSignOut = async () => {
     setShowUserMenu(false);
@@ -71,7 +76,19 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                       {user.email && user.displayName && (
                         <p className="text-xs text-gray-400 dark:text-gray-400 truncate">{user.email}</p>
                       )}
+                      <span className={`inline-block mt-1 px-1.5 py-0.5 text-[10px] font-semibold rounded ${isPaid ? 'bg-tiffany/15 text-tiffany' : 'bg-gray-100 dark:bg-neutral-600 text-gray-500 dark:text-gray-400'}`}>
+                        {tierLabel}
+                      </span>
                     </div>
+                    {!isPaid && (
+                      <button
+                        onClick={() => { setShowUserMenu(false); setShowUpgrade(true); }}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-tiffany hover:bg-tiffany/5 transition-colors"
+                      >
+                        <Crown size={14} />
+                        {t.upgradeCta}
+                      </button>
+                    )}
                     <button
                       onClick={handleSignOut}
                       className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
@@ -95,6 +112,7 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
       </div>
 
       {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
+      {showUpgrade && <UpgradePrompt onClose={() => setShowUpgrade(false)} />}
     </>
   );
 }

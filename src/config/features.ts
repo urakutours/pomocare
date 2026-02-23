@@ -1,26 +1,35 @@
 import type { UserTier } from '@/services/auth/AuthService';
 
 export interface FeatureFlags {
-  customSounds: boolean;
-  exportData: boolean;
   cloudSync: boolean;
+  exportData: boolean;
   advancedStats: boolean;
-  themes: boolean;
+  sessionNotes: boolean;
+  unlimitedLabels: boolean;
+  adFree: boolean;
+  maxLabels: number;
 }
+
+const PAID_FLAGS: FeatureFlags = {
+  cloudSync: true,
+  exportData: true,
+  advancedStats: true,
+  sessionNotes: true,
+  unlimitedLabels: true,
+  adFree: true,
+  maxLabels: Infinity,
+};
 
 export const FEATURE_FLAGS: Record<UserTier, FeatureFlags> = {
   free: {
-    customSounds: false,
-    exportData: false,
     cloudSync: false,
+    exportData: false,
     advancedStats: false,
-    themes: false,
+    sessionNotes: false,
+    unlimitedLabels: false,
+    adFree: false,
+    maxLabels: 2,
   },
-  pro: {
-    customSounds: true,
-    exportData: true,
-    cloudSync: true,
-    advancedStats: true,
-    themes: true,
-  },
+  standard: { ...PAID_FLAGS },
+  pro: { ...PAID_FLAGS },
 };

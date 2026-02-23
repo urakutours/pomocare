@@ -163,4 +163,18 @@ export interface Translations {
   // Stats display mode
   statsSets: string;
   statsTime: string;
+
+  // Upgrade / Tier
+  upgradeTitle: string;
+  upgradeDescription: string;
+  upgradeStandard: string;
+  upgradePro: string;
+  upgradeStandardPrice: string;
+  upgradeProPrice: string;
+  upgradeRequired: string;
+  freeLabelLimit: string;
+  planFree: string;
+  planStandard: string;
+  planPro: string;
+  upgradeCta: string;
 }

@@ -1,10 +1,13 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { Lock } from 'lucide-react';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { FeatureProvider } from '@/contexts/FeatureContext';
+import { FeatureProvider, useFeatures } from '@/contexts/FeatureContext';
 import { I18nProvider, useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { createStorageService, createSupabaseStorageService, LocalStorageAdapter } from '@/services/storage';
+import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
+import { AdBanner } from '@/components/ads/AdBanner';
 import { useSettings } from '@/hooks/useSettings';
 import { useSessions } from '@/hooks/useSessions';
 import { useTimer } from '@/hooks/useTimer';
@@ -267,6 +270,8 @@ function LabelSelect({
 
 function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   const { t } = useI18n();
+  const features = useFeatures();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const {
     sessions,
     addSession,
@@ -351,6 +356,11 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
   // Add a new label inline from the TOP screen
   const handleAddLabelInline = (label: LabelDefinition) => {
+    if (labels.length >= features.maxLabels) {
+      setShowUpgrade(true);
+      setShowLabelCreator(false);
+      return;
+    }
     const updatedLabels = [...labels, label];
     setLabels(updatedLabels);
     // Persist to settings
@@ -386,6 +396,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
   if (isBreakMode) {
     return (
+      <>
       <AppShell
         header={
           <Header
@@ -431,10 +442,13 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           />
         )}
       </AppShell>
+      <AdBanner />
+      </>
     );
   }
 
   return (
+    <>
     <AppShell
       header={
         <Header
@@ -505,7 +519,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
               />
 
               {/* Task memo input (same width as dropdown) */}
-              {activeLabel && (
+              {activeLabel && features.sessionNotes && (
                 <textarea
                   value={activeNote}
                   onChange={(e) => setActiveNote(e.target.value)}
@@ -513,6 +527,15 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
                   rows={2}
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 resize-none"
                 />
+              )}
+              {activeLabel && !features.sessionNotes && (
+                <button
+                  onClick={() => setShowUpgrade(true)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-neutral-600 rounded-lg bg-gray-50 dark:bg-neutral-700/50"
+                >
+                  <Lock size={14} />
+                  {t.labelNotePlaceholder}
+                </button>
               )}
             </div>
 
@@ -533,38 +556,44 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           </div>
         </div>
       )}
+
+      {/* Upgrade prompt modal */}
+      {showUpgrade && <UpgradePrompt onClose={() => setShowUpgrade(false)} />}
     </AppShell>
+    <AdBanner />
+    </>
   );
 }
 
-// ---- Storage switcher based on auth state ----
-// ログイン済み → Supabase (PostgreSQL + JSONB)
-// 未ログイン   → localStorage
+// ---- Storage switcher based on auth state + tier ----
+// 未ログイン          → localStorage
+// ログイン + free     → localStorage (ログイン可能だがデータはローカル)
+// ログイン + standard/pro → Supabase (クラウド同期)
 function AppWithStorage() {
   const { user, isLoading: authLoading, isPasswordRecovery, clearPasswordRecovery } = useAuth();
+  const features = useFeatures();
   const [storage, setStorage] = useState<StorageService | null>(null);
-  const prevUidRef = useRef<string | null | undefined>(undefined); // undefined = 未初期化
+  const prevStorageKeyRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (authLoading) return;
 
     const currentUid = user?.id ?? null;
+    const useCloud = currentUid && features.cloudSync;
+    const storageKey = useCloud ? `supabase:${currentUid}` : `local:${currentUid ?? 'anon'}`;
 
-    // 同じユーザーなら再初期化不要
-    if (prevUidRef.current === currentUid) return;
-    prevUidRef.current = currentUid;
+    // 同じキーなら再初期化不要
+    if (prevStorageKeyRef.current === storageKey) return;
+    prevStorageKeyRef.current = storageKey;
 
-    // ストレージ切替中はローディング表示
     setStorage(null);
 
-    if (currentUid) {
-      // ログイン済み → Supabase
-      setStorage(createSupabaseStorageService(currentUid));
+    if (useCloud) {
+      setStorage(createSupabaseStorageService(currentUid!));
     } else {
-      // 未ログイン → 匿名 localStorage
       setStorage(createStorageService());
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, features.cloudSync]);
 
   // Supabase password recovery (user clicked reset link in email)
   if (isPasswordRecovery) {

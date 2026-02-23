@@ -122,4 +122,18 @@ export const es: Translations = {
   labelNamePlaceholder: 'Nombre de etiqueta',
   statsSets: 'Sets',
   statsTime: 'Tiempo',
+
+  // Upgrade / Tier
+  upgradeTitle: 'Mejora tu plan',
+  upgradeDescription: 'Esta función requiere un plan Standard o superior.',
+  upgradeStandard: 'Standard',
+  upgradePro: 'Pro',
+  upgradeStandardPrice: '$2.49/mes',
+  upgradeProPrice: '$39.99 (pago único)',
+  upgradeRequired: 'Se requiere actualización',
+  freeLabelLimit: 'El plan gratuito permite hasta 2 etiquetas',
+  planFree: 'Free',
+  planStandard: 'Standard',
+  planPro: 'Pro',
+  upgradeCta: 'Más información',
 };

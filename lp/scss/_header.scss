@@ -97,6 +97,11 @@
   display: flex;
   align-items: center;
   gap: $space-3;
+
+  // 言語ドロップダウンはハンバーガーメニュー内に移動（モバイル）
+  @include mq-down(lg) {
+    .lang-dropdown { display: none; }
+  }
 }
 
 // ----- ハンバーガー -----

@@ -11,7 +11,9 @@
 .showcase-content {
   display: flex;
   align-items: center;
-  gap: $space-6;
+  gap: 56px;
+  max-width: 92%;
+  margin: 0 auto;
 
   @include mq-down(md) {
     flex-direction: column;
@@ -21,7 +23,7 @@
 
 // ----- スクリーンショット表示エリア -----
 .showcase-visual {
-  flex: 1;
+  flex: 0 0 auto;
   @include flex-center;
 }
 
@@ -47,6 +49,7 @@
   img {
     width: 100%;
     height: 100%;
+    max-height: none; // グローバル 70vh 制限を解除
     object-fit: cover;
     transition: opacity $duration-normal $ease-out;
   }
@@ -55,6 +58,13 @@
 // ----- テキスト＆タブエリア -----
 .showcase-info {
   flex: 1;
+
+  h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: $space-2;
+  }
 }
 
 .showcase-desc {

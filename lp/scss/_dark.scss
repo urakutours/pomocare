@@ -43,7 +43,7 @@
 
   // ----- フォンモックアップ -----
   .phone-mockup {
-    background: $color-gray-700;
+    background: $color-primary;
   }
 
   // ----- Showcase -----
@@ -92,7 +92,6 @@
   // ----- グラデーションアクセント（Features） -----
   .features {
     position: relative;
-    overflow: hidden;
     &::after {
       content: '';
       position: absolute;
@@ -108,7 +107,6 @@
   // ----- グラデーションアクセント（Pricing） -----
   .pricing {
     position: relative;
-    overflow: hidden;
     &::before {
       content: '';
       position: absolute;

@@ -15,9 +15,21 @@
   // ----- モバイル: 1カラム -----
   grid-template-columns: 1fr;
 
-  // ----- タブレット: 2カラム -----
+  // ----- タブレット: 2カラム（統計が左に2行分、右にマルチ+カスタマイズ） -----
   @include mq(md) {
     grid-template-columns: repeat(2, 1fr);
+
+    // 統計・分析: 左列、2行分（マルチ+カスタマイズと高さを合わせる）
+    .feature-card:nth-child(3) { grid-column: 1; grid-row: 2 / 4; }
+
+    // マルチプラットフォーム: 右列 上
+    .feature-card:nth-child(4) { grid-column: 2; grid-row: 2; }
+
+    // カスタマイズ: 右列 下（マルチの直下）
+    .feature-card:nth-child(5) { grid-column: 2; grid-row: 3; }
+
+    // プライバシー: 全幅
+    .feature-card:nth-child(6) { grid-column: 1 / 3; }
   }
 
   // ----- デスクトップ: 6カラム Bento Grid -----
@@ -34,13 +46,13 @@
     .feature-card:nth-child(3) { grid-column: 1 / 3; grid-row: span 2; }
 
     // 下段右上: マルチプラットフォーム（3分の1）
-    .feature-card:nth-child(4) { grid-column: 3 / 5; }
+    .feature-card:nth-child(4) { grid-column: 3 / 5; grid-row: auto; }
 
     // 下段右上: カスタマイズ（3分の1）
-    .feature-card:nth-child(5) { grid-column: 5 / 7; }
+    .feature-card:nth-child(5) { grid-column: 5 / 7; grid-row: auto; }
 
     // 下段右下: プライバシー（右3分の2、統計の下端と揃える）
-    .feature-card:nth-child(6) { grid-column: 3 / 7; }
+    .feature-card:nth-child(6) { grid-column: 3 / 7; grid-row: auto; }
   }
 }
 

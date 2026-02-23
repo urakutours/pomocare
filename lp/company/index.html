@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>会社概要 - PomoCare</title>
+  <meta name="description" content="株式会社URAKUの会社概要。PomoCareを運営する会社情報をご紹介します。">
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ==================== Header ==================== -->
+  <header class="header" id="header">
+    <nav class="nav container">
+      <a href="../" class="logo" aria-label="PomoCare">
+        <svg class="logo-icon" viewBox="0 0 512 512" width="34" height="34">
+          <circle cx="256" cy="256" r="256" fill="#0abab5"/>
+          <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
+        </svg>
+        <img src="../images/logo.svg" class="logo-img" alt="PomoCare" height="20">
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="../#features" data-i18n="navFeatures">機能</a></li>
+        <li><a href="../#pricing" data-i18n="navPricing">料金</a></li>
+        <li><a href="../#faq" data-i18n="navFaq">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-dropdown-btn" id="langDropdownBtn" aria-haspopup="listbox" aria-expanded="false">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="langDropdownLabel">JP</span>
+            <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <ul class="lang-dropdown-menu" id="langDropdownMenu" role="listbox">
+            <li><button class="lang-option active" data-lang="ja" role="option">&#x1F1EF;&#x1F1F5; 日本語</button></li>
+            <li><button class="lang-option" data-lang="en" role="option">&#x1F1FA;&#x1F1F8; English</button></li>
+          </ul>
+        </div>
+
+        <a href="https://app.pomocare.com" class="btn btn-sm btn-primary nav-cta" data-i18n="navOpenApp">アプリを開く</a>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- モバイルナビ -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="../#features" data-i18n="navFeatures">機能</a>
+    <a href="../#pricing" data-i18n="navPricing">料金</a>
+    <a href="../#faq" data-i18n="navFaq">FAQ</a>
+    <a href="https://app.pomocare.com" class="btn btn-primary" data-i18n="navOpenApp">アプリを開く</a>
+  </div>
+
+  <!-- ==================== Content ==================== -->
+  <main class="legal-content">
+    <a href="../" class="legal-back">&larr; <span data-i18n="backToHome">トップに戻る</span></a>
+
+    <!-- Japanese version -->
+    <div id="company-ja">
+      <h1>会社概要</h1>
+      <p class="legal-date">最終更新日: 2026年2月23日</p>
+
+      <table class="legal-table">
+        <tbody>
+          <tr>
+            <th>商号</th>
+            <td>株式会社URAKU</td>
+          </tr>
+          <tr>
+            <th>代表取締役</th>
+            <td>奥山　大介</td>
+          </tr>
+          <tr>
+            <th>所在地</th>
+            <td>〒108-0074　東京都港区高輪2-1-13-414</td>
+          </tr>
+          <tr>
+            <th>電話番号</th>
+            <td><a href="tel:0362774682">03-6277-4682</a></td>
+          </tr>
+          <tr>
+            <th>お問い合わせ</th>
+            <td><a href="mailto:support@pomocare.com">support@pomocare.com</a></td>
+          </tr>
+          <tr>
+            <th>事業内容</th>
+            <td>ソフトウェアの企画・開発・販売<br>フォーカスタイマーアプリ「PomoCare」の運営</td>
+          </tr>
+          <tr>
+            <th>サービスURL</th>
+            <td><a href="https://pomocare.com">https://pomocare.com</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- English version -->
+    <div id="company-en" style="display:none;">
+      <h1>About</h1>
+      <p class="legal-date">Last updated: February 23, 2026</p>
+
+      <table class="legal-table">
+        <tbody>
+          <tr>
+            <th>Company Name</th>
+            <td>URAKU &amp; CO. (株式会社URAKU)</td>
+          </tr>
+          <tr>
+            <th>Representative Director</th>
+            <td>Daisuke Okuyama</td>
+          </tr>
+          <tr>
+            <th>Address</th>
+            <td>2-1-13-414 Takanawa, Minato-ku, Tokyo 108-0074, Japan</td>
+          </tr>
+          <tr>
+            <th>Phone</th>
+            <td><a href="tel:+81362774682">+81-3-6277-4682</a></td>
+          </tr>
+          <tr>
+            <th>Contact</th>
+            <td><a href="mailto:support@pomocare.com">support@pomocare.com</a></td>
+          </tr>
+          <tr>
+            <th>Business</th>
+            <td>Software planning, development &amp; distribution<br>Operation of focus timer app "PomoCare"</td>
+          </tr>
+          <tr>
+            <th>Service URL</th>
+            <td><a href="https://pomocare.com">https://pomocare.com</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ==================== Footer ==================== -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-top">
+        <div>
+          <div class="footer-brand">
+            <svg class="logo-icon" viewBox="0 0 512 512" width="28" height="28">
+              <circle cx="256" cy="256" r="256" fill="#0abab5"/>
+              <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
+            </svg>
+            <img src="../images/logo.svg" class="logo-img" alt="PomoCare" height="18">
+          </div>
+          <p class="footer-brand-desc" data-i18n="footerDesc">ポモドーロ・テクニックで集中力を高めるフォーカスタイマーアプリ</p>
+        </div>
+        <div class="footer-columns">
+          <div class="footer-col">
+            <h4 data-i18n="footerProduct">プロダクト</h4>
+            <ul>
+              <li><a href="../#features" data-i18n="navFeatures">機能</a></li>
+              <li><a href="../#pricing" data-i18n="navPricing">料金</a></li>
+              <li><a href="../#faq" data-i18n="navFaq">FAQ</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footerResources">リソース</h4>
+            <ul>
+              <li><a href="../manual/" data-i18n="footerManual">マニュアル</a></li>
+              <li><a href="../support/" data-i18n="footerSupport">サポート</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footerLegal">運営情報・ポリシー</h4>
+            <ul>
+              <li><a href="../company/" data-i18n="footerAbout">会社概要</a></li>
+              <li><a href="../privacy/" data-i18n="footerPrivacy">プライバシーポリシー</a></li>
+              <li><a href="../terms/" data-i18n="footerTerms">利用規約</a></li>
+              <li><a href="../tokushoho/" data-i18n="footerTokushoho">特定商取引法に基づく表記</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-copy">
+          <p>&copy; 2026 PomoCare</p>
+        </div>
+        <div class="footer-controls">
+          <div class="lang-dropdown" id="footerLangDropdown">
+            <button class="lang-dropdown-btn" id="footerLangBtn" aria-haspopup="listbox" aria-expanded="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span id="footerLangLabel">JP</span>
+              <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+            </button>
+            <ul class="lang-dropdown-menu" id="footerLangMenu" role="listbox">
+              <li><button class="lang-option active" data-lang="ja" role="option">&#x1F1EF;&#x1F1F5; 日本語</button></li>
+              <li><button class="lang-option" data-lang="en" role="option">&#x1F1FA;&#x1F1F8; English</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/i18n.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    function setPageLang(lang) {
+      document.getElementById('company-ja').style.display = lang === 'ja' ? 'block' : 'none';
+      document.getElementById('company-en').style.display = lang === 'en' ? 'block' : 'none';
+    }
+    var _origSetLang = window.setLanguage;
+    window.setLanguage = function(lang) {
+      if (_origSetLang) _origSetLang(lang);
+      setPageLang(lang);
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = localStorage.getItem('pomocare-lp-lang');
+      var lang = saved || (navigator.language.startsWith('ja') ? 'ja' : 'en');
+      setPageLang(lang);
+    });
+  </script>
+</body>
+</html>

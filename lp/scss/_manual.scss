@@ -438,10 +438,8 @@
 
   li {
     counter-increment: step;
-    display: flex;
-    align-items: flex-start;
-    gap: $space-3;
-    padding: $space-3 0;
+    position: relative;
+    padding: $space-3 0 $space-3 36px;
     margin: 0;
 
     &::before {
@@ -454,7 +452,9 @@
       color: $white;
       font-size: $text-xs;
       font-weight: $font-bold;
-      flex-shrink: 0;
+      position: absolute;
+      left: 0;
+      top: $space-3;
       margin-top: 2px;
     }
   }

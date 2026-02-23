@@ -83,9 +83,9 @@
     <ol>
       <li><a href="#s1-ja"><span class="toc-num">1</span>はじめに</a></li>
       <li><a href="#s2-ja"><span class="toc-num">2</span>メイン画面</a></li>
-      <li><a href="#s3-ja"><span class="toc-num">3</span>タイマーを使う</a></li>
+      <li><a href="#s3-ja"><span class="toc-num">3</span>ポモドーロをスタート</a></li>
       <li><a href="#s4-ja"><span class="toc-num">4</span>フォーカスモード</a></li>
-      <li><a href="#s5-ja"><span class="toc-num">5</span>休憩モード</a></li>
+      <li><a href="#s5-ja"><span class="toc-num">5</span>休憩画面</a></li>
       <li><a href="#s6-ja"><span class="toc-num">6</span>ラベルで分類する</a></li>
       <li><a href="#s7-ja"><span class="toc-num">7</span>セッションメモ</a></li>
       <li><a href="#s8-ja"><span class="toc-num">8</span>統計・グラフ</a></li>
@@ -202,7 +202,7 @@
   <section class="manual-section">
     <div class="section-header">
       <span class="section-num">3</span>
-      <h2>タイマーを使う</h2>
+      <h2>ポモドーロをスタート</h2>
     </div>
     <div class="content-row">
       <div class="content-text">
@@ -214,8 +214,9 @@
           <tr><th>リセット</th><td>一時停止中にリセットボタンをタップ（確認あり）</td></tr>
           <tr><th>早期完了</th><td>途中で「完了」をタップ → 経過時間が記録されます</td></tr>
         </table>
-        <h3>自動サイクル</h3>
-        <p>タイマーが0になると自動で次のモードに切り替わります。</p>
+        <h3>サイクルの流れ</h3>
+        <p>タイマーが0になると、次のモード（休憩または作業）の待機画面に切り替わります。<strong>スタートボタンを押す</strong>と休憩タイマーが始まり、休憩が終わると再び作業の待機画面が表示されます。</p>
+        <p>サイクルの回数や時間は設定画面でカスタマイズできますが、各ステップの開始は<strong>必ず自分でスタートボタンを押す</strong>必要があります。</p>
         <div class="cycle-flow">
           <span class="cycle-item cycle-work">作業</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-sbreak">短い休憩</span><span class="cycle-arrow">→</span>
@@ -224,6 +225,7 @@
           <span class="cycle-item cycle-work">作業</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-lbreak">長い休憩</span>
         </div>
+        <p class="hint-box"><strong>ポイント:</strong> 各モードの切り替え時にスタートボタンを押すタイミングは自由です。自分のペースで次のセッションを始められます。</p>
       </div>
       <div class="content-illust">
         <img src="../images/timer-controls.svg" alt="タイマーコントロール">
@@ -267,7 +269,7 @@
   <section class="manual-section">
     <div class="section-header">
       <span class="section-num">5</span>
-      <h2>休憩モード</h2>
+      <h2>休憩画面</h2>
     </div>
     <div class="content-row">
       <div class="content-text">
@@ -280,7 +282,7 @@
           <tr><th>タイマー開始</th><td>休憩タイマーを開始する</td></tr>
           <tr><th>スキップ</th><td>休憩をスキップして次の作業セッションへ進む</td></tr>
         </table>
-        <p>休憩中は、設定で登録したカスタムメッセージが表示されます。<br>例:「水を飲みましょう」「ストレッチしましょう」</p>
+        <p>休憩中は、設定で登録したカスタムメッセージが表示されます。<br>例:「水を飲みましょう」「ストレッチしましょう」「絶対合格」「今日もよく頑張った」</p>
       </div>
       <div class="content-illust">
         <img src="../images/break-mode.svg" alt="休憩モード">
@@ -567,9 +569,9 @@
     <ol>
       <li><a href="#s1-en"><span class="toc-num">1</span>Introduction</a></li>
       <li><a href="#s2-en"><span class="toc-num">2</span>Main Screen</a></li>
-      <li><a href="#s3-en"><span class="toc-num">3</span>Using the Timer</a></li>
+      <li><a href="#s3-en"><span class="toc-num">3</span>Start a Pomodoro</a></li>
       <li><a href="#s4-en"><span class="toc-num">4</span>Focus Mode</a></li>
-      <li><a href="#s5-en"><span class="toc-num">5</span>Break Mode</a></li>
+      <li><a href="#s5-en"><span class="toc-num">5</span>Break Screen</a></li>
       <li><a href="#s6-en"><span class="toc-num">6</span>Labels</a></li>
       <li><a href="#s7-en"><span class="toc-num">7</span>Session Notes</a></li>
       <li><a href="#s8-en"><span class="toc-num">8</span>Statistics & Charts</a></li>
@@ -686,7 +688,7 @@
   <section class="manual-section">
     <div class="section-header">
       <span class="section-num">3</span>
-      <h2>Using the Timer</h2>
+      <h2>Start a Pomodoro</h2>
     </div>
     <div class="content-row">
       <div class="content-text">
@@ -698,8 +700,9 @@
           <tr><th>Reset</th><td>Tap the reset button while paused (confirmation dialog).</td></tr>
           <tr><th>Complete Early</th><td>Tap "Complete" mid-session to record elapsed time.</td></tr>
         </table>
-        <h3>Auto Cycle</h3>
-        <p>When the timer reaches zero, it automatically switches to the next mode.</p>
+        <h3>How the Cycle Works</h3>
+        <p>When the timer reaches zero, the screen switches to a standby screen for the next mode (break or work). Press the <strong>Start button</strong> to begin the break timer. When the break ends, the work standby screen appears again.</p>
+        <p>Cycle counts and durations can be customized in Settings, but you always need to <strong>manually press Start</strong> for each step.</p>
         <div class="cycle-flow">
           <span class="cycle-item cycle-work">Work</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-sbreak">Short Break</span><span class="cycle-arrow">→</span>
@@ -708,6 +711,7 @@
           <span class="cycle-item cycle-work">Work</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-lbreak">Long Break</span>
         </div>
+        <p class="hint-box"><strong>Tip:</strong> You're free to start each mode whenever you're ready — the app waits for you to press Start.</p>
       </div>
       <div class="content-illust">
         <img src="../images/timer-controls.svg" alt="Timer Controls">
@@ -751,7 +755,7 @@
   <section class="manual-section">
     <div class="section-header">
       <span class="section-num">5</span>
-      <h2>Break Mode</h2>
+      <h2>Break Screen</h2>
     </div>
     <div class="content-row">
       <div class="content-text">
@@ -764,7 +768,7 @@
           <tr><th>Start Timer</th><td>Start the break timer</td></tr>
           <tr><th>Skip</th><td>Skip the break and start the next work session</td></tr>
         </table>
-        <p>During breaks, custom messages you've set will be displayed.<br>Example: "Drink some water", "Do some stretching"</p>
+        <p>During breaks, custom messages you've set will be displayed.<br>Example: "Drink some water", "Do some stretching", "You've got this!", "Great work today"</p>
       </div>
       <div class="content-illust">
         <img src="../images/break-mode.svg" alt="Break Mode">

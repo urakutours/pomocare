@@ -128,6 +128,7 @@ const translations = {
     ctaCta: '無料で始める',
     footerPrivacy: 'プライバシーポリシー',
     footerTerms: '利用規約',
+    footerTokushoho: '特定商取引法に基づく表記',
     footerSupport: 'サポート',
     footerManual: 'マニュアル',
     // Trust badges
@@ -161,7 +162,6 @@ const translations = {
     footerProduct: 'プロダクト',
     footerResources: 'リソース',
     footerLegal: '法的情報',
-    footerTokushoho: '特定商取引法に基づく表記',
     // Back to home
     backToHome: 'トップに戻る',
     companyName: '株式会社URAKU',
@@ -292,6 +292,7 @@ const translations = {
     ctaCta: 'Get Started Free',
     footerPrivacy: 'Privacy Policy',
     footerTerms: 'Terms of Service',
+    footerTokushoho: 'Specified Commercial Transactions',
     footerSupport: 'Support',
     footerManual: 'Manual',
     // Trust badges
@@ -325,7 +326,6 @@ const translations = {
     footerProduct: 'Product',
     footerResources: 'Resources',
     footerLegal: 'Legal',
-    footerTokushoho: 'Specified Commercial Transactions Act',
     // Back to home
     backToHome: 'Back to Home',
     companyName: 'URAKU & CO.',

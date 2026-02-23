@@ -305,18 +305,22 @@
 
 // ----- ポモドーロフロー -----
 .pomodoro-flow {
-  margin: $space-4 0;
+  margin: $space-6 auto;
+  max-width: 600px;
+  text-align: center;
 
   > p {
-    color: var(--text-secondary);
-    font-size: $text-base;
+    color: var(--text-primary);
+    font-size: $text-lg;
     line-height: $leading-relaxed;
     margin: 0;
+
+    strong { color: $color-primary; }
   }
 
   .flow-arrow {
     text-align: center;
-    padding: $space-1 0;
+    padding: $space-2 0;
     line-height: 1;
   }
 }
@@ -418,7 +422,7 @@
   margin: $space-8 0 $space-4;
 
   img {
-    max-width: 420px;
+    max-width: 500px;
     width: 100%;
     height: auto;
     margin: 0 auto;

@@ -1,40 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200">
   <!-- Background -->
-  <rect width="280" height="200" rx="12" fill="#f8fafa"/>
+  <rect width="280" height="200" rx="12" fill="#151c2c"/>
 
   <!-- Center label -->
-  <text x="140" y="98" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6b7280" font-weight="600">POMODORO</text>
-  <text x="140" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9ca3af">CYCLE</text>
-
-  <!-- Circular arc path (invisible, for reference) -->
-  <!-- 5 nodes arranged in a circle: 4 Work + 1 Long Break -->
-  <!-- Positions on circle r=70 centered at 140,100 -->
-  <!-- Node 1 (Work): top = 140, 30 -->
-  <!-- Node 2 (Work): right = 206.6, 66.5 -->
-  <!-- Node 3 (Work): bottom-right = 206.6, 133.5 -->
-  <!-- Node 4 (Work): bottom-left = 73.4, 133.5 -->
-  <!-- Node 5 (Long Break): left = 73.4, 66.5 -->
+  <text x="140" y="98" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9ca3af" font-weight="600">POMODORO</text>
+  <text x="140" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6b7280">CYCLE</text>
 
   <!-- Connecting arrows (curved) -->
   <!-- Arrow 1->2 -->
-  <path d="M 158,36 Q 195,30 200,58" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <polygon points="200,58 196,52 203,54" fill="#d1d5db"/>
+  <path d="M 158,36 Q 195,30 200,58" fill="none" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="200,58 196,52 203,54" fill="#4b5563"/>
 
   <!-- Arrow 2->3 -->
-  <path d="M 212,80 Q 225,105 212,126" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <polygon points="212,126 215,119 208,121" fill="#d1d5db"/>
+  <path d="M 212,80 Q 225,105 212,126" fill="none" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="212,126 215,119 208,121" fill="#4b5563"/>
 
   <!-- Arrow 3->4 -->
-  <path d="M 194,142 Q 140,170 86,142" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <polygon points="86,142 93,145 92,138" fill="#d1d5db"/>
+  <path d="M 194,142 Q 140,170 86,142" fill="none" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="86,142 93,145 92,138" fill="#4b5563"/>
 
   <!-- Arrow 4->5 -->
-  <path d="M 68,126 Q 55,105 68,80" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <polygon points="68,80 65,87 72,85" fill="#d1d5db"/>
+  <path d="M 68,126 Q 55,105 68,80" fill="none" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="68,80 65,87 72,85" fill="#4b5563"/>
 
   <!-- Arrow 5->1 -->
-  <path d="M 80,58 Q 95,30 122,36" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <polygon points="122,36 116,33 117,40" fill="#d1d5db"/>
+  <path d="M 80,58 Q 95,30 122,36" fill="none" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="122,36 116,33 117,40" fill="#4b5563"/>
 
   <!-- Node 1: Work -->
   <circle cx="140" cy="34" r="18" fill="#0abab5" opacity="0.9"/>
@@ -76,9 +67,9 @@
 
   <!-- Legend -->
   <circle cx="20" cy="185" r="4" fill="#0abab5"/>
-  <text x="28" y="188" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Work</text>
+  <text x="28" y="188" font-family="Inter, sans-serif" font-size="6" fill="#9ca3af">Work</text>
   <circle cx="55" cy="185" r="4" fill="#f59e0b"/>
-  <text x="63" y="188" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Short Break</text>
+  <text x="63" y="188" font-family="Inter, sans-serif" font-size="6" fill="#9ca3af">Short Break</text>
   <circle cx="115" cy="185" r="4" fill="#8b5cf6"/>
-  <text x="123" y="188" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Long Break</text>
+  <text x="123" y="188" font-family="Inter, sans-serif" font-size="6" fill="#9ca3af">Long Break</text>
 </svg>

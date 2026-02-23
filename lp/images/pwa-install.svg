@@ -1,30 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200">
   <!-- Background -->
-  <rect width="280" height="200" rx="12" fill="#f0fdfb"/>
+  <rect width="280" height="200" rx="12" fill="#151c2c"/>
 
   <!-- Phone frame -->
-  <rect x="90" y="15" width="100" height="170" rx="16" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+  <rect x="90" y="15" width="100" height="170" rx="16" fill="#1f2937" stroke="#374151" stroke-width="2"/>
 
   <!-- Phone notch -->
-  <rect x="120" y="18" width="40" height="5" rx="2.5" fill="#e5e7eb"/>
+  <rect x="120" y="18" width="40" height="5" rx="2.5" fill="#374151"/>
 
   <!-- Phone screen area -->
-  <rect x="95" y="28" width="90" height="138" rx="2" fill="#f8fafa"/>
+  <rect x="95" y="28" width="90" height="138" rx="2" fill="#111827"/>
 
   <!-- App screen content - PomoCare logo large -->
   <circle cx="140" cy="75" r="24" fill="#0abab5"/>
   <polygon points="134,64 134,86 153,75" fill="#ffffff"/>
 
   <!-- App name -->
-  <text x="140" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1f2937" font-weight="700">PomoCare</text>
-  <text x="140" y="124" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" fill="#9ca3af">Focus Timer App</text>
+  <text x="140" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#f3f4f6" font-weight="700">PomoCare</text>
+  <text x="140" y="124" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" fill="#6b7280">Focus Timer App</text>
 
   <!-- Install button on screen -->
   <rect x="108" y="132" width="64" height="22" rx="11" fill="#0abab5"/>
   <text x="140" y="146" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#ffffff" font-weight="600">Install App</text>
 
   <!-- Phone home bar -->
-  <rect x="120" y="173" width="40" height="3" rx="1.5" fill="#d1d5db"/>
+  <rect x="120" y="173" width="40" height="3" rx="1.5" fill="#374151"/>
 
   <!-- Download/install arrow indicator (floating, outside phone) -->
   <g transform="translate(205, 50)">
@@ -43,20 +43,20 @@
 
   <!-- PWA badge -->
   <g transform="translate(30, 110)">
-    <rect width="50" height="40" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-    <text x="25" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#374151" font-weight="700">PWA</text>
-    <text x="25" y="33" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" fill="#9ca3af">Progressive</text>
-    <text x="25" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" fill="#9ca3af">Web App</text>
+    <rect width="50" height="40" rx="8" fill="#1f2937" stroke="#374151" stroke-width="1"/>
+    <text x="25" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#f3f4f6" font-weight="700">PWA</text>
+    <text x="25" y="33" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" fill="#6b7280">Progressive</text>
+    <text x="25" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" fill="#6b7280">Web App</text>
   </g>
 
   <!-- Feature bullets -->
   <g transform="translate(30, 55)">
     <circle cx="5" cy="0" r="2.5" fill="#10b981" opacity="0.7"/>
-    <text x="12" y="3" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Offline</text>
+    <text x="12" y="3" font-family="Inter, sans-serif" font-size="6" fill="#9ca3af">Offline</text>
     <circle cx="5" cy="14" r="2.5" fill="#10b981" opacity="0.7"/>
-    <text x="12" y="17" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Fast</text>
+    <text x="12" y="17" font-family="Inter, sans-serif" font-size="6" fill="#9ca3af">Fast</text>
     <circle cx="5" cy="28" r="2.5" fill="#10b981" opacity="0.7"/>
-    <text x="12" y="31" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">No store</text>
+    <text x="12" y="31" font-family="Inter, sans-serif" font-size="6" fill="#9ca3af">No store</text>
   </g>
 
   <!-- Decorative elements -->

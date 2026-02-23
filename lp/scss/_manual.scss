@@ -6,7 +6,7 @@
   background:
     radial-gradient(ellipse at 20% 50%, rgba($color-primary, 0.12) 0%, transparent 50%),
     linear-gradient(135deg, $color-primary-subtle 0%, $white 100%);
-  padding: 120px $space-6 60px;
+  padding: 140px $space-6 100px;
   text-align: center;
 
   @include dark {
@@ -16,16 +16,16 @@
   }
 
   h1 {
-    font-size: clamp(1.8rem, 4vw, 2.2rem);
+    font-size: clamp(2rem, 4.5vw, 2.5rem);
     font-weight: $font-bold;
     color: var(--text-primary);
-    margin-bottom: $space-3;
+    margin-bottom: $space-5;
   }
 
   p {
     font-size: $text-lg;
     color: var(--text-secondary);
-    max-width: 540px;
+    max-width: 600px;
     margin: 0 auto;
     line-height: $leading-relaxed;
   }
@@ -83,8 +83,8 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: $color-primary-subtle;
-    color: $color-primary;
+    background: var(--surface-bg);
+    color: var(--text-secondary);
     font-size: 0.72rem;
     font-weight: $font-bold;
     flex-shrink: 0;
@@ -258,29 +258,34 @@
 
   &:hover { border-color: $color-primary; }
 
-  .bc-icon { font-size: $text-xl; margin-bottom: $space-2; }
+  .bc-illust {
+    width: 56px;
+    height: 56px;
+    margin-bottom: $space-3;
+    svg { width: 100%; height: 100%; }
+  }
   h4 { font-size: $text-base; font-weight: $font-semibold; color: var(--text-primary); margin: 0 0 6px; }
   p { font-size: $text-sm; color: var(--text-secondary); line-height: $leading-normal; margin: 0; }
 }
 
 // ----- 対象ユーザーピル -----
-.audience-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $space-2;
-  margin: $space-4 0;
-  padding: 0;
+.manual-section .audience-list {
   list-style: none;
+  padding: 0;
+  margin: $space-5 0;
 
   li {
-    background: $color-primary-subtle;
-    border: 1px solid $color-primary-light;
-    border-radius: $radius-full;
-    padding: $space-2 $space-4;
-    font-size: $text-sm;
-    color: $color-primary;
-    font-weight: $font-medium;
+    padding: $space-3 0;
+    font-size: $text-base;
+    color: var(--text-secondary);
+    line-height: $leading-relaxed;
+    border-bottom: 1px solid var(--border-light);
+    background: none;
+    border-radius: 0;
+    font-weight: $font-normal;
     margin: 0;
+
+    &:last-child { border-bottom: none; }
   }
 }
 
@@ -373,6 +378,18 @@
     width: 100%;
     height: auto;
     border-radius: $radius-md;
+  }
+}
+
+.content-illust-full {
+  text-align: center;
+  margin: $space-8 0 $space-4;
+
+  img {
+    max-width: 420px;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
   }
 }
 

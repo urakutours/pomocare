@@ -42,7 +42,7 @@ export const pt: Translations = {
   addLabel: 'Adicionar rótulo',
   activeLabelLabel: 'Rótulo ativo',
   noLabel: 'Sem rótulo',
-  weeklyStats: 'Estatísticas semanais',
+  weeklyStats: 'Estatísticas',
   weekly: 'Semana',
   monthly: 'Mês',
   yearly: 'Ano',

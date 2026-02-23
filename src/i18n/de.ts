@@ -42,7 +42,7 @@ export const de: Translations = {
   addLabel: 'Beschriftung hinzufügen',
   activeLabelLabel: 'Aktive Beschriftung',
   noLabel: 'Keine Beschriftung',
-  weeklyStats: 'Wochenstatistik',
+  weeklyStats: 'Statistiken',
   weekly: 'Woche',
   monthly: 'Monat',
   yearly: 'Jahr',

@@ -42,7 +42,7 @@ export const en: Translations = {
   addLabel: 'Add Label',
   activeLabelLabel: 'Active Label',
   noLabel: 'No Label',
-  weeklyStats: 'Weekly Stats',
+  weeklyStats: 'Statistics',
   weekly: 'Weekly',
   monthly: 'Monthly',
   yearly: 'Yearly',

@@ -42,7 +42,7 @@ export const it: Translations = {
   addLabel: 'Aggiungi etichetta',
   activeLabelLabel: 'Etichetta attiva',
   noLabel: 'Nessuna etichetta',
-  weeklyStats: 'Statistiche settimanali',
+  weeklyStats: 'Statistiche',
   weekly: 'Settimana',
   monthly: 'Mese',
   yearly: 'Anno',

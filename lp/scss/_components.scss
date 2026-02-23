@@ -87,6 +87,24 @@
   justify-content: center;
   margin-bottom: $space-10;
   flex-wrap: wrap;
+
+  // ----- モバイル: 横スクロール・画面端まで -----
+  @include mq-down(md) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    // コンテナのpadding分を打ち消して画面端まで伸ばす
+    margin-left: calc(-1 * clamp(16px, 5vw, 40px));
+    margin-right: calc(-1 * clamp(16px, 5vw, 40px));
+    padding-left: clamp(16px, 5vw, 40px);
+    padding-right: clamp(16px, 5vw, 40px);
+    // スクロールバー非表示
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+    // スクロールスナップ
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .tab-btn {
@@ -110,6 +128,11 @@
     color: $white;
     border-color: $color-primary;
   }
+
+  @include mq-down(md) {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
 }
 
 // ----- 言語ドロップダウン -----
@@ -127,14 +150,13 @@
   font-weight: $font-semibold;
   color: var(--text-secondary);
   background: transparent;
-  border: 1px solid var(--border-color);
+  border: none;
   border-radius: $radius-sm;
   cursor: pointer;
-  @include transition(border-color, color);
+  @include transition(color);
   white-space: nowrap;
 
   &:hover {
-    border-color: $color-primary;
     color: $color-primary;
   }
 }
@@ -422,5 +444,63 @@
 
   @include mq-down(md) {
     th { width: 40%; white-space: normal; }
+  }
+}
+
+// =============================================
+// Cookie コンバナー
+// =============================================
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba($color-gray-900, 0.97);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  padding: $space-4 0;
+  transform: translateY(100%);
+  transition: transform 0.35s $ease-out;
+
+  &.is-visible {
+    transform: translateY(0);
+  }
+
+  &__inner {
+    @extend .container;
+    display: flex;
+    align-items: center;
+    gap: $space-6;
+
+    @include mq-down(md) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $space-3;
+    }
+  }
+
+  &__text {
+    flex: 1;
+    font-size: $text-sm;
+    color: var(--text-secondary);
+    line-height: 1.6;
+
+    a {
+      color: $color-primary;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-3;
+    flex-shrink: 0;
+
+    @include mq-down(sm) {
+      width: 100%;
+      .btn { flex: 1; }
+    }
   }
 }

@@ -31,6 +31,10 @@
   justify-content: space-between;
   gap: $space-3;
   height: 64px;
+
+  @include mq-down(lg) {
+    justify-content: flex-start;
+  }
 }
 
 // ----- ロゴ -----
@@ -101,6 +105,7 @@
   // 言語ドロップダウンはハンバーガーメニュー内に移動（モバイル）
   @include mq-down(lg) {
     .lang-dropdown { display: none; }
+    margin-left: auto;
   }
 }
 

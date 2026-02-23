@@ -210,7 +210,8 @@
   border: 1px solid $color-primary-light;
   border-radius: $radius-md;
   padding: $space-5 $space-6;
-  margin: $space-5 0;
+  margin: $space-5 auto;
+  max-width: 600px;
 
   @include dark {
     background: rgba($color-primary, 0.08);
@@ -271,7 +272,8 @@
 .manual-section .audience-list {
   list-style: none;
   padding: 0;
-  margin: $space-5 0;
+  margin: $space-5 auto;
+  max-width: 600px;
 
   li {
     display: flex;

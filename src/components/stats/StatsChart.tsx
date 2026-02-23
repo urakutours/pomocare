@@ -348,6 +348,7 @@ function BarDetailModal({
           <div
             style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
             onMouseDown={closeMenu}
+            onClick={(e) => e.stopPropagation()}
           />
           {/* Dropdown */}
           <div
@@ -360,6 +361,7 @@ function BarDetailModal({
             }}
             className="bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-40 overflow-hidden"
             onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             {(() => {
               const s = sorted.find((x) => x.date === openMenuDate);

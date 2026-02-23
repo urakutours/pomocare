@@ -473,7 +473,6 @@
   }
 
   th {
-    width: 30%;
     font-weight: $font-semibold;
     color: var(--text-primary);
     white-space: nowrap;
@@ -490,7 +489,7 @@
   }
 
   @include mq-down(md) {
-    th { width: 40%; white-space: normal; }
+    th { white-space: normal; }
   }
 }
 

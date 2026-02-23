@@ -120,10 +120,9 @@
   }
 }
 
-// ----- ダークモード（Gray / Dark 両対応） -----
+// ----- ダークモード -----
 // 使用例: @include dark { background: $color-gray-900; }
 @mixin dark {
-  [data-theme="gray"] &,
   [data-theme="dark"] & {
     @content;
   }

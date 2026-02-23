@@ -1,11 +1,17 @@
 // =============================================
-// Gray / Dark テーマ 共通上書きスタイル
+// ダークモード 上書きスタイル
+// data-theme="dark" 時の追加調整
 // CSS Custom Propertiesで大半は自動切替。
 // ここではCSS変数だけでは対応できないケースのみ記述。
 // =============================================
 
-[data-theme="gray"],
 [data-theme="dark"] {
+
+  // ----- Glassmorphism -----
+  .header {
+    background: rgba($color-gray-950, 0.92);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
 
   // ----- カード -----
   .feature-card,
@@ -60,6 +66,10 @@
     border-left-color: $color-primary;
     border-right-color: $color-primary;
   }
+
+  // ----- セクション背景コントラスト強化 -----
+  --surface-bg:     #080d18;
+  --surface-sunken: #0f1828;
 
   // ----- グラデーションアクセント（ヒーロー） -----
   .hero {
@@ -121,52 +131,5 @@
       background: radial-gradient(ellipse at 50% 0%, rgba($color-primary, 0.12) 0%, transparent 70%);
       pointer-events: none;
     }
-  }
-}
-
-// =============================================
-// Gray テーマ固有
-// =============================================
-[data-theme="gray"] {
-  --surface-bg:     #080d18;
-  --surface-sunken: #0f1828;
-}
-
-// =============================================
-// Dark テーマ固有
-// =============================================
-[data-theme="dark"] {
-
-  // ----- ヘッダー背景（ニュートラルダーク） -----
-  .header {
-    background: rgba(19, 23, 27, 0.92);
-  }
-
-  // ----- カード枠なし -----
-  .feature-card,
-  .pricing-card,
-  .use-case-content,
-  .faq-item {
-    border-color: transparent;
-  }
-
-  // ----- Pricing Popular（枠は維持） -----
-  .pricing-card.popular {
-    border-color: $color-primary;
-  }
-
-  // ----- タブ active（logo_dark.svg と同色） -----
-  .tab-btn.active {
-    background: #59a8a5;
-    border-color: #59a8a5;
-  }
-
-  // ----- ヒーロー背景（ニュートラルダーク） -----
-  .hero {
-    background:
-      radial-gradient(ellipse at 20% 50%, rgba($color-primary, 0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, rgba($color-accent-purple, 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse at 60% 80%, rgba($color-accent-amber, 0.03) 0%, transparent 50%),
-      linear-gradient(135deg, #13171b 0%, #0f1215 100%);
   }
 }

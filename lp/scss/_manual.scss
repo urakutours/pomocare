@@ -240,6 +240,7 @@
 }
 
 // ----- ベネフィットカード -----
+.benefit-cards,
 .benefit-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -258,7 +259,7 @@
   &:hover { border-color: $color-primary; }
 
   .bc-icon { font-size: $text-xl; margin-bottom: $space-2; }
-  h4 { font-size: $text-base; font-weight: $font-semibold; color: var(--text-primary); margin-bottom: 6px; }
+  h4 { font-size: $text-base; font-weight: $font-semibold; color: var(--text-primary); margin: 0 0 6px; }
   p { font-size: $text-sm; color: var(--text-secondary); line-height: $leading-normal; margin: 0; }
 }
 
@@ -304,7 +305,7 @@
 
 // ----- テーブル -----
 .manual-section {
-  table {
+  table, .info-table {
     width: 100%;
     border-collapse: collapse;
     margin: $space-4 0;
@@ -321,9 +322,257 @@
     background: var(--surface-sunken);
     font-weight: $font-semibold;
     color: var(--text-primary);
+    white-space: nowrap;
+    width: 1%;
   }
 
   td {
     color: var(--text-secondary);
+  }
+}
+
+// ----- コンテンツ2カラムレイアウト -----
+.content-row {
+  display: flex;
+  gap: $space-10;
+  align-items: flex-start;
+  margin-bottom: $space-6;
+
+  @include mq-down(md) {
+    flex-direction: column;
+    gap: $space-6;
+  }
+
+  &.reverse {
+    flex-direction: row-reverse;
+
+    @include mq-down(md) {
+      flex-direction: column;
+    }
+  }
+}
+
+.content-text {
+  flex: 1;
+  min-width: 0;
+
+  h3:first-child { margin-top: 0; }
+}
+
+.content-illust {
+  flex: 0 0 260px;
+  max-width: 260px;
+
+  @include mq-down(md) {
+    flex: none;
+    max-width: 220px;
+    margin: 0 auto;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+    border-radius: $radius-md;
+  }
+}
+
+// ----- ステップリスト -----
+.manual-steps {
+  counter-reset: step;
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: $space-4 0;
+
+  li {
+    counter-increment: step;
+    display: flex;
+    align-items: flex-start;
+    gap: $space-3;
+    padding: $space-3 0;
+    margin: 0;
+
+    &::before {
+      content: counter(step);
+      @include flex-center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: $color-primary;
+      color: $white;
+      font-size: $text-xs;
+      font-weight: $font-bold;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+}
+
+// ----- サイクルフロー図 -----
+.cycle-flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin: $space-5 0;
+  padding: $space-4 $space-5;
+  background: var(--surface-sunken);
+  border-radius: $radius-md;
+  border: 1px solid var(--border-light);
+}
+
+.cycle-item {
+  display: inline-flex;
+  align-items: center;
+  padding: $space-2 $space-4;
+  border-radius: $radius-full;
+  font-size: $text-sm;
+  font-weight: $font-semibold;
+}
+
+.cycle-work {
+  background: rgba($color-primary, 0.15);
+  color: $color-primary;
+}
+
+.cycle-sbreak {
+  background: rgba($color-accent-amber, 0.15);
+  color: $color-accent-amber;
+}
+
+.cycle-lbreak {
+  background: rgba($color-accent-purple, 0.15);
+  color: $color-accent-purple;
+}
+
+.cycle-arrow {
+  color: var(--text-tertiary);
+  font-size: $text-lg;
+  font-weight: $font-bold;
+}
+
+// ----- スクリーンショットスロット（プレースホルダー非表示）-----
+.screenshot-slot {
+  display: none;
+}
+
+// ----- screenshot-img を直接使用する <img> -----
+img.screenshot-img {
+  display: block;
+  max-width: 300px;
+  margin: $space-8 auto 0;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  border: 1px solid var(--border-color);
+}
+
+// ----- FAQ セクション -----
+.manual-faq {
+  details {
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    margin-bottom: $space-3;
+    overflow: hidden;
+    @include transition(border-color);
+
+    &[open] {
+      border-color: $color-primary;
+
+      summary {
+        background: rgba($color-primary, 0.06);
+        border-bottom: 1px solid var(--border-light);
+      }
+    }
+  }
+
+  summary {
+    padding: $space-4 $space-5;
+    cursor: pointer;
+    font-weight: $font-semibold;
+    color: var(--text-primary);
+    font-size: $text-base;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    @include transition(background, color);
+
+    &:hover {
+      background: var(--surface-sunken);
+    }
+
+    &::-webkit-details-marker { display: none; }
+
+    &::before {
+      content: '?';
+      @include flex-center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba($color-primary, 0.12);
+      color: $color-primary;
+      font-size: $text-xs;
+      font-weight: $font-bold;
+      flex-shrink: 0;
+    }
+
+    &::after {
+      content: '+';
+      margin-left: auto;
+      color: var(--text-tertiary);
+      font-size: $text-lg;
+      font-weight: $font-bold;
+      flex-shrink: 0;
+      transition: transform $duration-normal $ease-out;
+    }
+  }
+
+  details[open] summary::after {
+    content: '−';
+    color: $color-primary;
+  }
+
+  details p {
+    padding: $space-4 $space-5;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: $text-sm;
+    line-height: $leading-relaxed;
+  }
+}
+
+// ----- CTA セクション -----
+.manual-cta {
+  background: linear-gradient(135deg, $color-primary 0%, darken($color-primary, 8%) 100%);
+  text-align: center;
+  padding: $space-20 $space-6;
+
+  h2 {
+    font-size: $text-3xl;
+    font-weight: $font-bold;
+    color: $white;
+    margin-bottom: $space-3;
+  }
+
+  p {
+    color: rgba($white, 0.85);
+    font-size: $text-lg;
+    margin-bottom: $space-8;
+  }
+
+  .btn-white {
+    background: $white;
+    color: $color-primary;
+    font-weight: $font-bold;
+    padding: $space-3 $space-8;
+    border-radius: $radius-full;
+    font-size: $text-base;
+    display: inline-flex;
+    align-items: center;
+    @include transition(transform, box-shadow);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-lg;
+    }
   }
 }

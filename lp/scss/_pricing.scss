@@ -169,6 +169,13 @@
   &.open { display: block; }
 }
 
+.comp-cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: $space-4;
+  margin-top: $space-8;
+}
+
 // ----- テーブル -----
 .comp-table-wrap {
   max-width: 900px;

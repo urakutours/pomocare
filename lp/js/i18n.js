@@ -161,7 +161,8 @@ const translations = {
     footerDesc: 'ポモドーロ・テクニックで集中力を高めるフォーカスタイマーアプリ',
     footerProduct: 'プロダクト',
     footerResources: 'リソース',
-    footerLegal: '法的情報',
+    footerLegal: '運営情報・ポリシー',
+    footerAbout: '会社概要',
     // Back to home
     backToHome: 'トップに戻る',
     companyName: '株式会社URAKU',
@@ -325,7 +326,8 @@ const translations = {
     footerDesc: 'A focus timer app that boosts concentration using the Pomodoro Technique',
     footerProduct: 'Product',
     footerResources: 'Resources',
-    footerLegal: 'Legal',
+    footerLegal: 'Company & Policy',
+    footerAbout: 'About',
     // Back to home
     backToHome: 'Back to Home',
     companyName: 'URAKU & CO.',

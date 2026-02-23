@@ -52,13 +52,7 @@
   color: $color-gray-400;
   font-size: $text-sm;
   margin-top: $space-3;
-  max-width: 280px;
   line-height: $leading-normal;
-
-  // タブレット以上: max-width 解除
-  @include mq(md) {
-    max-width: none;
-  }
 }
 
 // ----- リンクカラム -----

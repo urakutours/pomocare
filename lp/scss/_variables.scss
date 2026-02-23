@@ -82,8 +82,8 @@ $color-error:    #ef4444;
 // =============================================
 // フォントファミリー
 // =============================================
-$font-sans:    'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
-$font-display: 'Inter', 'Noto Sans JP', sans-serif;
+$font-sans:    'Noto Sans JP', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+$font-display: 'Noto Sans JP', 'Inter', sans-serif;
 
 // =============================================
 // フォントサイズスケール（clampでフルイドタイポグラフィ）

@@ -76,10 +76,29 @@ document.addEventListener('DOMContentLoaded', function () {
         opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
       });
     });
+    // Sync mobile nav language row
+    var mobileLangRow = document.getElementById('mobileLangRow');
+    if (mobileLangRow) {
+      mobileLangRow.querySelectorAll('.lang-option').forEach(function (opt) {
+        opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
+      });
+    }
   }
 
   initLangDropdown('langDropdown', 'langDropdownBtn', 'langDropdownMenu');
   initLangDropdown('footerLangDropdown', 'footerLangBtn', 'footerLangMenu');
+
+  // Mobile nav language buttons
+  var mobileLangRow = document.getElementById('mobileLangRow');
+  if (mobileLangRow) {
+    mobileLangRow.querySelectorAll('.lang-option').forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        var lang = opt.getAttribute('data-lang');
+        if (typeof setLanguage === 'function') setLanguage(lang);
+        syncAllLangDropdowns(lang);
+      });
+    });
+  }
 
   // Sync initial state
   var initialLang = localStorage.getItem('pomocare-lp-lang') ||
@@ -191,6 +210,65 @@ document.addEventListener('DOMContentLoaded', function () {
       var isOpen = compContent.classList.toggle('open');
       compToggle.classList.toggle('open', isOpen);
     });
+  }
+
+  // ================================================================
+  // Cookie consent banner
+  // ================================================================
+  var cookieBanner = document.getElementById('cookieBanner');
+  var cookieAccept = document.getElementById('cookieAccept');
+  var cookieDecline = document.getElementById('cookieDecline');
+  var cookieBannerText = document.getElementById('cookieBannerText');
+
+  var COOKIE_KEY = 'pomocare-cookie-consent';
+
+  function updateCookieBannerText(lang) {
+    if (!cookieBannerText) return;
+    var privacyHref = cookieBannerText.querySelector('a');
+    if (lang === 'en') {
+      cookieBannerText.innerHTML = 'We use cookies and local storage to improve our service. See our <a href="privacy/">Privacy Policy</a> for details.';
+      if (cookieAccept) cookieAccept.textContent = 'Accept';
+      if (cookieDecline) cookieDecline.textContent = 'Decline';
+    } else {
+      cookieBannerText.innerHTML = '当サイトはサービス改善のためCookieおよびローカルストレージを使用します。詳細は<a href="privacy/">プライバシーポリシー</a>をご覧ください。';
+      if (cookieAccept) cookieAccept.textContent = '同意する';
+      if (cookieDecline) cookieDecline.textContent = '拒否する';
+    }
+  }
+
+  if (cookieBanner) {
+    // Show banner if consent not yet given
+    if (!localStorage.getItem(COOKIE_KEY)) {
+      setTimeout(function () {
+        cookieBanner.classList.add('is-visible');
+      }, 800);
+    }
+
+    if (cookieAccept) {
+      cookieAccept.addEventListener('click', function () {
+        localStorage.setItem(COOKIE_KEY, 'accepted');
+        cookieBanner.classList.remove('is-visible');
+      });
+    }
+
+    if (cookieDecline) {
+      cookieDecline.addEventListener('click', function () {
+        localStorage.setItem(COOKIE_KEY, 'declined');
+        cookieBanner.classList.remove('is-visible');
+      });
+    }
+
+    // Sync text with language
+    var currentLang = localStorage.getItem('pomocare-lp-lang') ||
+      (navigator.language.startsWith('ja') ? 'ja' : 'en');
+    updateCookieBannerText(currentLang);
+
+    // Listen for language changes via i18n hook
+    var _origSetLangForCookie = window.setLanguage;
+    window.setLanguage = function (lang) {
+      if (_origSetLangForCookie) _origSetLangForCookie(lang);
+      updateCookieBannerText(lang);
+    };
   }
 
 });

@@ -161,6 +161,7 @@ const translations = {
     footerProduct: 'プロダクト',
     footerResources: 'リソース',
     footerLegal: '法的情報',
+    footerTokushoho: '特定商取引法に基づく表記',
     // Back to home
     backToHome: 'トップに戻る',
     companyName: '株式会社URAKU',
@@ -324,6 +325,7 @@ const translations = {
     footerProduct: 'Product',
     footerResources: 'Resources',
     footerLegal: 'Legal',
+    footerTokushoho: 'Specified Commercial Transactions Act',
     // Back to home
     backToHome: 'Back to Home',
     companyName: 'URAKU & CO.',

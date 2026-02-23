@@ -168,6 +168,35 @@
     border-top: 1px solid var(--border-color);
   }
 
+  // ----- モバイルメニュー内言語切替 -----
+  .mobile-lang-row {
+    display: flex;
+    justify-content: center;
+    gap: $space-3;
+    margin-top: $space-4;
+    padding-top: $space-4;
+    border-top: 1px solid var(--border-color);
+
+    .lang-option {
+      padding: 8px 20px;
+      font-size: $text-sm;
+      font-weight: $font-medium;
+      color: var(--text-secondary);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: $radius-full;
+      cursor: pointer;
+      @include transition(background, color, border-color);
+
+      &.active,
+      &:hover {
+        background: $color-primary;
+        color: $white;
+        border-color: $color-primary;
+      }
+    }
+  }
+
   &.open {
     display: flex;
   }

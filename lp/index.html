@@ -64,6 +64,10 @@
     <a href="#pricing" data-i18n="navPricing">料金</a>
     <a href="#faq" data-i18n="navFaq">FAQ</a>
     <a href="https://app.pomocare.com" class="btn btn-primary" data-i18n="navOpenApp">アプリを開く</a>
+    <div class="mobile-lang-row" id="mobileLangRow">
+      <button class="lang-option active" data-lang="ja">&#x1F1EF;&#x1F1F5; 日本語</button>
+      <button class="lang-option" data-lang="en">&#x1F1FA;&#x1F1F8; English</button>
+    </div>
   </div>
 
   <!-- ==================== Hero ==================== -->
@@ -666,13 +670,14 @@
             <ul>
               <li><a href="privacy/" data-i18n="footerPrivacy">プライバシーポリシー</a></li>
               <li><a href="terms/" data-i18n="footerTerms">利用規約</a></li>
+              <li><a href="tokushoho/" data-i18n="footerTokushoho">特定商取引法に基づく表記</a></li>
             </ul>
           </div>
         </div>
       </div>
       <div class="footer-bottom">
         <div class="footer-copy">
-          <p>&copy; 2026 PomoCare by URAKU Inc. All rights reserved.</p>
+          <p>&copy; 2026 PomoCare</p>
         </div>
         <div class="footer-controls">
           <div class="lang-dropdown" id="footerLangDropdown">
@@ -690,6 +695,19 @@
       </div>
     </div>
   </footer>
+
+  <!-- ==================== Cookie Banner ==================== -->
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie同意" aria-live="polite">
+    <div class="cookie-banner__inner">
+      <p class="cookie-banner__text" id="cookieBannerText">
+        当サイトはサービス改善のためCookieおよびローカルストレージを使用します。詳細は<a href="privacy/">プライバシーポリシー</a>をご覧ください。
+      </p>
+      <div class="cookie-banner__actions">
+        <button class="btn btn-sm btn-outline" id="cookieDecline">拒否する</button>
+        <button class="btn btn-sm btn-primary" id="cookieAccept">同意する</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/i18n.js"></script>
   <script src="js/theme.js"></script>

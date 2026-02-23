@@ -1,0 +1,329 @@
+// =============================================
+// マニュアルページ固有スタイル
+// =============================================
+
+.manual-hero {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba($color-primary, 0.12) 0%, transparent 50%),
+    linear-gradient(135deg, $color-primary-subtle 0%, $white 100%);
+  padding: 120px $space-6 60px;
+  text-align: center;
+
+  @include dark {
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba($color-primary, 0.08) 0%, transparent 50%),
+      linear-gradient(135deg, $color-gray-950 0%, #0d1320 100%);
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.2rem);
+    font-weight: $font-bold;
+    color: var(--text-primary);
+    margin-bottom: $space-3;
+  }
+
+  p {
+    font-size: $text-lg;
+    color: var(--text-secondary);
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: $leading-relaxed;
+  }
+}
+
+// ----- 目次 -----
+.manual-toc {
+  max-width: 760px;
+  margin: -30px auto 0;
+  padding: $space-6 $space-8;
+  background: var(--surface-raised);
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  border: 1px solid var(--border-color);
+  position: relative;
+  z-index: 10;
+
+  h2 {
+    font-size: $text-sm;
+    font-weight: $font-bold;
+    color: $color-primary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: $space-4;
+  }
+
+  ol {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px $space-8;
+
+    @include mq-down(sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  li { padding: 0; }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    font-size: $text-sm;
+    color: var(--text-primary);
+    padding: 6px 0;
+    @include transition(color);
+
+    &:hover { color: $color-primary; }
+  }
+
+  .toc-num {
+    @include flex-center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: $color-primary-subtle;
+    color: $color-primary;
+    font-size: 0.72rem;
+    font-weight: $font-bold;
+    flex-shrink: 0;
+  }
+}
+
+// ----- セクション -----
+.manual-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: $space-20 $space-6;
+  border-bottom: 1px solid var(--border-light);
+
+  &:last-of-type { border-bottom: none; }
+}
+
+.manual-section-alt {
+  background: var(--surface-sunken);
+  .manual-section { border-bottom-color: var(--border-color); }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  margin-bottom: $space-10;
+}
+
+.section-num {
+  @include flex-center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: $color-primary;
+  color: $white;
+  font-size: $text-lg;
+  font-weight: $font-bold;
+  flex-shrink: 0;
+}
+
+.section-header h2 {
+  font-size: clamp(1.4rem, 3vw, 1.7rem);
+  font-weight: $font-bold;
+  color: var(--text-primary);
+}
+
+// ----- コンテンツスタイル -----
+.manual-section {
+  p {
+    color: var(--text-secondary);
+    font-size: $text-base;
+    line-height: $leading-relaxed;
+    margin-bottom: $space-4;
+  }
+
+  h3 {
+    font-size: $text-xl;
+    font-weight: $font-semibold;
+    color: var(--text-primary);
+    margin: $space-8 0 $space-3;
+  }
+
+  h4 {
+    font-size: $text-lg;
+    font-weight: $font-semibold;
+    color: var(--text-primary);
+    margin: $space-6 0 $space-2;
+  }
+
+  ul, ol {
+    padding-left: $space-6;
+    margin-bottom: $space-4;
+  }
+
+  li {
+    color: var(--text-secondary);
+    font-size: $text-base;
+    line-height: $leading-relaxed;
+    margin-bottom: $space-2;
+  }
+
+  ul { list-style: disc; }
+  ol { list-style: decimal; }
+}
+
+// ----- スクリーンショット表示 -----
+.screenshot-container {
+  margin: $space-6 0;
+  text-align: center;
+}
+
+.screenshot-img {
+  max-width: 320px;
+  margin: 0 auto;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-md;
+  border: 1px solid var(--border-color);
+
+  img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.screenshot-caption {
+  font-size: $text-sm;
+  color: var(--text-tertiary);
+  margin-top: $space-3;
+  text-align: center;
+}
+
+.screenshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $space-4;
+  margin: $space-6 0;
+}
+
+// ----- 特徴ボックス -----
+.feature-box {
+  background: $color-primary-subtle;
+  border: 1px solid $color-primary-light;
+  border-radius: $radius-md;
+  padding: $space-5 $space-6;
+  margin: $space-5 0;
+
+  @include dark {
+    background: rgba($color-primary, 0.08);
+    border-color: rgba($color-primary, 0.2);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: $space-2 0;
+      display: flex;
+      align-items: flex-start;
+      gap: $space-2;
+      margin: 0;
+
+      &::before {
+        content: '✓';
+        color: $color-primary;
+        font-weight: $font-bold;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+// ----- ベネフィットカード -----
+.benefit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-4;
+  margin: $space-6 0;
+
+  @include mq-down(sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.benefit-card {
+  @include card($radius-md);
+  padding: $space-5;
+
+  &:hover { border-color: $color-primary; }
+
+  .bc-icon { font-size: $text-xl; margin-bottom: $space-2; }
+  h4 { font-size: $text-base; font-weight: $font-semibold; color: var(--text-primary); margin-bottom: 6px; }
+  p { font-size: $text-sm; color: var(--text-secondary); line-height: $leading-normal; margin: 0; }
+}
+
+// ----- 対象ユーザーピル -----
+.audience-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin: $space-4 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    background: $color-primary-subtle;
+    border: 1px solid $color-primary-light;
+    border-radius: $radius-full;
+    padding: $space-2 $space-4;
+    font-size: $text-sm;
+    color: $color-primary;
+    font-weight: $font-medium;
+    margin: 0;
+  }
+}
+
+// ----- ヒントボックス -----
+.hint-box {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: $radius-md;
+  padding: $space-4 $space-5;
+  margin: $space-5 0;
+  font-size: $text-sm;
+
+  @include dark {
+    background: rgba($color-accent-amber, 0.08);
+    border-color: rgba($color-accent-amber, 0.3);
+  }
+
+  strong {
+    color: var(--text-primary);
+  }
+}
+
+// ----- テーブル -----
+.manual-section {
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: $space-4 0;
+    font-size: $text-sm;
+  }
+
+  th, td {
+    padding: $space-3 $space-4;
+    border: 1px solid var(--border-color);
+    text-align: left;
+  }
+
+  th {
+    background: var(--surface-sunken);
+    font-weight: $font-semibold;
+    color: var(--text-primary);
+  }
+
+  td {
+    color: var(--text-secondary);
+  }
+}

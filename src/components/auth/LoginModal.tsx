@@ -47,13 +47,13 @@ export function LoginModal({ onClose }: LoginModalProps) {
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : '';
-      if (msg.includes('user-not-found') || msg.includes('wrong-password') || msg.includes('invalid-credential')) {
+      if (msg.includes('Invalid login credentials')) {
         setError(t.authErrorInvalidCredential);
-      } else if (msg.includes('email-already-in-use')) {
+      } else if (msg.includes('already registered') || msg.includes('already been registered')) {
         setError(t.authErrorEmailInUse);
-      } else if (msg.includes('weak-password')) {
+      } else if (msg.includes('at least 6 characters') || msg.includes('too short')) {
         setError(t.authErrorWeakPassword);
-      } else if (msg.includes('invalid-email')) {
+      } else if (msg.includes('invalid') && msg.includes('email')) {
         setError(t.authErrorInvalidEmail);
       } else {
         setError(view === 'signin' ? t.authErrorLoginFailed : t.authErrorSignupFailed);

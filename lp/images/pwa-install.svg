@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200">
+  <!-- Background -->
+  <rect width="280" height="200" rx="12" fill="#f0fdfb"/>
+
+  <!-- Phone frame -->
+  <rect x="90" y="15" width="100" height="170" rx="16" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+
+  <!-- Phone notch -->
+  <rect x="120" y="18" width="40" height="5" rx="2.5" fill="#e5e7eb"/>
+
+  <!-- Phone screen area -->
+  <rect x="95" y="28" width="90" height="138" rx="2" fill="#f8fafa"/>
+
+  <!-- App screen content - PomoCare logo large -->
+  <circle cx="140" cy="75" r="24" fill="#0abab5"/>
+  <polygon points="134,64 134,86 153,75" fill="#ffffff"/>
+
+  <!-- App name -->
+  <text x="140" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1f2937" font-weight="700">PomoCare</text>
+  <text x="140" y="124" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" fill="#9ca3af">Focus Timer App</text>
+
+  <!-- Install button on screen -->
+  <rect x="108" y="132" width="64" height="22" rx="11" fill="#0abab5"/>
+  <text x="140" y="146" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#ffffff" font-weight="600">Install App</text>
+
+  <!-- Phone home bar -->
+  <rect x="120" y="173" width="40" height="3" rx="1.5" fill="#d1d5db"/>
+
+  <!-- Download/install arrow indicator (floating, outside phone) -->
+  <g transform="translate(205, 50)">
+    <circle cx="0" cy="0" r="18" fill="#0abab5" opacity="0.1"/>
+    <circle cx="0" cy="0" r="13" fill="#0abab5" opacity="0.15"/>
+    <!-- Download arrow -->
+    <line x1="0" y1="-6" x2="0" y2="5" stroke="#0abab5" stroke-width="2" stroke-linecap="round"/>
+    <polyline points="-4,2 0,7 4,2" fill="none" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Base line -->
+    <line x1="-5" y1="9" x2="5" y2="9" stroke="#0abab5" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Curved arrow from download icon to phone -->
+  <path d="M192,55 Q175,45 170,55" fill="none" stroke="#0abab5" stroke-width="1.2" stroke-dasharray="3,3" opacity="0.5"/>
+  <polygon points="170,55 173,50 175,57" fill="#0abab5" opacity="0.5"/>
+
+  <!-- PWA badge -->
+  <g transform="translate(30, 110)">
+    <rect width="50" height="40" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="25" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#374151" font-weight="700">PWA</text>
+    <text x="25" y="33" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" fill="#9ca3af">Progressive</text>
+    <text x="25" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" fill="#9ca3af">Web App</text>
+  </g>
+
+  <!-- Feature bullets -->
+  <g transform="translate(30, 55)">
+    <circle cx="5" cy="0" r="2.5" fill="#10b981" opacity="0.7"/>
+    <text x="12" y="3" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Offline</text>
+    <circle cx="5" cy="14" r="2.5" fill="#10b981" opacity="0.7"/>
+    <text x="12" y="17" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Fast</text>
+    <circle cx="5" cy="28" r="2.5" fill="#10b981" opacity="0.7"/>
+    <text x="12" y="31" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">No store</text>
+  </g>
+
+  <!-- Decorative elements -->
+  <circle cx="250" cy="150" r="4" fill="#0abab5" opacity="0.1"/>
+  <circle cx="240" cy="165" r="3" fill="#0abab5" opacity="0.08"/>
+  <circle cx="255" cy="130" r="2.5" fill="#0abab5" opacity="0.12"/>
+</svg>

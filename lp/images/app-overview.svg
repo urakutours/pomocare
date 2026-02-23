@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200">
+  <!-- Background -->
+  <rect width="280" height="200" rx="12" fill="#f0fdfb"/>
+
+  <!-- Phone frame -->
+  <rect x="80" y="10" width="120" height="180" rx="14" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+  <!-- Phone notch -->
+  <rect x="120" y="12" width="40" height="5" rx="2.5" fill="#e5e7eb"/>
+
+  <!-- Status bar area -->
+  <rect x="82" y="22" width="116" height="24" rx="0" fill="#0abab5"/>
+  <!-- Logo area (small play icon) -->
+  <circle cx="96" cy="34" r="6" fill="rgba(255,255,255,0.25)"/>
+  <polygon points="94.5,31 94.5,37 99,34" fill="#fff"/>
+  <!-- App name -->
+  <text x="106" y="37" font-family="Inter, sans-serif" font-size="7" fill="#fff" font-weight="700">PomoCare</text>
+
+  <!-- Header icons -->
+  <!-- Stats icon (bar chart) -->
+  <rect x="162" y="30" width="2" height="7" rx="1" fill="rgba(255,255,255,0.7)"/>
+  <rect x="166" y="28" width="2" height="9" rx="1" fill="rgba(255,255,255,0.7)"/>
+  <rect x="170" y="31" width="2" height="6" rx="1" fill="rgba(255,255,255,0.7)"/>
+
+  <!-- Settings icon (gear) -->
+  <circle cx="180" cy="34" r="3" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
+  <circle cx="180" cy="34" r="1" fill="rgba(255,255,255,0.7)"/>
+
+  <!-- User icon -->
+  <circle cx="192" cy="33" r="3.5" fill="rgba(255,255,255,0.25)"/>
+  <circle cx="192" cy="31.5" r="1.5" fill="rgba(255,255,255,0.7)"/>
+  <path d="M189,36 Q192,34 195,36" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="0.8"/>
+
+  <!-- Timer display area -->
+  <rect x="92" y="56" width="96" height="70" rx="10" fill="#f8fafa"/>
+
+  <!-- Circular progress ring -->
+  <circle cx="140" cy="88" r="28" fill="none" stroke="#e5e7eb" stroke-width="3"/>
+  <circle cx="140" cy="88" r="28" fill="none" stroke="#0abab5" stroke-width="3" stroke-dasharray="132 44" stroke-linecap="round" transform="rotate(-90 140 88)"/>
+
+  <!-- Timer text -->
+  <text x="140" y="93" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#1f2937" font-weight="700">25:00</text>
+
+  <!-- Session label -->
+  <text x="140" y="75" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" fill="#0abab5" font-weight="600">FOCUS SESSION</text>
+
+  <!-- Controls area -->
+  <circle cx="120" cy="140" r="8" fill="#e5e7eb"/>
+  <rect x="117.5" y="137" width="1.5" height="6" rx="0.5" fill="#9ca3af"/>
+  <rect x="121" y="137" width="1.5" height="6" rx="0.5" fill="#9ca3af"/>
+
+  <circle cx="140" cy="140" r="10" fill="#0abab5"/>
+  <polygon points="137.5,136 137.5,144 144.5,140" fill="#fff"/>
+
+  <circle cx="160" cy="140" r="8" fill="#e5e7eb"/>
+  <path d="M157,140 Q157,137 160,137 L163,137 Q160,137 160,140 Q160,143 163,143 L157,143 Q157,143 157,140Z" fill="none" stroke="#9ca3af" stroke-width="1.2"/>
+  <path d="M158,138 L156,136" fill="none" stroke="#9ca3af" stroke-width="1"/>
+
+  <!-- Session dots -->
+  <circle cx="131" cy="155" r="2.5" fill="#0abab5"/>
+  <circle cx="138" cy="155" r="2.5" fill="#0abab5" opacity="0.3"/>
+  <circle cx="145" cy="155" r="2.5" fill="#0abab5" opacity="0.3"/>
+  <circle cx="152" cy="155" r="2.5" fill="#0abab5" opacity="0.3"/>
+
+  <!-- Label tag -->
+  <rect x="115" y="163" width="50" height="14" rx="7" fill="#0abab5" opacity="0.15"/>
+  <circle cx="123" cy="170" r="2" fill="#0abab5"/>
+  <text x="128" y="173" font-family="Inter, sans-serif" font-size="6" fill="#0abab5" font-weight="500">Study</text>
+</svg>

@@ -1,0 +1,143 @@
+// =============================================
+// PomoCare LP — Mixin 定義
+// 再利用可能なスタイルパターンを集約
+// =============================================
+
+// ----- レスポンシブ (min-width) -----
+// 使用例: @include mq(md) { ... }
+@mixin mq($breakpoint) {
+  @if $breakpoint == sm {
+    @media (min-width: $bp-sm) { @content; }
+  } @else if $breakpoint == md {
+    @media (min-width: $bp-md) { @content; }
+  } @else if $breakpoint == lg {
+    @media (min-width: $bp-lg) { @content; }
+  } @else if $breakpoint == xl {
+    @media (min-width: $bp-xl) { @content; }
+  }
+}
+
+// ----- max-width メディアクエリ -----
+// 使用例: @include mq-down(md) { ... }
+@mixin mq-down($breakpoint) {
+  @if $breakpoint == sm {
+    @media (max-width: #{$bp-sm - 1px}) { @content; }
+  } @else if $breakpoint == md {
+    @media (max-width: #{$bp-md - 1px}) { @content; }
+  } @else if $breakpoint == lg {
+    @media (max-width: #{$bp-lg - 1px}) { @content; }
+  }
+}
+
+// ----- Glassmorphism -----
+// 使用例: @include glass;
+@mixin glass($opacity: 0.6, $blur: $glass-blur) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid $glass-border;
+}
+
+// ----- カードスタイル -----
+// 使用例: @include card;
+@mixin card($radius: $radius-lg, $shadow: $shadow-sm) {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-color);
+  border-radius: $radius;
+  box-shadow: $shadow;
+  transition: all $duration-normal $ease-out;
+}
+
+// ----- カードホバー -----
+@mixin card-hover {
+  border-color: $color-primary;
+  box-shadow: $shadow-lg;
+  transform: translateY(-4px);
+}
+
+// ----- セクション共通パディング -----
+@mixin section-padding {
+  padding: $section-py 0;
+}
+
+// ----- コンテナ -----
+@mixin container($max-width: 1120px) {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: 0 $space-6;
+
+  @include mq-down(sm) {
+    padding: 0 $space-4;
+  }
+}
+
+// ----- フレックスセンタリング -----
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ----- セクションタイトル -----
+@mixin section-title {
+  font-size: $text-4xl;
+  font-weight: $font-bold;
+  text-align: center;
+  margin-bottom: $space-3;
+  color: var(--text-primary);
+}
+
+// ----- セクションサブタイトル -----
+@mixin section-subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: $text-lg;
+  margin-bottom: $space-16;
+}
+
+// ----- スムーズトランジション -----
+// 使用例: @include transition(color, background);
+@mixin transition($properties...) {
+  $value: ();
+  @each $prop in $properties {
+    $value: append($value, $prop $duration-normal $ease-out, comma);
+  }
+  transition: $value;
+}
+
+// ----- フォーカス表示（アクセシビリティ） -----
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// ----- レデューストモーション対応 -----
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+// ----- ダークモード -----
+// 使用例: @include dark { background: $color-gray-900; }
+@mixin dark {
+  [data-theme="dark"] & {
+    @content;
+  }
+}
+
+// ----- テキスト切り詰め -----
+@mixin truncate($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,40 +8,59 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    .legal-content { max-width: 760px; margin: 0 auto; padding: 120px 24px 80px; }
-    .legal-content h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; color: #111827; }
-    .legal-date { color: #6b7280; font-size: 0.9rem; margin-bottom: 40px; }
-    .legal-content h2 { font-size: 1.25rem; font-weight: 600; margin: 36px 0 12px; color: #111827; }
-    .legal-content p, .legal-content li { color: #4b5563; font-size: 0.95rem; line-height: 1.8; margin-bottom: 12px; }
-    .legal-content ul { padding-left: 24px; list-style: disc; }
-    .legal-back { display: inline-flex; align-items: center; gap: 6px; color: #0abab5; font-weight: 500; margin-bottom: 24px; font-size: 0.9rem; }
-    .legal-back:hover { text-decoration: underline; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
+
+  <!-- ==================== Header ==================== -->
+  <header class="header" id="header">
     <nav class="nav container">
-      <a href="/" class="logo" aria-label="PomoCare">
+      <a href="../" class="logo" aria-label="PomoCare">
         <svg class="logo-icon" viewBox="0 0 512 512" width="36" height="36">
           <circle cx="256" cy="256" r="256" fill="#0abab5"/>
           <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
         </svg>
         <span class="logo-text">PomoCare</span>
       </a>
+
+      <ul class="nav-links">
+        <li><a href="../#features" data-i18n="navFeatures">機能</a></li>
+        <li><a href="../#pricing" data-i18n="navPricing">料金</a></li>
+        <li><a href="../#faq" data-i18n="navFaq">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-dropdown-btn" id="langDropdownBtn" aria-haspopup="listbox" aria-expanded="false">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="langDropdownLabel">JP</span>
+            <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <ul class="lang-dropdown-menu" id="langDropdownMenu" role="listbox">
+            <li><button class="lang-option active" data-lang="ja" role="option">&#x1F1EF;&#x1F1F5; 日本語</button></li>
+            <li><button class="lang-option" data-lang="en" role="option">&#x1F1FA;&#x1F1F8; English</button></li>
+          </ul>
+        </div>
+
+        <a href="https://app.pomocare.com" class="btn btn-sm btn-primary nav-cta" data-i18n="navOpenApp">アプリを開く</a>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </nav>
   </header>
 
-  <!-- Language Switcher -->
-  <div class="lang-switcher" id="langSwitcher">
-    <button class="lang-btn active" data-lang="ja">JP</button>
-    <button class="lang-btn" data-lang="en">EN</button>
-  </div>
+  <!-- モバイルナビ -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="../#features" data-i18n="navFeatures">機能</a>
+    <a href="../#pricing" data-i18n="navPricing">料金</a>
+    <a href="../#faq" data-i18n="navFaq">FAQ</a>
+    <a href="https://app.pomocare.com" class="btn btn-primary" data-i18n="navOpenApp">アプリを開く</a>  </div>
 
+  <!-- ==================== Content ==================== -->
   <main class="legal-content">
-    <a href="/" class="legal-back">&larr; <span data-i18n="backToHome">トップに戻る</span></a>
+    <a href="../" class="legal-back">&larr; <span data-i18n="backToHome">トップに戻る</span></a>
 
     <!-- Japanese version -->
     <div id="privacy-ja">
@@ -172,41 +191,84 @@
     </div>
   </main>
 
-  <!-- Footer -->
+  <!-- ==================== Footer ==================== -->
   <footer class="footer">
     <div class="container footer-inner">
-      <div class="footer-brand">
-        <svg class="logo-icon" viewBox="0 0 512 512" width="28" height="28">
-          <circle cx="256" cy="256" r="256" fill="#0abab5"/>
-          <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
-        </svg>
-        <span class="logo-text">PomoCare</span>
+      <div class="footer-top">
+        <div>
+          <div class="footer-brand">
+            <svg class="logo-icon" viewBox="0 0 512 512" width="28" height="28">
+              <circle cx="256" cy="256" r="256" fill="#0abab5"/>
+              <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
+            </svg>
+            <span class="logo-text">PomoCare</span>
+          </div>
+          <p class="footer-brand-desc" data-i18n="footerDesc">ポモドーロ・テクニックで集中力を高めるフォーカスタイマーアプリ</p>
+        </div>
+        <div class="footer-columns">
+          <div class="footer-col">
+            <h4 data-i18n="footerProduct">プロダクト</h4>
+            <ul>
+              <li><a href="../#features" data-i18n="navFeatures">機能</a></li>
+              <li><a href="../#pricing" data-i18n="navPricing">料金</a></li>
+              <li><a href="../#faq" data-i18n="navFaq">FAQ</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footerResources">リソース</h4>
+            <ul>
+              <li><a href="../manual/" data-i18n="footerManual">マニュアル</a></li>
+              <li><a href="../support/" data-i18n="footerSupport">サポート</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footerLegal">法的情報</h4>
+            <ul>
+              <li><a href="../privacy/" data-i18n="footerPrivacy">プライバシーポリシー</a></li>
+              <li><a href="../terms/" data-i18n="footerTerms">利用規約</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="footer-links">
-        <a href="/privacy/">プライバシーポリシー</a>
-        <a href="/terms/">利用規約</a>
-        <a href="/support/">サポート</a>
-      </div>
-      <div class="footer-copy">
-        <p>&copy; 2026 Pomocare. All rights reserved.</p>
+      <div class="footer-bottom">
+        <div class="footer-copy">
+          <p>&copy; 2026 PomoCare by URAKU Inc. All rights reserved.</p>
+        </div>
+        <div class="footer-controls">
+          <div class="lang-dropdown" id="footerLangDropdown">
+            <button class="lang-dropdown-btn" id="footerLangBtn" aria-haspopup="listbox" aria-expanded="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span id="footerLangLabel">JP</span>
+              <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+            </button>
+            <ul class="lang-dropdown-menu" id="footerLangMenu" role="listbox">
+              <li><button class="lang-option active" data-lang="ja" role="option">&#x1F1EF;&#x1F1F5; 日本語</button></li>
+              <li><button class="lang-option" data-lang="en" role="option">&#x1F1FA;&#x1F1F8; English</button></li>
+            </ul>
+          </div>        </div>
       </div>
     </div>
   </footer>
 
+  <script src="../js/i18n.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/main.js"></script>
   <script>
-    // Simple language toggle for legal pages
-    function setLegalLang(lang) {
+    // Bilingual content toggle for privacy page
+    function setPageLang(lang) {
       document.getElementById('privacy-ja').style.display = lang === 'ja' ? 'block' : 'none';
       document.getElementById('privacy-en').style.display = lang === 'en' ? 'block' : 'none';
-      document.documentElement.lang = lang;
-      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-      localStorage.setItem('pomocare-lp-lang', lang);
     }
-    document.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem('pomocare-lp-lang');
-      const lang = saved || (navigator.language.startsWith('ja') ? 'ja' : 'en');
-      setLegalLang(lang);
-      document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => setLegalLang(b.dataset.lang)));
+    // Override the i18n setLanguage to also switch page content
+    var _origSetLang = window.setLanguage;
+    window.setLanguage = function(lang) {
+      if (_origSetLang) _origSetLang(lang);
+      setPageLang(lang);
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = localStorage.getItem('pomocare-lp-lang');
+      var lang = saved || (navigator.language.startsWith('ja') ? 'ja' : 'en');
+      setPageLang(lang);
     });
   </script>
 </body>

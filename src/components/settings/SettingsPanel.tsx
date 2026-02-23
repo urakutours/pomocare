@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, Palette, GripVertical, Upload } from 'lucide-react';
+import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SUPPORTED_LANGUAGES, getTranslations } from '@/i18n';
 import type { Language } from '@/i18n';
 import { previewAlarm } from '@/utils/alarm';
+import { QuickLabelModal } from '@/App';
 
 interface SettingsPanelProps {
   settings: PomodoroSettings;
@@ -506,36 +507,32 @@ function ConfirmModal({
   );
 }
 
-// ---- Edit Label Modal ----
-type EditMode = 'color' | 'name' | null;
-
+// ---- Label dot menu (edit / delete) ----
 function LabelDotMenu({
   label,
-  onChangeColor,
-  onChangeName,
+  onEdit,
   onDelete,
-  changeColorLabel,
   renameLabel,
   deleteLabel,
   cancelLabel,
+  labelNamePlaceholder,
+  saveLabel,
 }: {
   label: LabelDefinition;
-  onChangeColor: (id: string, color: string) => void;
-  onChangeName: (id: string, name: string) => void;
+  onEdit: (id: string, name: string, color: string) => void;
   onDelete: (id: string) => void;
-  changeColorLabel: string;
   renameLabel: string;
   deleteLabel: string;
   cancelLabel: string;
+  labelNamePlaceholder: string;
+  saveLabel: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<EditMode>(null);
-  const [editName, setEditName] = useState(label.name);
-  const [editColor, setEditColor] = useState(label.color);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const close = () => { setOpen(false); setMode(null); };
+  const close = () => { setOpen(false); };
 
   // Close on outside click
   useEffect(() => {
@@ -551,7 +548,7 @@ function LabelDotMenu({
 
   return (
     <>
-      {/* Delete confirm modal — rendered outside the dropdown so it overlays everything */}
+      {/* Delete confirm modal */}
       {showDeleteConfirm && (
         <ConfirmModal
           message={`${label.name}`}
@@ -560,6 +557,22 @@ function LabelDotMenu({
           cancelLabel={cancelLabel}
           onConfirm={() => { setShowDeleteConfirm(false); onDelete(label.id); }}
           onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
+
+      {/* Edit label modal (QuickLabelModal in edit mode) */}
+      {showEditModal && (
+        <QuickLabelModal
+          onAdd={(edited) => { onEdit(edited.id, edited.name, edited.color); setShowEditModal(false); }}
+          onClose={() => setShowEditModal(false)}
+          addNewLabel=""
+          labelNamePlaceholder={labelNamePlaceholder}
+          addButtonText=""
+          initialName={label.name}
+          initialColor={label.color}
+          editId={label.id}
+          title={renameLabel}
+          buttonText={saveLabel}
         />
       )}
 
@@ -573,62 +586,18 @@ function LabelDotMenu({
 
         {open && (
           <div className="absolute right-0 top-6 z-30 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg w-44 overflow-hidden">
-            {mode === null && (
-              <>
-                <button
-                  onClick={() => setMode('color')}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
-                >
-                  <Palette size={13} /> {changeColorLabel}
-                </button>
-                <button
-                  onClick={() => { setEditName(label.name); setMode('name'); }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
-                >
-                  <Pencil size={13} /> {renameLabel}
-                </button>
-                <button
-                  onClick={() => { close(); setShowDeleteConfirm(true); }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
-                >
-                  <Trash2 size={13} /> {deleteLabel}
-                </button>
-              </>
-            )}
-            {mode === 'color' && (
-              <div className="p-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{changeColorLabel}</p>
-                <ColorPicker value={editColor} onChange={(c) => setEditColor(c)} />
-                <button
-                  onClick={() => { onChangeColor(label.id, editColor); close(); }}
-                  className="mt-3 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
-                >
-                  OK
-                </button>
-              </div>
-            )}
-            {mode === 'name' && (
-              <div className="p-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{renameLabel}</p>
-                <input
-                  autoFocus
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') { onChangeName(label.id, editName.trim()); close(); }
-                    if (e.key === 'Escape') close();
-                  }}
-                  className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-600 dark:text-gray-200"
-                />
-                <button
-                  onClick={() => { if (editName.trim()) { onChangeName(label.id, editName.trim()); close(); } }}
-                  className="mt-2 w-full py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg"
-                >
-                  OK
-                </button>
-              </div>
-            )}
+            <button
+              onClick={() => { close(); setShowEditModal(true); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-600"
+            >
+              <Pencil size={13} /> {renameLabel}
+            </button>
+            <button
+              onClick={() => { close(); setShowDeleteConfirm(true); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
+            >
+              <Trash2 size={13} /> {deleteLabel}
+            </button>
           </div>
         )}
       </div>
@@ -641,20 +610,22 @@ function LabelManager({
   labels,
   onChange,
   addLabel,
-  changeColorLabel,
   renameLabel,
   deleteLabel,
   cancelLabel,
   noLabelsText,
+  labelNamePlaceholder,
+  saveLabel,
 }: {
   labels: LabelDefinition[];
   onChange: (labels: LabelDefinition[]) => void;
   addLabel: string;
-  changeColorLabel: string;
   renameLabel: string;
   deleteLabel: string;
   cancelLabel: string;
   noLabelsText: string;
+  labelNamePlaceholder: string;
+  saveLabel: string;
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -664,12 +635,8 @@ function LabelManager({
     onChange([...labels, label]);
   };
 
-  const handleChangeColor = (id: string, color: string) => {
-    onChange(labels.map((l) => l.id === id ? { ...l, color } : l));
-  };
-
-  const handleChangeName = (id: string, name: string) => {
-    onChange(labels.map((l) => l.id === id ? { ...l, name } : l));
+  const handleEdit = (id: string, name: string, color: string) => {
+    onChange(labels.map((l) => l.id === id ? { ...l, name, color } : l));
   };
 
   const handleDelete = (id: string) => {
@@ -785,13 +752,13 @@ function LabelManager({
             <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate">{l.name}</span>
             <LabelDotMenu
               label={l}
-              onChangeColor={handleChangeColor}
-              onChangeName={handleChangeName}
+              onEdit={handleEdit}
               onDelete={handleDelete}
-              changeColorLabel={changeColorLabel}
               renameLabel={renameLabel}
               deleteLabel={deleteLabel}
               cancelLabel={cancelLabel}
+              labelNamePlaceholder={labelNamePlaceholder}
+              saveLabel={saveLabel}
             />
           </div>
         ))}
@@ -991,7 +958,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
           } else {
             // Auto-create missing label
             const newId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-            const newLabel: LabelDefinition = { id: newId, name: labelName, color: '#0abab5' };
+            const newLabel: LabelDefinition = { id: newId, name: labelName, color: LABEL_COLORS[(currentLabels.length + newLabelsToCreate.length) % LABEL_COLORS.length] };
             newLabelsToCreate.push(newLabel);
             labelByName[labelName] = newId;
             labelId = newId;
@@ -1051,24 +1018,23 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
     }`;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-3 flex-shrink-0">
-        <h3 className="font-semibold text-gray-700 dark:text-gray-200">{t.settings}</h3>
-        <button onClick={onClose}>
-          <X size={18} className="text-gray-500 dark:text-gray-400" />
-        </button>
-      </div>
+    <div className="flex flex-col h-full relative">
+      {/* Close button - fixed */}
+      <button onClick={onClose} className="absolute top-0 right-0 z-10">
+        <X size={18} className="text-gray-500 dark:text-gray-400" />
+      </button>
 
-      {/* Tab switcher */}
-      <div className="flex gap-1 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1 mb-3 flex-shrink-0">
-        <button className={tabClass(tab === 'general')} onClick={() => setTab('general')}>{t.settingsTabGeneral}</button>
-        <button className={tabClass(tab === 'labels')} onClick={() => setTab('labels')}>{t.settingsTabLabels}</button>
-        <button className={tabClass(tab === 'presets')} onClick={() => setTab('presets')}>{t.settingsTabPresets}</button>
-      </div>
-
-      {/* Tab content */}
+      {/* Scrollable content */}
       <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {/* Title */}
+        <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-3 pr-6">{t.settings}</h3>
+
+        {/* Tab switcher */}
+        <div className="flex gap-1 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1 mb-3">
+          <button className={tabClass(tab === 'general')} onClick={() => setTab('general')}>{t.settingsTabGeneral}</button>
+          <button className={tabClass(tab === 'labels')} onClick={() => setTab('labels')}>{t.settingsTabLabels}</button>
+          <button className={tabClass(tab === 'presets')} onClick={() => setTab('presets')}>{t.settingsTabPresets}</button>
+        </div>
         {/* General tab */}
         {tab === 'general' && (
           <div className="space-y-4 p-1">
@@ -1216,11 +1182,12 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               labels={labels}
               onChange={handleLabelsChange}
               addLabel={t.addLabel}
-              changeColorLabel={t.labelChangeColor}
               renameLabel={t.labelRename}
               deleteLabel={t.labelDelete}
               cancelLabel={t.dataResetCancel}
               noLabelsText={t.noLabel}
+              labelNamePlaceholder={t.labelNamePlaceholder}
+              saveLabel="OK"
             />
           </div>
         )}

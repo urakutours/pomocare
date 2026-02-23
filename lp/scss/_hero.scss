@@ -1,0 +1,152 @@
+// =============================================
+// ヒーローセクション
+// メッシュグラデーション + フォンモックアップ + 大胆なタイポグラフィ
+// =============================================
+
+.hero {
+  position: relative;
+  padding: 120px 0 $space-20;
+  overflow: hidden;
+
+  // ----- メッシュグラデーション背景 -----
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba($color-primary, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba($color-accent-purple, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba($color-accent-amber, 0.04) 0%, transparent 50%),
+    linear-gradient(135deg, $color-primary-subtle 0%, $white 100%);
+
+  @include dark {
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba($color-primary, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba($color-accent-purple, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, rgba($color-accent-amber, 0.03) 0%, transparent 50%),
+      linear-gradient(135deg, $color-gray-950 0%, #0d1320 100%);
+  }
+}
+
+// ----- 内部レイアウト -----
+.hero-inner {
+  display: flex;
+  align-items: center;
+  gap: $space-16;
+
+  @include mq-down(md) {
+    flex-direction: column;
+    text-align: center;
+    gap: $space-10;
+  }
+}
+
+// ----- テキストエリア -----
+.hero-text {
+  flex: 1;
+  max-width: 520px;
+
+  h1 {
+    font-size: $text-hero;
+    font-weight: $font-extrabold;
+    line-height: $leading-tight;
+    margin-bottom: $space-5;
+    color: var(--text-primary);
+  }
+
+  @include mq-down(md) {
+    max-width: 100%;
+    h1 { font-size: clamp(2rem, 5vw, 2.75rem); }
+  }
+}
+
+.hero-subtitle {
+  font-size: $text-lg;
+  color: var(--text-secondary);
+  margin-bottom: $space-8;
+  line-height: $leading-relaxed;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  @include mq-down(md) {
+    align-items: center;
+  }
+}
+
+// ----- ストアバッジ -----
+.store-badges {
+  display: flex;
+  gap: $space-3;
+  flex-wrap: wrap;
+
+  @include mq-down(md) {
+    justify-content: center;
+  }
+}
+
+.store-badge {
+  @include transition(opacity, transform);
+  &:hover { opacity: 0.8; transform: translateY(-1px); }
+}
+
+// ----- 信頼バッジ -----
+.hero-trust {
+  display: flex;
+  gap: $space-4;
+  flex-wrap: wrap;
+  margin-top: $space-2;
+
+  @include mq-down(md) {
+    justify-content: center;
+  }
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: $text-sm;
+  color: var(--text-secondary);
+  font-weight: $font-medium;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: $color-success;
+  }
+}
+
+// ----- ビジュアルエリア -----
+.hero-visual {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+// ----- フォンモックアップ -----
+.phone-mockup {
+  width: 280px;
+  background: $color-primary;
+  border-radius: 36px;
+  padding: $space-3;
+  box-shadow: $shadow-xl;
+  animation: float 3s ease-in-out infinite;
+
+  @include mq-down(md) {
+    width: 240px;
+  }
+}
+
+.phone-screen {
+  background: $color-gray-900;
+  border-radius: 26px;
+  overflow: hidden;
+
+  // ----- スクリーンショット画像 -----
+  .phone-screen-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: none; // グローバル 70vh 制限を解除（モックアップ内部）
+  }
+}

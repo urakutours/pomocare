@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200">
+  <!-- Soft warm background -->
+  <rect width="280" height="200" rx="12" fill="#f0fdf4"/>
+
+  <!-- Decorative soft circles -->
+  <circle cx="40" cy="30" r="20" fill="#10b981" opacity="0.06"/>
+  <circle cx="250" cy="160" r="30" fill="#10b981" opacity="0.05"/>
+  <circle cx="220" cy="40" r="15" fill="#fbbf24" opacity="0.08"/>
+
+  <!-- Coffee cup -->
+  <rect x="55" y="95" width="45" height="48" rx="6" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+  <!-- Cup handle -->
+  <path d="M100,105 Q115,105 115,118 Q115,131 100,131" fill="none" stroke="#d1d5db" stroke-width="1.5"/>
+  <!-- Coffee liquid -->
+  <rect x="58" y="107" width="39" height="33" rx="4" fill="#d97706" opacity="0.25"/>
+  <!-- Cup rim highlight -->
+  <rect x="55" y="95" width="45" height="5" rx="3" fill="#f3f4f6"/>
+  <!-- Saucer -->
+  <ellipse cx="77" cy="147" rx="30" ry="5" fill="#e5e7eb"/>
+
+  <!-- Steam lines -->
+  <path d="M65,88 Q62,78 67,70" fill="none" stroke="#9ca3af" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+  <path d="M77,85 Q74,73 79,65" fill="none" stroke="#9ca3af" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M89,88 Q86,78 91,70" fill="none" stroke="#9ca3af" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+
+  <!-- Small plant -->
+  <rect x="170" y="118" width="22" height="28" rx="4" fill="#d97706" opacity="0.3"/>
+  <!-- Plant pot rim -->
+  <rect x="167" y="118" width="28" height="5" rx="2.5" fill="#d97706" opacity="0.4"/>
+  <!-- Plant leaves -->
+  <path d="M181,118 Q181,105 173,95" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="170" cy="93" rx="7" ry="5" fill="#10b981" opacity="0.7" transform="rotate(-20 170 93)"/>
+  <path d="M181,118 Q181,100 190,90" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="193" cy="88" rx="7" ry="5" fill="#10b981" opacity="0.6" transform="rotate(25 193 88)"/>
+  <path d="M181,118 Q183,108 181,98" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/>
+  <ellipse cx="180" cy="96" rx="5" ry="4" fill="#34d399" opacity="0.5"/>
+
+  <!-- Timer display -->
+  <rect x="130" y="30" width="80" height="40" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1.5" opacity="0.9"/>
+  <text x="170" y="47" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#10b981" font-weight="600">BREAK TIME</text>
+  <text x="170" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#1f2937" font-weight="700">05:00</text>
+
+  <!-- Relaxation text -->
+  <text x="140" y="180" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6b7280">Take a moment to recharge</text>
+
+  <!-- Small decorative elements -->
+  <circle cx="230" cy="110" r="2" fill="#10b981" opacity="0.3"/>
+  <circle cx="240" cy="120" r="1.5" fill="#10b981" opacity="0.2"/>
+  <circle cx="30" cy="140" r="2" fill="#fbbf24" opacity="0.3"/>
+</svg>

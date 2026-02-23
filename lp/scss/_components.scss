@@ -1,0 +1,386 @@
+// =============================================
+// 共通コンポーネント
+// ボタン、バッジ、タブナビ等
+// =============================================
+
+// ----- ボタン -----
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-semibold;
+  border-radius: $radius-md;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-size: $text-sm;
+  padding: 10px 24px;
+  text-decoration: none;
+  gap: $space-2;
+  @include transition(background, color, border-color, box-shadow, transform);
+  @include focus-ring;
+
+  // ----- サイズバリアント -----
+  &-sm  { padding: 6px 18px; font-size: $text-sm; border-radius: $radius-sm; }
+  &-md  { padding: 10px 24px; font-size: $text-base; }
+  &-lg  { padding: 14px 36px; font-size: $text-lg; }
+
+  // ----- Primary -----
+  &-primary {
+    background: $color-primary;
+    color: $white;
+    border-color: $color-primary;
+    &:hover { background: $color-primary-hover; border-color: $color-primary-hover; }
+  }
+
+  // ----- Outline -----
+  &-outline {
+    background: transparent;
+    color: $color-primary;
+    border-color: $color-primary;
+    &:hover { background: $color-primary; color: $white; }
+  }
+
+  // ----- Ghost -----
+  &-ghost {
+    background: transparent;
+    color: $color-primary;
+    &:hover { background: $color-primary-subtle; }
+  }
+
+  // ----- White（ダーク背景用） -----
+  &-white {
+    background: $white;
+    color: $color-primary;
+    border-color: $white;
+    &:hover { background: $color-primary-subtle; border-color: $color-primary-subtle; }
+  }
+
+  // ----- マイクロインタラクション -----
+  &:hover  { transform: translateY(-1px); }
+  &:active { transform: scale(0.97); }
+}
+
+// ----- バッジ -----
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  font-size: $text-xs;
+  font-weight: $font-semibold;
+  padding: 4px 12px;
+  border-radius: $radius-full;
+  background: $color-primary-subtle;
+  color: $color-primary;
+  border: 1px solid $color-primary-light;
+
+  &--purple {
+    background: #f5f3ff;
+    color: $color-accent-purple;
+    border-color: #ddd6fe;
+  }
+}
+
+// ----- タブナビ -----
+.tab-nav {
+  display: flex;
+  gap: $space-2;
+  justify-content: center;
+  margin-bottom: $space-10;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  padding: 10px 24px;
+  font-size: $text-sm;
+  font-weight: $font-semibold;
+  border-radius: $radius-full;
+  border: 1px solid var(--border-color);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  cursor: pointer;
+  @include transition(background, color, border-color);
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+
+  &.active {
+    background: $color-primary;
+    color: $white;
+    border-color: $color-primary;
+  }
+}
+
+// ----- 言語ドロップダウン -----
+.lang-dropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.lang-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  font-size: $text-xs;
+  font-weight: $font-semibold;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-sm;
+  cursor: pointer;
+  @include transition(border-color, color);
+  white-space: nowrap;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+}
+
+.lang-chevron {
+  transition: transform 0.2s;
+}
+
+.lang-dropdown.open .lang-chevron {
+  transform: rotate(180deg);
+}
+
+.lang-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 140px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  z-index: 1100;
+  overflow: hidden;
+}
+
+.lang-dropdown.open .lang-dropdown-menu {
+  display: block;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  width: 100%;
+  padding: 9px 14px;
+  font-size: $text-sm;
+  font-weight: $font-medium;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background $duration-fast;
+
+  &:hover {
+    background: var(--surface-sunken);
+  }
+
+  &.active {
+    color: $color-primary;
+    font-weight: $font-bold;
+    background: $color-primary-subtle;
+  }
+}
+
+// ----- テーマトグル -----
+.theme-toggle {
+  @include flex-center;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-sm;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  color: var(--text-secondary);
+  @include transition(border-color, color, background);
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// ----- 法的ページ共通 -----
+.legal-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 120px $space-6 $space-20;
+
+  h1 {
+    font-size: $text-4xl;
+    font-weight: $font-bold;
+    margin-bottom: $space-2;
+    color: var(--text-primary);
+  }
+
+  h2 {
+    font-size: $text-xl;
+    font-weight: $font-semibold;
+    margin: 36px 0 $space-3;
+    color: var(--text-primary);
+  }
+
+  h3 {
+    font-size: $text-lg;
+    font-weight: $font-semibold;
+    margin: $space-6 0 $space-2;
+    color: var(--text-primary);
+  }
+
+  p, li {
+    color: var(--text-secondary);
+    font-size: $text-base;
+    line-height: $leading-relaxed;
+    margin-bottom: $space-3;
+  }
+
+  ul {
+    padding-left: $space-6;
+    list-style: disc;
+  }
+}
+
+.legal-date {
+  color: var(--text-tertiary);
+  font-size: $text-sm;
+  margin-bottom: $space-10;
+}
+
+.legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: $color-primary;
+  font-weight: $font-medium;
+  margin-bottom: $space-6;
+  font-size: $text-sm;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ----- サポートページ固有 -----
+.support-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 120px $space-6 $space-20;
+
+  h1 {
+    font-size: $text-4xl;
+    font-weight: $font-bold;
+    margin-bottom: $space-8;
+    color: var(--text-primary);
+  }
+
+  h2 {
+    font-size: $text-xl;
+    font-weight: $font-semibold;
+    margin: 36px 0 $space-3;
+    color: var(--text-primary);
+  }
+
+  p, li {
+    color: var(--text-secondary);
+    font-size: $text-base;
+    line-height: $leading-relaxed;
+    margin-bottom: $space-3;
+  }
+
+  ul {
+    padding-left: $space-6;
+    list-style: disc;
+  }
+}
+
+.contact-card {
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-lg;
+  padding: $space-8;
+  margin: $space-6 0;
+  text-align: center;
+
+  h3 {
+    font-size: $text-lg;
+    font-weight: $font-semibold;
+    margin-bottom: $space-2;
+    color: var(--text-primary);
+  }
+
+  p {
+    color: var(--text-secondary);
+    margin-bottom: $space-4;
+  }
+
+  a {
+    color: $color-primary;
+    font-weight: $font-semibold;
+    font-size: $text-lg;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.support-faq {
+  margin-top: $space-10;
+
+  details {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    margin-bottom: $space-3;
+    overflow: hidden;
+
+    &[open] {
+      border-color: $color-primary;
+    }
+  }
+
+  summary {
+    padding: $space-5 $space-6;
+    font-weight: $font-semibold;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: $text-base;
+    color: var(--text-primary);
+
+    &::-webkit-details-marker { display: none; }
+
+    &::after {
+      content: '';
+      width: 20px;
+      height: 20px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      transition: transform $duration-normal $ease-out;
+      flex-shrink: 0;
+    }
+  }
+
+  details[open] summary::after {
+    transform: rotate(180deg);
+  }
+
+  details p {
+    padding: 0 $space-6 $space-5;
+  }
+}

@@ -1,0 +1,71 @@
+// =============================================
+// ユースケースセクション
+// タブ/ピルナビ切替式
+// =============================================
+
+.use-cases {
+  @include section-padding;
+  background: var(--surface-bg);
+}
+
+// ----- タブコンテンツ -----
+.use-case-panel {
+  display: none;
+  &.active { display: block; }
+}
+
+.use-case-content {
+  @include card($radius-xl);
+  padding: $space-10 $space-8;
+  display: flex;
+  gap: $space-8;
+  align-items: center;
+
+  @include mq-down(md) {
+    flex-direction: column;
+    padding: $space-6;
+    text-align: center;
+  }
+}
+
+.use-case-icon-large {
+  font-size: 4rem;
+  line-height: 1;
+  flex-shrink: 0;
+
+  @include mq-down(md) {
+    font-size: 3rem;
+  }
+}
+
+.use-case-body {
+  flex: 1;
+
+  h3 {
+    font-size: $text-2xl;
+    font-weight: $font-bold;
+    color: var(--text-primary);
+    margin-bottom: $space-3;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: $text-base;
+    line-height: $leading-normal;
+    margin-bottom: $space-4;
+  }
+}
+
+.use-case-tag {
+  display: inline-block;
+  font-size: $text-sm;
+  font-weight: $font-semibold;
+  color: $color-primary;
+  padding-left: $space-3;
+  border-left: 2px solid $color-primary;
+
+  &--paid {
+    color: $color-accent-purple;
+    border-left-color: $color-accent-purple;
+  }
+}

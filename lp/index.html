@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,11 +14,12 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Header / Navigation -->
-  <header class="header">
+
+  <!-- ==================== Header ==================== -->
+  <header class="header" id="header">
     <nav class="nav container">
       <a href="/" class="logo" aria-label="PomoCare">
         <svg class="logo-icon" viewBox="0 0 512 512" width="36" height="36">
@@ -27,31 +28,37 @@
         </svg>
         <span class="logo-text">PomoCare</span>
       </a>
+
       <ul class="nav-links">
         <li><a href="#features" data-i18n="navFeatures">機能</a></li>
         <li><a href="#pricing" data-i18n="navPricing">料金</a></li>
         <li><a href="#faq" data-i18n="navFaq">FAQ</a></li>
-        <li><a href="https://app.pomocare.com" class="btn btn-sm btn-primary" data-i18n="navOpenApp">アプリを開く</a></li>
       </ul>
-      <!-- Language dropdown — always visible in nav -->
-      <div class="lang-dropdown" id="langDropdown">
-        <button class="lang-dropdown-btn" id="langDropdownBtn" aria-haspopup="listbox" aria-expanded="false">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          <span id="langDropdownLabel">JP</span>
-          <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-        </button>
-        <ul class="lang-dropdown-menu" id="langDropdownMenu" role="listbox">
-          <li><button class="lang-option active" data-lang="ja" role="option">🇯🇵 日本語</button></li>
-          <li><button class="lang-option" data-lang="en" role="option">🇺🇸 English</button></li>
-        </ul>
+
+      <div class="nav-actions">
+        <!-- 言語ドロップダウン -->
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-dropdown-btn" id="langDropdownBtn" aria-haspopup="listbox" aria-expanded="false">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="langDropdownLabel">JP</span>
+            <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <ul class="lang-dropdown-menu" id="langDropdownMenu" role="listbox">
+            <li><button class="lang-option active" data-lang="ja" role="option">🇯🇵 日本語</button></li>
+            <li><button class="lang-option" data-lang="en" role="option">🇺🇸 English</button></li>
+          </ul>
+        </div>
+
+        <a href="https://app.pomocare.com" class="btn btn-sm btn-primary nav-cta" data-i18n="navOpenApp">アプリを開く</a>
       </div>
+
       <button class="hamburger" id="hamburger" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
     </nav>
   </header>
 
-  <!-- Mobile Nav -->
+  <!-- モバイルナビ -->
   <div class="mobile-nav" id="mobileNav">
     <a href="#features" data-i18n="navFeatures">機能</a>
     <a href="#pricing" data-i18n="navPricing">料金</a>
@@ -59,7 +66,7 @@
     <a href="https://app.pomocare.com" class="btn btn-primary" data-i18n="navOpenApp">アプリを開く</a>
   </div>
 
-  <!-- Hero Section -->
+  <!-- ==================== Hero ==================== -->
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-text">
@@ -83,81 +90,80 @@
               </svg>
             </a>
           </div>
-          <p class="hero-note" data-i18n="heroNote">Web版は登録不要ですぐに使えます</p>
+          <div class="hero-trust">
+            <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="trustInstantStart">登録なしですぐ使える</span></span>
+            <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="trustPlatforms">Web・Windows・Android対応</span></span>
+            <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="trustCloudSync">クラウドでデバイス間同期</span></span>
+          </div>
         </div>
       </div>
       <div class="hero-visual">
         <div class="phone-mockup">
           <div class="phone-screen">
-            <div class="mock-timer">
-              <div class="mock-circle">
-                <svg viewBox="0 0 200 200" width="200" height="200">
-                  <circle cx="100" cy="100" r="90" fill="none" stroke="#e5e7eb" stroke-width="8"/>
-                  <circle cx="100" cy="100" r="90" fill="none" stroke="#0abab5" stroke-width="8"
-                    stroke-dasharray="565.5" stroke-dashoffset="141" stroke-linecap="round"
-                    transform="rotate(-90 100 100)"/>
-                </svg>
-                <div class="mock-time">18:45</div>
-                <div class="mock-label">Pomodoro</div>
-              </div>
-              <div class="mock-controls">
-                <div class="mock-btn-stop"></div>
-                <div class="mock-btn-complete"></div>
-              </div>
-            </div>
+            <img src="images/app-dark-mode.jpg" alt="PomoCare Dark Mode" class="phone-screen-img">
           </div>
         </div>
       </div>
     </div>
-    <div class="hero-wave">
-      <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
-        <path d="M0,60 C360,120 1080,0 1440,60 L1440,120 L0,120 Z" fill="#ffffff"/>
-      </svg>
-    </div>
   </section>
 
-  <!-- Features Section -->
+  <!-- ==================== Features (Bento Grid) ==================== -->
   <section class="features" id="features">
     <div class="container">
-      <h2 class="section-title" data-i18n="featuresTitle">集中をサポートする機能</h2>
-      <p class="section-subtitle" data-i18n="featuresSubtitle">シンプルなのに必要な機能がすべて揃っています</p>
+      <h2 class="section-title animate-on-scroll" data-i18n="featuresTitle">集中をサポートする機能</h2>
+      <p class="section-subtitle animate-on-scroll" data-i18n="featuresSubtitle">シンプルなのに必要な機能がすべて揃っています</p>
       <div class="features-grid">
-        <div class="feature-card">
+        <!-- カード1: ポモドーロタイマー -->
+        <div class="feature-card animate-on-scroll">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <h3 data-i18n="feature1Title">ポモドーロタイマー</h3>
           <p data-i18n="feature1Desc">集中時間・短い休憩・長い休憩を自由に設定。自分に最適なリズムでディープワークに集中できます。</p>
+          <div class="feature-card-img feature-card-img--square">
+            <img src="images/screenshot-focus-mode-crop.jpg" alt="Focus mode screenshot" loading="lazy">
+          </div>
         </div>
-        <div class="feature-card">
+        <!-- カード2: ラベル管理 -->
+        <div class="feature-card animate-on-scroll">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           </div>
           <h3 data-i18n="feature2Title">ラベル管理</h3>
           <p data-i18n="feature2Desc">作業内容ごとにラベルを設定して分類。どのタスクにどれだけ集中したかを可視化できます。</p>
+          <div class="feature-card-img feature-card-img--square">
+            <img src="images/screenshot-labels-crop.jpg" alt="Labels screenshot" loading="lazy">
+          </div>
         </div>
-        <div class="feature-card">
+        <!-- カード3: 統計・分析 -->
+        <div class="feature-card animate-on-scroll">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           </div>
           <h3 data-i18n="feature3Title">統計・分析</h3>
           <p data-i18n="feature3Desc">日別・週別・月別・年別の集中時間を美しいチャートで表示。ラベルごとの内訳もひと目でわかります。</p>
+          <div class="feature-card-img">
+            <img src="images/stats-chart.jpg" alt="Statistics chart screenshot" loading="lazy">
+          </div>
         </div>
-        <div class="feature-card">
+        <!-- カード4: マルチプラットフォーム -->
+        <div class="feature-card animate-on-scroll">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
           <h3 data-i18n="feature4Title">マルチプラットフォーム</h3>
           <p data-i18n="feature4Desc">Web、Windows、Androidで利用可能。どのデバイスからでもアクセスでき、すぐに集中を始められます。</p>
         </div>
-        <div class="feature-card">
+        <!-- カード5: カスタマイズ -->
+        <div class="feature-card animate-on-scroll">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </div>
           <h3 data-i18n="feature5Title">カスタマイズ</h3>
           <p data-i18n="feature5Desc">テーマ切替（ライト/ダーク）、アラーム音の選択、プリセット設定など、自分好みにカスタマイズ可能。</p>
         </div>
-        <div class="feature-card">
+        <!-- カード6: プライバシー & クラウド同期 (2x1 wide) -->
+        <div class="feature-card feature-card--wide animate-on-scroll">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
@@ -168,51 +174,177 @@
     </div>
   </section>
 
-  <!-- Use Cases Section -->
-  <section class="use-cases">
+  <!-- ==================== App Showcase ==================== -->
+  <section class="showcase" id="showcase">
     <div class="container">
-      <h2 class="section-title" data-i18n="useCasesTitle">こんな場面で活躍します</h2>
-      <p class="section-subtitle" data-i18n="useCasesSubtitle">PomoCareは、集中したいすべての人のために設計されています</p>
-      <div class="use-cases-grid">
+      <h2 class="section-title animate-on-scroll" data-i18n="showcaseTitle">PomoCareを体験する</h2>
+      <p class="section-subtitle animate-on-scroll" data-i18n="showcaseSubtitle">実際のアプリ画面をご覧ください</p>
 
-        <div class="use-case-card fade-in">
-          <div class="use-case-icon">📚</div>
-          <h3 data-i18n="useCase1Title">受験・学業</h3>
-          <p data-i18n="useCase1Desc">参考書1冊を25分ずつ。ラベルで「数学」「英語」「暗記」を分けて管理すれば、どの科目にどれだけ集中できたかが一目瞭然。試験前の追い込みも計画的に。</p>
-          <div class="use-case-tag" data-i18n="useCase1Tag">📊 科目別の学習時間を可視化</div>
+      <div class="tab-nav" id="showcaseTabs">
+        <button class="tab-btn active" data-tab="timer" data-i18n="showcaseTabTimer">タイマー</button>
+        <button class="tab-btn" data-tab="stats" data-i18n="showcaseTabStats">統計</button>
+        <button class="tab-btn" data-tab="settings" data-i18n="showcaseTabSettings">設定</button>
+        <button class="tab-btn" data-tab="labels" data-i18n="showcaseTabLabels">ラベル</button>
+      </div>
+
+      <div class="showcase-content">
+        <div class="showcase-visual">
+          <div class="showcase-phone">
+            <div class="showcase-screen">
+              <img id="showcaseImg" src="images/screenshot-focus-mode.jpg" alt="App screenshot" loading="lazy">
+            </div>
+          </div>
         </div>
-
-        <div class="use-case-card fade-in">
-          <div class="use-case-icon">🌍</div>
-          <h3 data-i18n="useCase2Title">語学習得</h3>
-          <p data-i18n="useCase2Desc">TOEICや英会話の上達に必要なのは、毎日の積み上げ。「リスニング」「スピーキング」「単語」のラベルで細かく記録すれば、トータル学習時間の達成感が継続力を生みます。</p>
-          <div class="use-case-tag" data-i18n="useCase2Tag">⏱ 毎日の積み上げを記録</div>
+        <div class="showcase-info">
+          <div class="showcase-panel active" data-panel="timer">
+            <h3 data-i18n="showcaseTimerTitle">集中モード</h3>
+            <p class="showcase-desc" data-i18n="showcaseTimerDesc">タイマーをスタートすると自動的にフォーカスモードに切り替わり、余計な情報をシャットアウト。カウントダウンだけが表示されるシンプルな画面で、作業に没頭できます。</p>
+          </div>
+          <div class="showcase-panel" data-panel="stats">
+            <h3 data-i18n="showcaseStatsTitle">統計・分析</h3>
+            <p class="showcase-desc" data-i18n="showcaseStatsDesc">日別・週別・月別・年別のセッション数と集中時間をグラフで表示。ラベルごとの内訳で、どの作業にどれだけ時間を費やしたかがひと目でわかります。</p>
+          </div>
+          <div class="showcase-panel" data-panel="settings">
+            <h3 data-i18n="showcaseSettingsTitle">柔軟な設定</h3>
+            <p class="showcase-desc" data-i18n="showcaseSettingsDesc">集中・休憩・長休憩の時間、アラーム音、テーマ、プリセットをお好みに調整。自動スタートや通知設定など、自分だけの集中環境をつくれます。</p>
+          </div>
+          <div class="showcase-panel" data-panel="labels">
+            <h3 data-i18n="showcaseLabelsTitle">ラベル管理</h3>
+            <p class="showcase-desc" data-i18n="showcaseLabelsDesc">「コーディング」「会議」「学習」など、作業内容にラベルを付けてセッションを分類。統計画面で、どの作業にどれだけ集中したかを正確に把握できます。</p>
+          </div>
         </div>
-
-        <div class="use-case-card fade-in">
-          <div class="use-case-icon">💻</div>
-          <h3 data-i18n="useCase3Title">デスクワーク・テレワーク</h3>
-          <p data-i18n="useCase3Desc">「会議資料」「コーディング」「メール対応」など、業務をラベルで分けるだけ。有料版のクラウド同期なら、オフィスでも在宅でも同じデータを引き継いで仕事のバランスを可視化できます。</p>
-          <div class="use-case-tag use-case-tag-paid" data-i18n="useCase3Tag">✨ 有料版：複数デバイスで継続</div>
-        </div>
-
-        <div class="use-case-card fade-in">
-          <div class="use-case-icon">🎨</div>
-          <h3 data-i18n="useCase4Title">副業・クリエイティブ作業</h3>
-          <p data-i18n="useCase4Desc">本業の合間に進める副業やデザイン・執筆作業。「本業」「副業」「個人プロジェクト」でラベル分けすれば、限られた時間をどこに使っているかが明確になります。</p>
-          <div class="use-case-tag" data-i18n="useCase4Tag">🏷 ラベルで時間配分を管理</div>
-        </div>
-
       </div>
     </div>
   </section>
 
-  <!-- How It Works -->
+  <!-- ==================== Use Cases (Tab式) ==================== -->
+  <section class="use-cases" id="use-cases">
+    <div class="container">
+      <h2 class="section-title animate-on-scroll" data-i18n="useCasesTitle">こんな場面で活躍します</h2>
+      <p class="section-subtitle animate-on-scroll" data-i18n="useCasesSubtitle">PomoCareは、集中したいすべての人のために設計されています</p>
+
+      <div class="tab-nav" id="useCaseTabs">
+        <button class="tab-btn active" data-tab="study" data-i18n="useCaseTab1">受験・学業</button>
+        <button class="tab-btn" data-tab="language" data-i18n="useCaseTab2">語学習得</button>
+        <button class="tab-btn" data-tab="work" data-i18n="useCaseTab3">デスクワーク</button>
+        <button class="tab-btn" data-tab="creative" data-i18n="useCaseTab4">副業・クリエイティブ</button>
+      </div>
+
+      <div class="use-case-panel active" data-panel="study">
+        <div class="use-case-content animate-on-scroll">
+          <div class="use-case-illustration">
+            <svg viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="30" y="100" width="140" height="6" rx="3" fill="#374151"/>
+              <path d="M40 98 L100 88 L100 30 L40 40Z" fill="#151c2c" stroke="#0abab5" stroke-width="2"/>
+              <path d="M160 98 L100 88 L100 30 L160 40Z" fill="#151c2c" stroke="#0abab5" stroke-width="2"/>
+              <line x1="52" y1="52" x2="88" y2="44" stroke="#374151" stroke-width="1.5"/>
+              <line x1="52" y1="64" x2="88" y2="56" stroke="#374151" stroke-width="1.5"/>
+              <line x1="52" y1="76" x2="88" y2="68" stroke="#374151" stroke-width="1.5"/>
+              <line x1="112" y1="44" x2="148" y2="52" stroke="#374151" stroke-width="1.5"/>
+              <line x1="112" y1="56" x2="148" y2="64" stroke="#374151" stroke-width="1.5"/>
+              <line x1="112" y1="68" x2="148" y2="76" stroke="#374151" stroke-width="1.5"/>
+              <circle cx="100" cy="140" r="26" stroke="#0abab5" stroke-width="2.5" fill="#151c2c"/>
+              <line x1="100" y1="140" x2="100" y2="124" stroke="#0abab5" stroke-width="2" stroke-linecap="round"/>
+              <line x1="100" y1="140" x2="114" y2="140" stroke="#0abab5" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="100" cy="140" r="2.5" fill="#0abab5"/>
+            </svg>
+          </div>
+          <div class="use-case-body">
+            <h3 data-i18n="useCase1Title">受験・学業</h3>
+            <p data-i18n="useCase1Desc">参考書1冊を25分ずつ。ラベルで「数学」「英語」「暗記」を分けて管理すれば、どの科目にどれだけ集中できたかが一目瞭然。試験前の追い込みも計画的に。</p>
+            <span class="use-case-tag" data-i18n="useCase1Tag">科目別の学習時間を可視化</span>
+          </div>
+        </div>
+      </div>
+      <div class="use-case-panel" data-panel="language">
+        <div class="use-case-content animate-on-scroll">
+          <div class="use-case-illustration">
+            <svg viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="100" cy="95" r="50" stroke="#0abab5" stroke-width="2" fill="#151c2c"/>
+              <ellipse cx="100" cy="95" rx="25" ry="50" stroke="#374151" stroke-width="1.5" fill="none"/>
+              <line x1="50" y1="95" x2="150" y2="95" stroke="#374151" stroke-width="1.5"/>
+              <line x1="58" y1="72" x2="142" y2="72" stroke="#374151" stroke-width="1"/>
+              <line x1="58" y1="118" x2="142" y2="118" stroke="#374151" stroke-width="1"/>
+              <rect x="130" y="16" width="56" height="30" rx="12" fill="#0abab5"/>
+              <polygon points="142,46 150,46 138,56" fill="#0abab5"/>
+              <text x="158" y="36" fill="#fff" font-size="13" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">ABC</text>
+              <rect x="14" y="26" width="50" height="30" rx="12" fill="#374151"/>
+              <polygon points="50,56 42,56 54,66" fill="#374151"/>
+              <text x="39" y="46" fill="#9ca3af" font-size="11" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">あいう</text>
+            </svg>
+          </div>
+          <div class="use-case-body">
+            <h3 data-i18n="useCase2Title">語学習得</h3>
+            <p data-i18n="useCase2Desc">TOEICや英会話の上達に必要なのは、毎日の積み上げ。「リスニング」「スピーキング」「単語」のラベルで細かく記録すれば、トータル学習時間の達成感が継続力を生みます。</p>
+            <span class="use-case-tag" data-i18n="useCase2Tag">毎日の積み上げを記録</span>
+          </div>
+        </div>
+      </div>
+      <div class="use-case-panel" data-panel="work">
+        <div class="use-case-content animate-on-scroll">
+          <div class="use-case-illustration">
+            <svg viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="30" y="20" width="140" height="95" rx="8" stroke="#0abab5" stroke-width="2" fill="#151c2c"/>
+              <rect x="50" y="78" width="16" height="24" rx="2" fill="#374151"/>
+              <rect x="72" y="62" width="16" height="40" rx="2" fill="#374151"/>
+              <rect x="94" y="46" width="16" height="56" rx="2" fill="#0abab5"/>
+              <rect x="116" y="68" width="16" height="34" rx="2" fill="#374151"/>
+              <rect x="138" y="52" width="16" height="50" rx="2" fill="#0abab5" opacity="0.6"/>
+              <rect x="85" y="115" width="30" height="8" rx="2" fill="#374151"/>
+              <rect x="75" y="123" width="50" height="6" rx="3" fill="#374151"/>
+              <rect x="55" y="142" width="90" height="18" rx="6" stroke="#374151" stroke-width="1.5" fill="#1f2937"/>
+              <rect x="62" y="146" width="7" height="4" rx="1" fill="#374151"/>
+              <rect x="72" y="146" width="7" height="4" rx="1" fill="#374151"/>
+              <rect x="82" y="146" width="7" height="4" rx="1" fill="#374151"/>
+              <rect x="92" y="146" width="7" height="4" rx="1" fill="#374151"/>
+              <rect x="102" y="146" width="7" height="4" rx="1" fill="#374151"/>
+              <rect x="112" y="146" width="7" height="4" rx="1" fill="#374151"/>
+              <rect x="122" y="146" width="7" height="4" rx="1" fill="#374151"/>
+              <rect x="75" y="152" width="50" height="4" rx="1" fill="#374151"/>
+            </svg>
+          </div>
+          <div class="use-case-body">
+            <h3 data-i18n="useCase3Title">デスクワーク・テレワーク</h3>
+            <p data-i18n="useCase3Desc">「会議資料」「コーディング」「メール対応」など、業務をラベルで分けるだけ。有料版のクラウド同期なら、オフィスでも在宅でも同じデータを引き継いで仕事のバランスを可視化できます。</p>
+            <span class="use-case-tag use-case-tag--paid" data-i18n="useCase3Tag">有料版：複数デバイスで継続</span>
+          </div>
+        </div>
+      </div>
+      <div class="use-case-panel" data-panel="creative">
+        <div class="use-case-content animate-on-scroll">
+          <div class="use-case-illustration">
+            <svg viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M100 16 C70 16 46 40 46 68 C46 88 62 98 68 114 L132 114 C138 98 154 88 154 68 C154 40 130 16 100 16Z" stroke="#0abab5" stroke-width="2" fill="#151c2c"/>
+              <rect x="74" y="114" width="52" height="7" rx="3.5" fill="#374151"/>
+              <rect x="78" y="123" width="44" height="5" rx="2.5" fill="#374151"/>
+              <rect x="82" y="130" width="36" height="5" rx="2.5" fill="#374151"/>
+              <path d="M90 66 L95 82 L100 66 L105 82 L110 66" stroke="#0abab5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="40" cy="46" r="3" fill="#0abab5" opacity="0.6"/>
+              <circle cx="160" cy="46" r="3" fill="#0abab5" opacity="0.6"/>
+              <circle cx="32" cy="76" r="2" fill="#0abab5" opacity="0.4"/>
+              <circle cx="168" cy="76" r="2" fill="#0abab5" opacity="0.4"/>
+              <circle cx="58" cy="158" r="11" fill="#0abab5"/>
+              <circle cx="84" cy="158" r="11" fill="#7c3aed"/>
+              <circle cx="110" cy="158" r="11" fill="#f59e0b"/>
+              <circle cx="136" cy="158" r="11" fill="#ef4444"/>
+            </svg>
+          </div>
+          <div class="use-case-body">
+            <h3 data-i18n="useCase4Title">副業・クリエイティブ作業</h3>
+            <p data-i18n="useCase4Desc">本業の合間に進める副業やデザイン・執筆作業。「本業」「副業」「個人プロジェクト」でラベル分けすれば、限られた時間をどこに使っているかが明確になります。</p>
+            <span class="use-case-tag" data-i18n="useCase4Tag">ラベルで時間配分を管理</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== How It Works ==================== -->
   <section class="how-it-works">
     <div class="container">
-      <h2 class="section-title" data-i18n="howTitle">使い方はかんたん</h2>
+      <h2 class="section-title animate-on-scroll" data-i18n="howTitle">使い方はかんたん</h2>
       <div class="steps">
-        <div class="step">
+        <div class="step animate-on-scroll">
           <div class="step-number">1</div>
           <h3 data-i18n="step1Title">タイマーをスタート</h3>
           <p data-i18n="step1Desc">集中したい時間を設定して、スタートボタンを押すだけ。</p>
@@ -220,7 +352,7 @@
         <div class="step-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </div>
-        <div class="step">
+        <div class="step animate-on-scroll">
           <div class="step-number">2</div>
           <h3 data-i18n="step2Title">集中する</h3>
           <p data-i18n="step2Desc">フォーカスモードで余計な情報をシャットアウト。作業に没頭できます。</p>
@@ -228,7 +360,7 @@
         <div class="step-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </div>
-        <div class="step">
+        <div class="step animate-on-scroll">
           <div class="step-number">3</div>
           <h3 data-i18n="step3Title">振り返る</h3>
           <p data-i18n="step3Desc">統計画面で集中時間やラベルごとの実績を確認。成長を実感できます。</p>
@@ -237,13 +369,13 @@
     </div>
   </section>
 
-  <!-- Pricing Section -->
+  <!-- ==================== Pricing ==================== -->
   <section class="pricing" id="pricing">
     <div class="container">
-      <h2 class="section-title" data-i18n="pricingTitle">料金プラン</h2>
-      <p class="section-subtitle" data-i18n="pricingSubtitle">あなたのスタイルに合った使い方を選べます</p>
+      <h2 class="section-title animate-on-scroll" data-i18n="pricingTitle">料金プラン</h2>
+      <p class="section-subtitle animate-on-scroll" data-i18n="pricingSubtitle">あなたのスタイルに合った使い方を選べます</p>
       <div class="pricing-grid">
-        <div class="pricing-card">
+        <div class="pricing-card animate-on-scroll">
           <div class="pricing-header">
             <h3 data-i18n="pricingFreeTitle">Free</h3>
             <div class="pricing-price">
@@ -253,18 +385,18 @@
           <ul class="pricing-features">
             <li data-i18n="pricingFreeF1">ポモドーロタイマー</li>
             <li data-i18n="pricingFreeF2">基本統計</li>
-            <li data-i18n="pricingFreeF3">ラベル管理（3個まで）</li>
+            <li data-i18n="pricingFreeF3">ラベル管理（2個まで）</li>
             <li data-i18n="pricingFreeF4">ライト/ダークテーマ</li>
             <li class="disabled" data-i18n="pricingFreeF5">広告表示あり</li>
           </ul>
           <a href="https://app.pomocare.com" class="btn btn-outline" data-i18n="pricingFreeCta">無料で始める</a>
         </div>
-        <div class="pricing-card popular">
+        <div class="pricing-card popular animate-on-scroll">
           <div class="pricing-badge" data-i18n="pricingPopular">おすすめ</div>
           <div class="pricing-header">
             <h3 data-i18n="pricingSubTitle">Standard</h3>
             <div class="pricing-price">
-              <span class="price-amount" data-i18n="pricingSubPrice">&#165;200</span>
+              <span class="price-amount" data-i18n="pricingSubPrice">&#165;250</span>
               <span class="price-period" data-i18n="pricingSubPeriod">/月</span>
             </div>
           </div>
@@ -277,11 +409,11 @@
           </ul>
           <a href="https://app.pomocare.com" class="btn btn-primary" data-i18n="pricingSubCta">サブスクリプションで始める</a>
         </div>
-        <div class="pricing-card">
+        <div class="pricing-card animate-on-scroll">
           <div class="pricing-header">
             <h3 data-i18n="pricingProTitle">Pro（買い切り）</h3>
             <div class="pricing-price">
-              <span class="price-amount" data-i18n="pricingProPrice">&#165;3,800</span>
+              <span class="price-amount" data-i18n="pricingProPrice">&#165;5,000</span>
               <span class="price-period" data-i18n="pricingProPeriod">一括</span>
             </div>
           </div>
@@ -295,197 +427,272 @@
           <a href="https://app.pomocare.com" class="btn btn-outline" data-i18n="pricingProCta">買い切りで購入</a>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Comparison Table Section -->
-  <section class="comparison" id="comparison">
-    <div class="container">
-      <h2 class="section-title" data-i18n="compTitle">無料版と有料版の違い</h2>
-      <p class="section-subtitle" data-i18n="compSubtitle">あなたに必要な機能を選んでください</p>
-      <div class="comp-table-wrap">
-        <table class="comp-table">
-          <thead>
-            <tr>
-              <th class="comp-feature-col" data-i18n="compFeatureHeader">機能</th>
-              <th class="comp-free-col">
-                <div class="comp-plan-name" data-i18n="compFreeName">Free</div>
-                <div class="comp-plan-price" data-i18n="compFreePrice">¥0</div>
-              </th>
-              <th class="comp-paid-col comp-paid-highlight">
-                <div class="comp-plan-badge" data-i18n="compPaidBadge">Standard / Pro</div>
-                <div class="comp-plan-name" data-i18n="compPaidName">有料版</div>
-                <div class="comp-plan-price" data-i18n="compPaidPrice">¥200/月〜</div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- タイマー機能 -->
-            <tr class="comp-category-row">
-              <td data-i18n="compCatTimer">⏱ タイマー機能</td>
-              <td class="comp-free-col"></td>
-              <td class="comp-paid-col"></td>
-            </tr>
-            <tr>
-              <td data-i18n="compR1">ポモドーロタイマー（集中・休憩・長休憩）</td>
-              <td class="comp-check">✓</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR2">タイマー時間のカスタマイズ</td>
-              <td class="comp-check">✓</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR3">カスタムメッセージ</td>
-              <td class="comp-check">✓</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR4">アラーム音・通知</td>
-              <td class="comp-check">✓</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR5">ライト / ダークテーマ</td>
-              <td class="comp-check">✓</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <!-- 統計・履歴 -->
-            <tr class="comp-category-row">
-              <td data-i18n="compCatStats">📊 統計・履歴</td>
-              <td class="comp-free-col"></td>
-              <td class="comp-paid-col"></td>
-            </tr>
-            <tr>
-              <td data-i18n="compR6">今日・今週のセッション履歴</td>
-              <td class="comp-check">✓</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR7">月別・年別グラフ統計</td>
-              <td class="comp-cross">—</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR8">セッションへのメモ追加</td>
-              <td class="comp-cross">—</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR9">CSVエクスポート</td>
-              <td class="comp-cross">—</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <!-- ラベル -->
-            <tr class="comp-category-row">
-              <td data-i18n="compCatLabel">🏷 ラベル機能</td>
-              <td class="comp-free-col"></td>
-              <td class="comp-paid-col"></td>
-            </tr>
-            <tr>
-              <td data-i18n="compR10">ラベルでセッションを分類</td>
-              <td class="comp-check">✓</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR11">ラベル数の上限</td>
-              <td class="comp-limit" data-i18n="compR11Free">2個まで</td>
-              <td class="comp-check comp-paid-col" data-i18n="compR11Paid">無制限</td>
-            </tr>
-            <!-- クラウド・その他 -->
-            <tr class="comp-category-row">
-              <td data-i18n="compCatCloud">☁️ クラウド・その他</td>
-              <td class="comp-free-col"></td>
-              <td class="comp-paid-col"></td>
-            </tr>
-            <tr>
-              <td data-i18n="compR12">クラウド同期（複数デバイス対応）</td>
-              <td class="comp-cross">—</td>
-              <td class="comp-check comp-paid-col">✓</td>
-            </tr>
-            <tr>
-              <td data-i18n="compR13">広告表示</td>
-              <td class="comp-limit" data-i18n="compR13Free">あり</td>
-              <td class="comp-check comp-paid-col" data-i18n="compR13Paid">なし</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td></td>
-              <td>
-                <a href="https://app.pomocare.com" class="btn btn-outline btn-sm" data-i18n="compFreeCta">無料で始める</a>
-              </td>
-              <td class="comp-paid-col">
-                <a href="#pricing" class="btn btn-primary btn-sm" data-i18n="compPaidCta">プランを見る</a>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+      <!-- 比較テーブル（折りたたみ） -->
+      <div class="comparison-toggle">
+        <button class="comparison-toggle-btn" id="compToggle" data-i18n="compToggleExpand">
+          詳細な比較を見る
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="comparison-content" id="compContent">
+        <div class="comp-table-wrap">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th class="comp-feature-col" data-i18n="compFeatureHeader">機能</th>
+                <th class="comp-free-col">
+                  <div class="comp-plan-name" data-i18n="compFreeName">Free</div>
+                  <div class="comp-plan-price" data-i18n="compFreePrice">¥0</div>
+                </th>
+                <th class="comp-paid-col comp-paid-highlight">
+                  <div class="comp-plan-badge" data-i18n="compPaidBadge">Standard / Pro</div>
+                  <div class="comp-plan-name" data-i18n="compPaidName">有料版</div>
+                  <div class="comp-plan-price" data-i18n="compPaidPrice">¥250/月〜</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="comp-category-row">
+                <td data-i18n="compCatTimer">タイマー機能</td>
+                <td class="comp-free-col"></td>
+                <td class="comp-paid-col"></td>
+              </tr>
+              <tr>
+                <td data-i18n="compR1">ポモドーロタイマー（集中・休憩・長休憩）</td>
+                <td class="comp-check">✓</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR2">タイマー時間のカスタマイズ</td>
+                <td class="comp-check">✓</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR3">カスタムメッセージ</td>
+                <td class="comp-check">✓</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR4">アラーム音・通知</td>
+                <td class="comp-check">✓</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR5">ライト / ダークテーマ</td>
+                <td class="comp-check">✓</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr class="comp-category-row">
+                <td data-i18n="compCatStats">統計・履歴</td>
+                <td class="comp-free-col"></td>
+                <td class="comp-paid-col"></td>
+              </tr>
+              <tr>
+                <td data-i18n="compR6">今日・今週のセッション履歴</td>
+                <td class="comp-check">✓</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR7">月別・年別グラフ統計</td>
+                <td class="comp-cross">—</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR8">セッションへのメモ追加</td>
+                <td class="comp-cross">—</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR9">CSVエクスポート</td>
+                <td class="comp-cross">—</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr class="comp-category-row">
+                <td data-i18n="compCatLabel">ラベル機能</td>
+                <td class="comp-free-col"></td>
+                <td class="comp-paid-col"></td>
+              </tr>
+              <tr>
+                <td data-i18n="compR10">ラベルでセッションを分類</td>
+                <td class="comp-check">✓</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR11">ラベル数の上限</td>
+                <td class="comp-limit" data-i18n="compR11Free">2個まで</td>
+                <td class="comp-check comp-paid-col" data-i18n="compR11Paid">無制限</td>
+              </tr>
+              <tr class="comp-category-row">
+                <td data-i18n="compCatCloud">クラウド・その他</td>
+                <td class="comp-free-col"></td>
+                <td class="comp-paid-col"></td>
+              </tr>
+              <tr>
+                <td data-i18n="compR12">クラウド同期（複数デバイス対応）</td>
+                <td class="comp-cross">—</td>
+                <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR13">広告表示</td>
+                <td class="comp-limit" data-i18n="compR13Free">あり</td>
+                <td class="comp-check comp-paid-col" data-i18n="compR13Paid">なし</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="comp-cta-buttons">
+          <a href="https://app.pomocare.com" class="btn btn-outline" data-i18n="compFreeCta">無料で始める</a>
+          <a href="#pricing" class="btn btn-primary" data-i18n="compPaidCta">プランを見る</a>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- FAQ Section -->
+  <!-- ==================== FAQ ==================== -->
   <section class="faq" id="faq">
     <div class="container">
-      <h2 class="section-title" data-i18n="faqTitle">よくある質問</h2>
+      <h2 class="section-title animate-on-scroll" data-i18n="faqTitle">よくある質問</h2>
       <div class="faq-list">
-        <details class="faq-item">
+        <details class="faq-item animate-on-scroll">
           <summary data-i18n="faq1Q">ポモドーロ・テクニックとは何ですか？</summary>
-          <p data-i18n="faq1A">ポモドーロ・テクニックは、25分間の集中作業と5分間の休憩を繰り返す時間管理法です。4セットごとに長い休憩（15-30分）を取ります。PomoCareではこの時間を自由にカスタマイズできます。</p>
+          <p data-i18n="faq1A">「25分集中 → 5分休憩」を1セットとし、4セットごとに長めの休憩を取る、科学的に裏付けられた生産性向上メソッドです。人間の集中力が持続しやすい短い時間に区切ることで、疲労を最小限に抑えながら高いパフォーマンスを維持できます。PomoCareでは集中・休憩の時間を自由にカスタマイズでき、自分に最適なリズムを見つけられます。</p>
         </details>
-        <details class="faq-item">
-          <summary data-i18n="faq2Q">アカウント登録は必要ですか？</summary>
-          <p data-i18n="faq2A">無料版ではアカウント登録は不要です。アプリを開いてすぐに使い始められます。有料版（Standard / Pro）ではクラウド同期のためにGoogleアカウント等での認証が必要です。</p>
+        <details class="faq-item animate-on-scroll">
+          <summary data-i18n="faq2Q">登録なしで本当にすぐ使えますか？</summary>
+          <p data-i18n="faq2A">はい。アプリを開いたらすぐにタイマーをスタートできます。アカウント登録なしでもタイマー、基本統計、ラベル管理などのコア機能をすべて利用可能です。アカウント登録は無料ですが、複数デバイス間のクラウド同期を利用するには有料プランへのアップグレードが必要です。</p>
         </details>
-        <details class="faq-item">
-          <summary data-i18n="faq3Q">データはどこに保存されますか？</summary>
-          <p data-i18n="faq3A">無料版ではすべてのデータがお使いのデバイスのローカルストレージに保存されます。有料版でクラウド同期を有効にすると、サーバーにも保存され複数デバイスからアクセスできます。</p>
+        <details class="faq-item animate-on-scroll">
+          <summary data-i18n="faq3Q">無料版でも十分に使えますか？</summary>
+          <p data-i18n="faq3A">もちろんです。ポモドーロタイマー、今日・今週の統計、ラベル管理（2個まで）、ライト/ダークテーマなど、集中に必要なコア機能はすべて無料で利用できます。月別・年別の詳細統計、無制限のラベル、クラウド同期、CSVエクスポートが必要な場合は有料プランをご検討ください。</p>
         </details>
-        <details class="faq-item">
-          <summary data-i18n="faq4Q">無料版と有料版の違いは何ですか？</summary>
-          <p data-i18n="faq4A">無料版では基本的なタイマー機能と統計機能が利用できます。有料版ではクラウド同期、無制限のラベル、CSVエクスポート、広告非表示などの追加機能が使えます。</p>
+        <details class="faq-item animate-on-scroll">
+          <summary data-i18n="faq4Q">データはどこに保存されますか？</summary>
+          <p data-i18n="faq4A">無料版ではお使いのデバイスのローカルストレージに保存されるため、外部にデータが送信されることはありません。有料プランでクラウド同期を有効にすると、暗号化されたサーバーにも保存され、複数デバイスからアクセスできます。</p>
         </details>
-        <details class="faq-item">
-          <summary data-i18n="faq5Q">どのデバイスで使えますか？</summary>
-          <p data-i18n="faq5A">Webブラウザ（Chrome、Safari、Firefox等）、Windows（Microsoft Store）、Android（Google Play）に対応しています。PWA対応のため、ブラウザからインストールしてアプリのように使うこともできます。</p>
+        <details class="faq-item animate-on-scroll">
+          <summary data-i18n="faq5Q">オフラインでも使えますか？</summary>
+          <p data-i18n="faq5A">はい。PWA（Progressive Web App）対応のため、一度アクセスすればオフラインでもタイマーや記録機能を利用できます。オンラインに戻った際に、有料プランのクラウド同期で自動的にデータが同期されます。</p>
+        </details>
+        <details class="faq-item animate-on-scroll">
+          <summary data-i18n="faq6Q">どのデバイスで使えますか？</summary>
+          <p data-i18n="faq6A">Webブラウザ（Chrome、Safari、Firefox等）、Windows（Microsoft Store）、Android（Google Play）に対応しています。ブラウザからPWAとしてインストールすれば、ネイティブアプリのように使うこともできます。</p>
+        </details>
+        <details class="faq-item animate-on-scroll">
+          <summary data-i18n="faq7Q">StandardとPro（買い切り）の違いは何ですか？</summary>
+          <p data-i18n="faq7A">どちらも使える機能は同じです。Standard（月額¥250）は月単位のサブスクリプション、Pro（¥5,000の一括払い）は一度購入すれば永久に全機能を利用できる買い切りプランです。長期的に利用される方にはProがおトクです。</p>
+        </details>
+        <details class="faq-item animate-on-scroll">
+          <summary data-i18n="faq8Q">有料プランはいつでも解約できますか？</summary>
+          <p data-i18n="faq8A">はい。Standardプランはいつでも解約可能で、解約後も契約期間の終了まで全機能をご利用いただけます。Pro（買い切り）は解約不要で永久にご利用いただけます。</p>
         </details>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
+  <!-- ==================== CTA ==================== -->
   <section class="cta">
     <div class="container">
-      <h2 data-i18n="ctaTitle">さあ、集中を始めましょう</h2>
-      <p data-i18n="ctaSubtitle">PomoCareで、より生産的な毎日を。</p>
-      <a href="https://app.pomocare.com" class="btn btn-white btn-lg" data-i18n="ctaCta">無料で始める</a>
+      <h2 class="animate-on-scroll" data-i18n="ctaTitle">さあ、集中を始めましょう</h2>
+      <p class="animate-on-scroll" data-i18n="ctaSubtitle">PomoCareで、より生産的な毎日を。</p>
+      <a href="https://app.pomocare.com" class="btn btn-cta-main animate-on-scroll" data-i18n="ctaCta">無料で始める</a>
+      <div class="cta-store-badges animate-on-scroll">
+        <a href="#" class="store-badge" aria-label="Google Play">
+          <svg viewBox="0 0 135 40" width="135" height="40">
+            <rect width="135" height="40" rx="5" fill="rgba(255,255,255,0.15)"/>
+            <rect x="0.5" y="0.5" width="134" height="39" rx="4.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+            <text x="67.5" y="14" fill="#fff" font-size="8" text-anchor="middle" font-family="Inter, sans-serif">GET IT ON</text>
+            <text x="67.5" y="28" fill="#fff" font-size="13" text-anchor="middle" font-family="Inter, sans-serif" font-weight="600">Google Play</text>
+          </svg>
+        </a>
+        <a href="#" class="store-badge" aria-label="Microsoft Store">
+          <svg viewBox="0 0 135 40" width="135" height="40">
+            <rect width="135" height="40" rx="5" fill="rgba(255,255,255,0.15)"/>
+            <rect x="0.5" y="0.5" width="134" height="39" rx="4.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+            <text x="67.5" y="14" fill="#fff" font-size="8" text-anchor="middle" font-family="Inter, sans-serif">DOWNLOAD FROM</text>
+            <text x="67.5" y="28" fill="#fff" font-size="13" text-anchor="middle" font-family="Inter, sans-serif" font-weight="600">Microsoft Store</text>
+          </svg>
+        </a>
+      </div>
+      <div class="cta-platforms animate-on-scroll">
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Web
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Windows
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Android
+        </span>
+      </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- ==================== Footer ==================== -->
   <footer class="footer">
     <div class="container footer-inner">
-      <div class="footer-brand">
-        <svg class="logo-icon" viewBox="0 0 512 512" width="28" height="28">
-          <circle cx="256" cy="256" r="256" fill="#0abab5"/>
-          <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
-        </svg>
-        <span class="logo-text">PomoCare</span>
+      <div class="footer-top">
+        <div>
+          <div class="footer-brand">
+            <svg class="logo-icon" viewBox="0 0 512 512" width="28" height="28">
+              <circle cx="256" cy="256" r="256" fill="#0abab5"/>
+              <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
+            </svg>
+            <span class="logo-text">PomoCare</span>
+          </div>
+          <p class="footer-brand-desc" data-i18n="footerDesc">ポモドーロ・テクニックで集中力を高めるフォーカスタイマーアプリ</p>
+        </div>
+        <div class="footer-columns">
+          <div class="footer-col">
+            <h4 data-i18n="footerProduct">プロダクト</h4>
+            <ul>
+              <li><a href="#features" data-i18n="navFeatures">機能</a></li>
+              <li><a href="#pricing" data-i18n="navPricing">料金</a></li>
+              <li><a href="#faq" data-i18n="navFaq">FAQ</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footerResources">リソース</h4>
+            <ul>
+              <li><a href="manual/" data-i18n="footerManual">マニュアル</a></li>
+              <li><a href="support/" data-i18n="footerSupport">サポート</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footerLegal">法的情報</h4>
+            <ul>
+              <li><a href="privacy/" data-i18n="footerPrivacy">プライバシーポリシー</a></li>
+              <li><a href="terms/" data-i18n="footerTerms">利用規約</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="footer-links">
-        <a href="/privacy/" data-i18n="footerPrivacy">プライバシーポリシー</a>
-        <a href="/terms/" data-i18n="footerTerms">利用規約</a>
-        <a href="/support/" data-i18n="footerSupport">サポート</a>
-      </div>
-      <div class="footer-copy">
-        <p>&copy; 2026 Pomocare. All rights reserved.</p>
+      <div class="footer-bottom">
+        <div class="footer-copy">
+          <p>&copy; 2026 PomoCare by URAKU Inc. All rights reserved.</p>
+        </div>
+        <div class="footer-controls">
+          <div class="lang-dropdown" id="footerLangDropdown">
+            <button class="lang-dropdown-btn" id="footerLangBtn" aria-haspopup="listbox" aria-expanded="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span id="footerLangLabel">JP</span>
+              <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+            </button>
+            <ul class="lang-dropdown-menu" id="footerLangMenu" role="listbox">
+              <li><button class="lang-option active" data-lang="ja" role="option">🇯🇵 日本語</button></li>
+              <li><button class="lang-option" data-lang="en" role="option">🇺🇸 English</button></li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </footer>
 
   <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

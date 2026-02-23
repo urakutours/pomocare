@@ -1,0 +1,91 @@
+// =============================================
+// 機能セクション — Bento Grid レイアウト
+// 不均等グリッドで視覚的リズムを作る
+// =============================================
+
+.features {
+  @include section-padding;
+  background: var(--surface-bg);
+}
+
+.features-grid {
+  display: grid;
+  gap: $space-6;
+
+  // ----- モバイル: 1カラム -----
+  grid-template-columns: 1fr;
+
+  // ----- タブレット: 2カラム -----
+  @include mq(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // ----- デスクトップ: 3カラム Bento Grid -----
+  @include mq(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.feature-card {
+  @include card($radius-xl);
+  padding: $space-8 $space-6;
+
+  &:hover {
+    @include card-hover;
+  }
+
+  // ----- 2カラム幅のカード（Bento） -----
+  &--wide {
+    @include mq(md) {
+      grid-column: span 2;
+    }
+  }
+}
+
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: $space-5;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.feature-card h3 {
+  font-size: $text-lg;
+  font-weight: $font-semibold;
+  margin-bottom: $space-2;
+  color: var(--text-primary);
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  font-size: $text-sm;
+  line-height: $leading-normal;
+}
+
+// ----- カード内ミニスクリーンショット -----
+.feature-card-img {
+  margin-top: $space-4;
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+
+  img {
+    width: 100%;
+    height: auto;
+  }
+
+  // ----- 余白の多いスクリーンショットをトリミング表示 -----
+  &--crop img {
+    height: 320px;
+    object-fit: cover;
+    object-position: center 35%;
+
+    @include mq-down(md) {
+      height: 260px;
+    }
+  }
+}

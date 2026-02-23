@@ -1,17 +1,5 @@
-import {
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  applyActionCode,
-  confirmPasswordReset,
-  deleteUser,
-  type User as FirebaseUser,
-} from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export type UserTier = 'free' | 'pro';
 
@@ -25,79 +13,98 @@ export interface User {
   emailVerified: boolean;
 }
 
-function toUser(fbUser: FirebaseUser): User {
+function toUser(sbUser: SupabaseUser): User {
   return {
-    id: fbUser.uid,
-    email: fbUser.email,
-    displayName: fbUser.displayName,
-    photoURL: fbUser.photoURL,
+    id: sbUser.id,
+    email: sbUser.email ?? null,
+    displayName:
+      sbUser.user_metadata?.full_name ??
+      sbUser.user_metadata?.name ??
+      null,
+    photoURL:
+      sbUser.user_metadata?.avatar_url ??
+      sbUser.user_metadata?.picture ??
+      null,
     tier: 'free',
     isAnonymous: false,
-    emailVerified: fbUser.emailVerified,
+    emailVerified: sbUser.email_confirmed_at != null,
   };
 }
 
 export class AuthService {
-  getCurrentUser(): Promise<User | null> {
-    return new Promise((resolve) => {
-      const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
-        unsubscribe();
-        resolve(fbUser ? toUser(fbUser) : null);
-      });
-    });
+  async getCurrentUser(): Promise<User | null> {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user ? toUser(user) : null;
   }
 
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
-    return onAuthStateChanged(auth, (fbUser) => {
-      callback(fbUser ? toUser(fbUser) : null);
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        callback(session?.user ? toUser(session.user) : null);
+      },
+    );
+    return () => subscription.unsubscribe();
   }
 
-  async signInWithGoogle(): Promise<User> {
-    const result = await signInWithPopup(auth, googleProvider);
-    return toUser(result.user);
+  async signInWithGoogle(): Promise<void> {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + window.location.pathname,
+      },
+    });
+    if (error) throw error;
+    // Redirect happens — no user returned
   }
 
   async signInWithEmail(email: string, password: string): Promise<User> {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    return toUser(result.user);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return toUser(data.user);
   }
 
   async signUpWithEmail(email: string, password: string): Promise<User> {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    // Send verification email
-    await sendEmailVerification(result.user);
-    return toUser(result.user);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin + window.location.pathname,
+      },
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error('Signup failed');
+    return toUser(data.user);
   }
 
   async resendVerificationEmail(): Promise<void> {
-    const fbUser = auth.currentUser;
-    if (fbUser) {
-      await sendEmailVerification(fbUser);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      await supabase.auth.resend({ type: 'signup', email: user.email });
     }
   }
 
   async sendPasswordReset(email: string): Promise<void> {
-    await sendPasswordResetEmail(auth, email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname,
+    });
+    if (error) throw error;
   }
 
-  async applyActionCode(code: string): Promise<void> {
-    await applyActionCode(auth, code);
-  }
-
-  async confirmPasswordReset(code: string, newPassword: string): Promise<void> {
-    await confirmPasswordReset(auth, code, newPassword);
+  async confirmPasswordReset(_code: string, newPassword: string): Promise<void> {
+    // Supabase password recovery: user clicks email link → lands on app with
+    // PASSWORD_RECOVERY event → we call updateUser to set the new password.
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
   }
 
   async deleteAccount(): Promise<void> {
-    const fbUser = auth.currentUser;
-    if (fbUser) {
-      await deleteUser(fbUser);
-    }
+    const { error } = await supabase.rpc('delete_own_account');
+    if (error) throw error;
+    await supabase.auth.signOut();
   }
 
   async signOut(): Promise<void> {
-    await firebaseSignOut(auth);
+    await supabase.auth.signOut();
   }
 }
 

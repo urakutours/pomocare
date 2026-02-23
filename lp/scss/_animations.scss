@@ -1,0 +1,77 @@
+// =============================================
+// キーフレーム & アニメーションユーティリティ
+// =============================================
+
+// ----- フロート（ヒーローモックアップ用） -----
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+// ----- パルスグロー（CTAボタン用） -----
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba($color-primary, 0.4); }
+  50%      { box-shadow: 0 0 20px 4px rgba($color-primary, 0.2); }
+}
+
+// ----- タイマープログレス（モックアップ用） -----
+@keyframes timer-progress {
+  from { stroke-dashoffset: 565; }
+  to   { stroke-dashoffset: 141; }
+}
+
+// =============================================
+// スクロールトリガーアニメーション
+// =============================================
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $duration-slow $ease-out,
+              transform $duration-slow $ease-out;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  // ----- スタガード対応 -----
+  .stagger-item {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity $duration-normal $ease-out,
+                transform $duration-normal $ease-out;
+    transition-delay: calc(var(--stagger-index, 0) * 80ms);
+  }
+
+  &.is-visible .stagger-item {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ----- 後方互換: 旧 fade-in クラス -----
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $duration-slow $ease-out, transform $duration-slow $ease-out;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// =============================================
+// アクセシビリティ: モーション軽減
+// =============================================
+@include reduced-motion {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

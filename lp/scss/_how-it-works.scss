@@ -1,0 +1,79 @@
+// =============================================
+// 使い方セクション
+// 水平タイムライン + ステップ
+// =============================================
+
+.how-it-works {
+  @include section-padding;
+  background: var(--surface-sunken);
+}
+
+// ----- ステップコンテナ -----
+.steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: $space-4;
+  margin-top: $space-12;
+  position: relative;
+
+  @include mq-down(md) {
+    flex-direction: column;
+    align-items: center;
+    gap: $space-8;
+  }
+}
+
+// ----- 個別ステップ -----
+.step {
+  text-align: center;
+  flex: 1;
+  max-width: 280px;
+  position: relative;
+
+  h3 {
+    font-size: $text-lg;
+    font-weight: $font-semibold;
+    margin-bottom: $space-2;
+    color: var(--text-primary);
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: $text-sm;
+    line-height: $leading-normal;
+  }
+}
+
+// ----- ステップ番号 -----
+.step-number {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: $color-primary;
+  color: $white;
+  font-size: $text-2xl;
+  font-weight: $font-bold;
+  @include flex-center;
+  margin: 0 auto $space-5;
+  position: relative;
+  z-index: 2;
+}
+
+// ----- ステップ間の矢印/ライン -----
+.step-arrow {
+  display: flex;
+  align-items: center;
+  padding-top: $space-4;
+  color: $color-primary;
+
+  svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  @include mq-down(md) {
+    transform: rotate(90deg);
+    padding: 0;
+  }
+}

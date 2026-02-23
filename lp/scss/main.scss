@@ -1,0 +1,33 @@
+// =============================================
+// PomoCare LP — メインスタイルシート
+// =============================================
+// このファイルはすべてのパーシャルを結合するエントリーポイントです。
+// 個別のスタイルはそれぞれのパーシャルファイルで管理します。
+// =============================================
+
+// --- 基盤（変数・mixin が全パーシャルで使えるように @import で読み込み） ---
+@import 'variables';
+@import 'mixins';
+@import 'reset';
+
+// --- 共通コンポーネント ---
+@import 'components';
+
+// --- セクション（表示順） ---
+@import 'header';
+@import 'hero';
+@import 'features';
+@import 'showcase';
+@import 'use-cases';
+@import 'how-it-works';
+@import 'pricing';
+@import 'faq';
+@import 'cta';
+@import 'footer';
+
+// --- ページ固有 ---
+@import 'manual';
+
+// --- テーマ・アニメーション ---
+@import 'animations';
+@import 'dark';

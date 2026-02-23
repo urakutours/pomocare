@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200">
+  <!-- Background -->
+  <rect width="280" height="200" rx="12" fill="#f8fafa"/>
+
+  <!-- Center label -->
+  <text x="140" y="98" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6b7280" font-weight="600">POMODORO</text>
+  <text x="140" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9ca3af">CYCLE</text>
+
+  <!-- Circular arc path (invisible, for reference) -->
+  <!-- 5 nodes arranged in a circle: 4 Work + 1 Long Break -->
+  <!-- Positions on circle r=70 centered at 140,100 -->
+  <!-- Node 1 (Work): top = 140, 30 -->
+  <!-- Node 2 (Work): right = 206.6, 66.5 -->
+  <!-- Node 3 (Work): bottom-right = 206.6, 133.5 -->
+  <!-- Node 4 (Work): bottom-left = 73.4, 133.5 -->
+  <!-- Node 5 (Long Break): left = 73.4, 66.5 -->
+
+  <!-- Connecting arrows (curved) -->
+  <!-- Arrow 1->2 -->
+  <path d="M 158,36 Q 195,30 200,58" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="200,58 196,52 203,54" fill="#d1d5db"/>
+
+  <!-- Arrow 2->3 -->
+  <path d="M 212,80 Q 225,105 212,126" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="212,126 215,119 208,121" fill="#d1d5db"/>
+
+  <!-- Arrow 3->4 -->
+  <path d="M 194,142 Q 140,170 86,142" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="86,142 93,145 92,138" fill="#d1d5db"/>
+
+  <!-- Arrow 4->5 -->
+  <path d="M 68,126 Q 55,105 68,80" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="68,80 65,87 72,85" fill="#d1d5db"/>
+
+  <!-- Arrow 5->1 -->
+  <path d="M 80,58 Q 95,30 122,36" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="122,36 116,33 117,40" fill="#d1d5db"/>
+
+  <!-- Node 1: Work -->
+  <circle cx="140" cy="34" r="18" fill="#0abab5" opacity="0.9"/>
+  <text x="140" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#fff" font-weight="700">WORK</text>
+  <text x="140" y="41" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" fill="#fff" opacity="0.8">25min</text>
+
+  <!-- Small break indicator between 1 and 2 -->
+  <circle cx="183" cy="42" r="8" fill="#f59e0b" opacity="0.8"/>
+  <text x="183" y="44" text-anchor="middle" font-family="Inter, sans-serif" font-size="4.5" fill="#fff" font-weight="600">5m</text>
+
+  <!-- Node 2: Work -->
+  <circle cx="206" cy="67" r="18" fill="#0abab5" opacity="0.9"/>
+  <text x="206" y="65" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#fff" font-weight="700">WORK</text>
+  <text x="206" y="74" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" fill="#fff" opacity="0.8">25min</text>
+
+  <!-- Small break indicator between 2 and 3 -->
+  <circle cx="218" cy="105" r="8" fill="#f59e0b" opacity="0.8"/>
+  <text x="218" y="107" text-anchor="middle" font-family="Inter, sans-serif" font-size="4.5" fill="#fff" font-weight="600">5m</text>
+
+  <!-- Node 3: Work -->
+  <circle cx="206" cy="134" r="18" fill="#0abab5" opacity="0.9"/>
+  <text x="206" y="132" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#fff" font-weight="700">WORK</text>
+  <text x="206" y="141" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" fill="#fff" opacity="0.8">25min</text>
+
+  <!-- Small break indicator between 3 and 4 -->
+  <circle cx="140" cy="158" r="8" fill="#f59e0b" opacity="0.8"/>
+  <text x="140" y="160" text-anchor="middle" font-family="Inter, sans-serif" font-size="4.5" fill="#fff" font-weight="600">5m</text>
+
+  <!-- Node 4: Work -->
+  <circle cx="74" cy="134" r="18" fill="#0abab5" opacity="0.9"/>
+  <text x="74" y="132" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#fff" font-weight="700">WORK</text>
+  <text x="74" y="141" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" fill="#fff" opacity="0.8">25min</text>
+
+  <!-- Node 5: Long Break -->
+  <circle cx="74" cy="67" r="22" fill="#8b5cf6" opacity="0.9"/>
+  <text x="74" y="63" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" fill="#fff" font-weight="700">LONG</text>
+  <text x="74" y="71" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" fill="#fff" font-weight="700">BREAK</text>
+  <text x="74" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" fill="#fff" opacity="0.8">20min</text>
+
+  <!-- Legend -->
+  <circle cx="20" cy="185" r="4" fill="#0abab5"/>
+  <text x="28" y="188" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Work</text>
+  <circle cx="55" cy="185" r="4" fill="#f59e0b"/>
+  <text x="63" y="188" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Short Break</text>
+  <circle cx="115" cy="185" r="4" fill="#8b5cf6"/>
+  <text x="123" y="188" font-family="Inter, sans-serif" font-size="6" fill="#6b7280">Long Break</text>
+</svg>

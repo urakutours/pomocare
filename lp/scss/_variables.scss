@@ -1,0 +1,181 @@
+// =============================================
+// PomoCare LP — 変数定義
+// カラー、タイポグラフィ、スペーシング、エフェクトを一元管理
+// =============================================
+
+// =============================================
+// カラーパレット — Primary
+// =============================================
+$color-primary:        #0abab5;
+$color-primary-hover:  #099d99;
+$color-primary-light:  #ccf2f1;
+$color-primary-subtle: #f0fffe;
+
+// =============================================
+// カラーパレット — Neutral
+// =============================================
+$white:           #ffffff;
+$color-gray-950:  #0a0f1a;
+$color-gray-900:  #111827;
+$color-gray-800:  #1f2937;
+$color-gray-700:  #374151;
+$color-gray-600:  #4b5563;
+$color-gray-500:  #6b7280;
+$color-gray-400:  #9ca3af;
+$color-gray-300:  #d1d5db;
+$color-gray-200:  #e5e7eb;
+$color-gray-100:  #f3f4f6;
+$color-gray-50:   #f9fafb;
+
+// =============================================
+// カラーパレット — Accent
+// =============================================
+$color-accent-purple: #7c3aed;
+$color-accent-amber:  #f59e0b;
+$color-accent-rose:   #f43f5e;
+$color-accent-sky:    #0ea5e9;
+
+// =============================================
+// カラーパレット — Semantic
+// =============================================
+$color-success:  #10b981;
+$color-warning:  #f59e0b;
+$color-error:    #ef4444;
+
+// =============================================
+// テーマ — CSS Custom Properties
+// Light（デフォルト）
+// =============================================
+:root {
+  --surface-bg:       #{$white};
+  --surface-raised:   #{$white};
+  --surface-overlay:  rgba(255, 255, 255, 0.80);
+  --surface-sunken:   #{$color-gray-50};
+
+  --text-primary:    #{$color-gray-900};
+  --text-secondary:  #{$color-gray-600};
+  --text-tertiary:   #{$color-gray-400};
+  --text-inverse:    #{$white};
+
+  --border-color:    #{$color-gray-200};
+  --border-light:    #{$color-gray-100};
+}
+
+// =============================================
+// テーマ — Dark
+// =============================================
+[data-theme="dark"] {
+  --surface-bg:       #{$color-gray-950};
+  --surface-raised:   #151c2c;
+  --surface-overlay:  rgba(15, 20, 35, 0.85);
+  --surface-sunken:   #0d1320;
+
+  --text-primary:    #{$color-gray-100};
+  --text-secondary:  #{$color-gray-400};
+  --text-tertiary:   #{$color-gray-500};
+  --text-inverse:    #{$color-gray-900};
+
+  --border-color:    #{$color-gray-700};
+  --border-light:    #{$color-gray-800};
+}
+
+// =============================================
+// フォントファミリー
+// =============================================
+$font-sans:    'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+$font-display: 'Inter', 'Noto Sans JP', sans-serif;
+
+// =============================================
+// フォントサイズスケール（clampでフルイドタイポグラフィ）
+// =============================================
+$text-xs:   0.75rem;
+$text-sm:   0.875rem;
+$text-base: 1rem;
+$text-lg:   1.125rem;
+$text-xl:   1.25rem;
+$text-2xl:  1.5rem;
+$text-3xl:  1.875rem;
+$text-4xl:  clamp(2rem, 4vw, 2.5rem);
+$text-5xl:  clamp(2.5rem, 5vw, 3.25rem);
+$text-hero: clamp(2.75rem, 6vw, 4.5rem);
+
+// =============================================
+// 行間 (line-height)
+// =============================================
+$leading-tight:   1.2;
+$leading-snug:    1.4;
+$leading-normal:  1.7;
+$leading-relaxed: 1.9;
+
+// =============================================
+// フォントウェイト
+// =============================================
+$font-normal:    400;
+$font-medium:    500;
+$font-semibold:  600;
+$font-bold:      700;
+$font-extrabold: 800;
+
+// =============================================
+// スペーシングスケール（4pxベース）
+// =============================================
+$space-1:  4px;
+$space-2:  8px;
+$space-3:  12px;
+$space-4:  16px;
+$space-5:  20px;
+$space-6:  24px;
+$space-8:  32px;
+$space-10: 40px;
+$space-12: 48px;
+$space-16: 64px;
+$space-20: 80px;
+$space-24: 96px;
+$space-32: 128px;
+
+// セクション余白（レスポンシブ対応）
+$section-py: clamp(64px, 10vw, 120px);
+
+// =============================================
+// 角丸 (Border Radius)
+// =============================================
+$radius-sm:   8px;
+$radius-md:   12px;
+$radius-lg:   16px;
+$radius-xl:   20px;
+$radius-2xl:  24px;
+$radius-full: 9999px;
+
+// =============================================
+// シャドウ（段階的な深さ）
+// =============================================
+$shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.06);
+$shadow-md:   0 4px 16px rgba(0, 0, 0, 0.08);
+$shadow-lg:   0 8px 32px rgba(0, 0, 0, 0.10);
+$shadow-xl:   0 16px 48px rgba(0, 0, 0, 0.12);
+$shadow-glow: 0 0 40px rgba(10, 186, 181, 0.15);
+
+// =============================================
+// Glassmorphism エフェクト
+// =============================================
+$glass-bg:     rgba(255, 255, 255, 0.60);
+$glass-border: rgba(255, 255, 255, 0.25);
+$glass-blur:   16px;
+
+// =============================================
+// トランジション
+// =============================================
+$ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+$ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+$duration-fast:   150ms;
+$duration-normal: 300ms;
+$duration-slow:   500ms;
+
+// =============================================
+// ブレークポイント
+// =============================================
+$bp-sm:  640px;
+$bp-md:  768px;
+$bp-lg:  1024px;
+$bp-xl:  1280px;

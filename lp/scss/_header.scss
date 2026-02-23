@@ -1,0 +1,174 @@
+// =============================================
+// ヘッダー / ナビゲーション
+// Glassmorphism + スクロール縮小 + モバイルメニュー
+// =============================================
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  @include glass(0.92, 12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  @include transition(box-shadow, border-color);
+
+  // ----- スクロール時のシャドウ出現 -----
+  &.scrolled {
+    box-shadow: $shadow-sm;
+  }
+
+  @include dark {
+    background: rgba($color-gray-950, 0.92);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+}
+
+// ----- ナビゲーション -----
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  height: 64px;
+}
+
+// ----- ロゴ -----
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  @include transition(opacity);
+
+  &:hover { opacity: 0.8; }
+}
+
+.logo-icon {
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: $text-xl;
+  font-weight: $font-bold;
+  color: $color-primary;
+}
+
+// ----- デスクトップナビリンク -----
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: $space-8;
+
+  a {
+    font-size: $text-sm;
+    font-weight: $font-medium;
+    color: var(--text-secondary);
+    @include transition(color);
+    position: relative;
+
+    // ----- 下線スライドインエフェクト -----
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: $color-primary;
+      transition: width $duration-normal $ease-out;
+    }
+
+    &:hover {
+      color: $color-primary;
+      &::after { width: 100%; }
+    }
+  }
+
+  // ナビ内のボタンには下線エフェクト不要
+  .btn::after { display: none; }
+
+  @include mq-down(lg) {
+    display: none;
+  }
+}
+
+// ----- ナビアクション（テーマ・言語・ボタン） -----
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+// ----- ハンバーガー -----
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $space-1;
+
+  span {
+    width: 22px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all $duration-normal;
+  }
+
+  &.active {
+    span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    span:nth-child(2) { opacity: 0; }
+    span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+  }
+
+  @include mq-down(lg) {
+    display: flex;
+  }
+}
+
+// ----- モバイルナビ -----
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--surface-bg);
+  padding: $space-8 $space-6;
+  flex-direction: column;
+  gap: $space-5;
+  text-align: center;
+  z-index: 899;
+  overflow-y: auto;
+
+  a {
+    font-size: $text-lg;
+    font-weight: $font-medium;
+    color: var(--text-primary);
+    padding: $space-3 0;
+    @include transition(color);
+
+    &:hover { color: $color-primary; }
+  }
+
+  .btn {
+    margin-top: $space-4;
+  }
+
+  // ----- モバイルメニュー内のテーマ・言語 -----
+  .mobile-nav-controls {
+    display: flex;
+    justify-content: center;
+    gap: $space-4;
+    margin-top: $space-6;
+    padding-top: $space-6;
+    border-top: 1px solid var(--border-color);
+  }
+
+  &.open {
+    display: flex;
+  }
+}

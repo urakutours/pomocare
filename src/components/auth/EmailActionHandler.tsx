@@ -1,50 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { authService } from '@/services/auth/AuthService';
 import { useI18n } from '@/contexts/I18nContext';
 
 interface EmailActionHandlerProps {
-  mode: string;
-  actionCode: string;
   onDone: () => void;
 }
 
-export function EmailActionHandler({ mode, actionCode, onDone }: EmailActionHandlerProps) {
+/**
+ * Supabase パスワードリセットフォーム
+ *
+ * Supabase はパスワードリセットリンクをクリックすると
+ * PASSWORD_RECOVERY イベントを発火してアプリにリダイレクトする。
+ * このコンポーネントで新パスワードを入力させて updateUser で更新する。
+ *
+ * メール確認は Supabase が自動で処理するためコンポーネント不要。
+ */
+export function EmailActionHandler({ onDone }: EmailActionHandlerProps) {
   const { t } = useI18n();
-  const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+  const [status, setStatus] = useState<'form' | 'processing' | 'success' | 'error'>('form');
   const [error, setError] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
-
-  useEffect(() => {
-    if (mode === 'verifyEmail') {
-      authService
-        .applyActionCode(actionCode)
-        .then(() => setStatus('success'))
-        .catch((e) => {
-          setStatus('error');
-          setError(e instanceof Error ? e.message : 'Verification failed');
-        });
-    } else if (mode === 'resetPassword') {
-      setShowPasswordForm(true);
-      setStatus('success');
-    }
-  }, [mode, actionCode]);
 
   const handlePasswordReset = async () => {
     if (newPassword.length < 6) return;
     try {
       setStatus('processing');
-      await authService.confirmPasswordReset(actionCode, newPassword);
-      setShowPasswordForm(false);
+      await authService.confirmPasswordReset('', newPassword);
       setStatus('success');
     } catch (e) {
       setStatus('error');
       setError(e instanceof Error ? e.message : 'Reset failed');
     }
   };
-
-  const isVerify = mode === 'verifyEmail';
-  const isReset = mode === 'resetPassword' && !showPasswordForm;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-tiffany/10 to-white dark:from-neutral-900 dark:to-neutral-800">
@@ -56,55 +43,7 @@ export function EmailActionHandler({ mode, actionCode, onDone }: EmailActionHand
           </>
         )}
 
-        {status === 'success' && isVerify && (
-          <>
-            <div className="w-12 h-12 mx-auto mb-4 bg-tiffany/10 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-tiffany" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{t.authEmailVerifiedTitle}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t.authEmailVerifiedMessage}</p>
-            <button
-              onClick={onDone}
-              className="w-full py-2.5 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-xl transition-colors"
-            >
-              {t.authOpenApp}
-            </button>
-            <button
-              onClick={() => window.close()}
-              className="w-full mt-2 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-            >
-              {t.authClose}
-            </button>
-          </>
-        )}
-
-        {status === 'success' && isReset && (
-          <>
-            <div className="w-12 h-12 mx-auto mb-4 bg-tiffany/10 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-tiffany" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{t.authPasswordResetDoneTitle}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t.authPasswordResetDoneMessage}</p>
-            <button
-              onClick={onDone}
-              className="w-full py-2.5 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-xl transition-colors"
-            >
-              {t.authOpenApp}
-            </button>
-            <button
-              onClick={() => window.close()}
-              className="w-full mt-2 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-            >
-              {t.authClose}
-            </button>
-          </>
-        )}
-
-        {showPasswordForm && status !== 'processing' && (
+        {status === 'form' && (
           <>
             <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{t.authForgotPasswordTitle}</h3>
             <input
@@ -120,6 +59,24 @@ export function EmailActionHandler({ mode, actionCode, onDone }: EmailActionHand
               className="w-full py-2.5 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-xl disabled:opacity-50 transition-colors"
             >
               {t.authSendResetEmail}
+            </button>
+          </>
+        )}
+
+        {status === 'success' && (
+          <>
+            <div className="w-12 h-12 mx-auto mb-4 bg-tiffany/10 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-tiffany" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{t.authPasswordResetDoneTitle}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t.authPasswordResetDoneMessage}</p>
+            <button
+              onClick={onDone}
+              className="w-full py-2.5 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-xl transition-colors"
+            >
+              {t.authOpenApp}
             </button>
           </>
         )}

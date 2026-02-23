@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200">
+  <!-- Background -->
+  <rect width="280" height="200" rx="12" fill="#fafafa"/>
+
+  <!-- Title -->
+  <text x="140" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#374151" font-weight="600">Organize with Labels</text>
+
+  <!-- Tag 1: Math - tilted slightly -->
+  <g transform="translate(45, 55) rotate(-5)">
+    <rect width="100" height="36" rx="18" fill="#3b6db8" opacity="0.12"/>
+    <rect width="100" height="36" rx="18" fill="none" stroke="#3b6db8" stroke-width="1.5" opacity="0.4"/>
+    <circle cx="22" cy="18" r="5" fill="#3b6db8"/>
+    <text x="35" y="22" font-family="Inter, sans-serif" font-size="11" fill="#3b6db8" font-weight="600">Math</text>
+  </g>
+
+  <!-- Tag 2: English - overlapping -->
+  <g transform="translate(125, 48) rotate(2)">
+    <rect width="110" height="36" rx="18" fill="#e8904a" opacity="0.12"/>
+    <rect width="110" height="36" rx="18" fill="none" stroke="#e8904a" stroke-width="1.5" opacity="0.4"/>
+    <circle cx="22" cy="18" r="5" fill="#e8904a"/>
+    <text x="35" y="22" font-family="Inter, sans-serif" font-size="11" fill="#e8904a" font-weight="600">English</text>
+  </g>
+
+  <!-- Tag 3: Coding -->
+  <g transform="translate(55, 100) rotate(3)">
+    <rect width="110" height="36" rx="18" fill="#0abab5" opacity="0.12"/>
+    <rect width="110" height="36" rx="18" fill="none" stroke="#0abab5" stroke-width="1.5" opacity="0.4"/>
+    <circle cx="22" cy="18" r="5" fill="#0abab5"/>
+    <text x="35" y="22" font-family="Inter, sans-serif" font-size="11" fill="#0abab5" font-weight="600">Coding</text>
+  </g>
+
+  <!-- Tag 4: Reading -->
+  <g transform="translate(140, 105) rotate(-3)">
+    <rect width="115" height="36" rx="18" fill="#8b5cf6" opacity="0.12"/>
+    <rect width="115" height="36" rx="18" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity="0.4"/>
+    <circle cx="22" cy="18" r="5" fill="#8b5cf6"/>
+    <text x="35" y="22" font-family="Inter, sans-serif" font-size="11" fill="#8b5cf6" font-weight="600">Reading</text>
+  </g>
+
+  <!-- Decorative small tags -->
+  <rect x="20" y="155" width="50" height="16" rx="8" fill="#3b6db8" opacity="0.08"/>
+  <rect x="80" y="158" width="40" height="16" rx="8" fill="#e8904a" opacity="0.08"/>
+  <rect x="165" y="155" width="45" height="16" rx="8" fill="#0abab5" opacity="0.08"/>
+  <rect x="220" y="158" width="42" height="16" rx="8" fill="#8b5cf6" opacity="0.08"/>
+
+  <!-- Bottom text -->
+  <text x="140" y="190" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#9ca3af">Categorize your focus sessions</text>
+</svg>

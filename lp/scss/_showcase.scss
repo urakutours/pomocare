@@ -1,0 +1,72 @@
+// =============================================
+// App Showcase セクション
+// スクリーンショットのタブ切替ギャラリー
+// =============================================
+
+.showcase {
+  @include section-padding;
+  background: var(--surface-sunken);
+}
+
+.showcase-content {
+  display: flex;
+  align-items: center;
+  gap: $space-6;
+
+  @include mq-down(md) {
+    flex-direction: column;
+    gap: $space-6;
+  }
+}
+
+// ----- スクリーンショット表示エリア -----
+.showcase-visual {
+  flex: 1;
+  @include flex-center;
+}
+
+.showcase-phone {
+  width: 260px;
+  background: $color-gray-800;
+  border-radius: 32px;
+  padding: 10px;
+  box-shadow: $shadow-xl;
+
+  @include mq-down(sm) {
+    width: 220px;
+  }
+}
+
+.showcase-screen {
+  border-radius: 24px;
+  overflow: hidden;
+  background: $color-gray-900;
+  aspect-ratio: 9 / 19.5;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity $duration-normal $ease-out;
+  }
+}
+
+// ----- テキスト＆タブエリア -----
+.showcase-info {
+  flex: 1;
+}
+
+.showcase-desc {
+  color: var(--text-secondary);
+  font-size: $text-base;
+  line-height: $leading-normal;
+  margin-top: $space-4;
+  min-height: 80px;
+}
+
+// ----- タブパネル（非アクティブ非表示） -----
+.showcase-panel {
+  display: none;
+  &.active { display: block; }
+}

@@ -42,7 +42,7 @@ export const ja: Translations = {
   addLabel: 'ラベルを追加',
   activeLabelLabel: '使用中のラベル',
   noLabel: 'ラベルなし',
-  weeklyStats: '週間',
+  weeklyStats: '統計・分析',
   weekly: '週間',
   monthly: '月間',
   yearly: '年間',

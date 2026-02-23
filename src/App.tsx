@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FeatureProvider } from '@/contexts/FeatureContext';
 import { I18nProvider, useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { createStorageService, createFirestoreStorageService, LocalStorageAdapter } from '@/services/storage';
+import { createStorageService, createSupabaseStorageService, LocalStorageAdapter } from '@/services/storage';
 import { useSettings } from '@/hooks/useSettings';
 import { useSessions } from '@/hooks/useSessions';
 import { useTimer } from '@/hooks/useTimer';
@@ -37,27 +38,42 @@ const QUICK_COLORS = [
   '#F4B07A', '#E8904A', '#C0B8B0', '#808070',
 ];
 
-function QuickLabelModal({
+export function QuickLabelModal({
   onAdd,
   onClose,
   addNewLabel,
   labelNamePlaceholder,
   addButtonText,
+  initialName,
+  initialColor,
+  editId,
+  title,
+  buttonText,
 }: {
   onAdd: (label: LabelDefinition) => void;
   onClose: () => void;
   addNewLabel: string;
   labelNamePlaceholder: string;
   addButtonText: string;
+  /** 編集モード用: 初期ラベル名 */
+  initialName?: string;
+  /** 編集モード用: 初期カラー */
+  initialColor?: string;
+  /** 編集モード用: 既存ラベルID（指定時は新規IDを生成しない） */
+  editId?: string;
+  /** モーダルタイトル上書き */
+  title?: string;
+  /** ボタンテキスト上書き */
+  buttonText?: string;
 }) {
-  const [name, setName] = useState('');
-  const [color, setColor] = useState(QUICK_COLORS[10]); // tiffany default
+  const [name, setName] = useState(initialName ?? '');
+  const [color, setColor] = useState(initialColor ?? QUICK_COLORS[10]);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleAdd = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    onAdd({ id: Date.now().toString(36), name: trimmed, color });
+    onAdd({ id: editId ?? Date.now().toString(36), name: trimmed, color });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -72,7 +88,7 @@ function QuickLabelModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-3">
-          <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm">{addNewLabel.replace('+ ', '')}</h4>
+          <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm">{title ?? addNewLabel.replace('+ ', '')}</h4>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">✕</button>
         </div>
         <input
@@ -114,14 +130,14 @@ function QuickLabelModal({
           disabled={!name.trim()}
           className="mt-4 w-full py-2 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg disabled:opacity-40 transition-colors"
         >
-          {addButtonText}
+          {buttonText ?? addButtonText}
         </button>
       </div>
     </div>
   );
 }
 
-// ---- Custom label selector with color dots ----
+// ---- Custom label selector with color dots (portal-based modal) ----
 function LabelSelect({
   labels,
   value,
@@ -136,28 +152,39 @@ function LabelSelect({
   onChange: (val: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  // Close on outside click
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
+  const selected = useMemo(() => labels.find((l) => l.id === value) ?? null, [labels, value]);
 
-  const selected = labels.find((l) => l.id === value) ?? null;
+  const handleOpen = () => {
+    if (!open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom - 8;
+      const spaceAbove = rect.top - 8;
+      const maxH = Math.min(window.innerHeight * 0.7, Math.max(spaceBelow, spaceAbove));
+      const openBelow = spaceBelow >= spaceAbove;
+      setDropdownStyle({
+        position: 'fixed',
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+        maxHeight: `${maxH}px`,
+        ...(openBelow
+          ? { top: rect.bottom + 4 }
+          : { bottom: window.innerHeight - rect.top + 4 }),
+      });
+    }
+    setOpen((v) => !v);
+  };
 
   return (
-    <div ref={ref} className="relative w-full">
+    <>
       {/* Trigger button */}
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleOpen}
         className="w-full flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-left focus:outline-none focus:ring-2 focus:ring-tiffany"
       >
         {selected ? (
@@ -176,53 +203,65 @@ function LabelSelect({
         </svg>
       </button>
 
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute z-40 w-full mt-1 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg overflow-hidden">
-          {/* No label option */}
-          <button
-            type="button"
-            onClick={() => { onChange(''); setOpen(false); }}
-            className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-neutral-600 ${!value ? 'bg-tiffany/10' : ''}`}
+      {/* Portal-based dropdown: stays on screen, scrollable, max 70vh */}
+      {open && createPortal(
+        <>
+          {/* Transparent backdrop */}
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
+            onMouseDown={() => setOpen(false)}
+          />
+          {/* Dropdown panel */}
+          <div
+            style={dropdownStyle}
+            className="bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl shadow-lg overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            <span className="w-3 h-3 rounded-full flex-shrink-0 border border-gray-300 dark:border-neutral-500" />
-            <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>
-          </button>
-
-          {/* Label options */}
-          {labels.map((l) => (
+            {/* No label option */}
             <button
-              key={l.id}
               type="button"
-              onClick={() => { onChange(l.id); setOpen(false); }}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-neutral-600 ${value === l.id ? 'bg-tiffany/10' : ''}`}
+              onClick={() => { onChange(''); setOpen(false); }}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-neutral-600 ${!value ? 'bg-tiffany/10' : ''}`}
             >
-              <span
-                className="w-3 h-3 rounded-full flex-shrink-0"
-                style={{ backgroundColor: l.color }}
-              />
-              <span className="flex-1 truncate text-gray-700 dark:text-gray-200">{l.name}</span>
-              {value === l.id && (
-                <svg className="w-3.5 h-3.5 text-tiffany flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                </svg>
-              )}
+              <span className="w-3 h-3 rounded-full flex-shrink-0 border border-gray-300 dark:border-neutral-500" />
+              <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>
             </button>
-          ))}
 
-          {/* Add new label */}
-          <button
-            type="button"
-            onClick={() => { onChange('__new__'); setOpen(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-tiffany hover:bg-tiffany/5 border-t border-gray-100 dark:border-neutral-600"
-          >
-            <span className="w-3 h-3 rounded-full flex-shrink-0 border-2 border-dashed border-tiffany flex items-center justify-center">
-            </span>
-            <span>{addNewLabel}</span>
-          </button>
-        </div>
+            {/* Label options */}
+            {labels.map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => { onChange(l.id); setOpen(false); }}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-neutral-600 ${value === l.id ? 'bg-tiffany/10' : ''}`}
+              >
+                <span
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: l.color }}
+                />
+                <span className="flex-1 truncate text-gray-700 dark:text-gray-200">{l.name}</span>
+                {value === l.id && (
+                  <svg className="w-3.5 h-3.5 text-tiffany flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+            ))}
+
+            {/* Add new label */}
+            <button
+              type="button"
+              onClick={() => { onChange('__new__'); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-tiffany hover:bg-tiffany/5 border-t border-gray-100 dark:border-neutral-600"
+            >
+              <span className="w-3 h-3 rounded-full flex-shrink-0 border-2 border-dashed border-tiffany flex items-center justify-center" />
+              <span>{addNewLabel}</span>
+            </button>
+          </div>
+        </>,
+        document.body
       )}
-    </div>
+    </>
   );
 }
 
@@ -301,7 +340,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
   const handleClearAll = async () => {
     await storage.clearAll();
-    // 匿名 localStorage もクリア（マイグレーションによる復元を防止）
+    // 匿名 localStorage もクリア
     await new LocalStorageAdapter().clearAll();
     window.location.reload();
   };
@@ -413,6 +452,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           onClearAll={handleClearAll}
           onImportCsv={importSessions}
           labels={labels}
+          onSaveLabels={handleSaveLabels}
         />
       )}
 
@@ -497,26 +537,13 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   );
 }
 
-// ---- Parse Firebase auth action URL params ----
-function useFirebaseAction() {
-  return useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get('mode');
-    const oobCode = params.get('oobCode');
-    if (mode && oobCode) return { mode, actionCode: oobCode };
-    return null;
-  }, []);
-}
-
 // ---- Storage switcher based on auth state ----
-// ログイン済み → Firestore（単一ドキュメント方式）
+// ログイン済み → Supabase (PostgreSQL + JSONB)
 // 未ログイン   → localStorage
-// StorageService インターフェースを維持し、将来の Supabase 移行に対応
 function AppWithStorage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isPasswordRecovery, clearPasswordRecovery } = useAuth();
   const [storage, setStorage] = useState<StorageService | null>(null);
   const prevUidRef = useRef<string | null | undefined>(undefined); // undefined = 未初期化
-  const firebaseAction = useFirebaseAction();
 
   useEffect(() => {
     if (authLoading) return;
@@ -531,29 +558,24 @@ function AppWithStorage() {
     setStorage(null);
 
     if (currentUid) {
-      // ログイン済み → Firestore（単一ドキュメント方式）
-      // 匿名データとは完全に分離し、各アカウント固有のデータのみ使用
-      setStorage(createFirestoreStorageService(currentUid));
+      // ログイン済み → Supabase
+      setStorage(createSupabaseStorageService(currentUid));
     } else {
       // 未ログイン → 匿名 localStorage
       setStorage(createStorageService());
     }
   }, [user, authLoading]);
 
-  // Firebase auth action (email verify / password reset)
-  if (firebaseAction) {
+  // Supabase password recovery (user clicked reset link in email)
+  if (isPasswordRecovery) {
     const handleActionDone = () => {
-      // Remove query params and reload
+      clearPasswordRecovery();
+      // Remove hash fragment left by Supabase
       window.history.replaceState({}, '', window.location.pathname);
-      window.location.reload();
     };
     return (
       <I18nProvider language="en">
-        <EmailActionHandler
-          mode={firebaseAction.mode}
-          actionCode={firebaseAction.actionCode}
-          onDone={handleActionDone}
-        />
+        <EmailActionHandler onDone={handleActionDone} />
       </I18nProvider>
     );
   }

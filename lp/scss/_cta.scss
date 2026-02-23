@@ -1,0 +1,48 @@
+// =============================================
+// CTAセクション
+// フルワイド + メッシュグラデーション
+// =============================================
+
+.cta {
+  padding: $space-20 0;
+  text-align: center;
+  color: $white;
+  position: relative;
+  overflow: hidden;
+
+  // ----- メッシュグラデーション（ヒーローと呼応） -----
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, $color-primary, #088f8b);
+
+  h2 {
+    font-size: $text-4xl;
+    font-weight: $font-bold;
+    margin-bottom: $space-3;
+  }
+
+  p {
+    font-size: $text-lg;
+    opacity: 0.9;
+    margin-bottom: $space-8;
+  }
+
+  // ----- プラットフォームアイコン -----
+  .cta-platforms {
+    display: flex;
+    justify-content: center;
+    gap: $space-6;
+    margin-top: $space-8;
+    font-size: $text-sm;
+    opacity: 0.8;
+  }
+
+  .btn-white {
+    box-shadow: $shadow-lg;
+
+    &:hover {
+      box-shadow: $shadow-xl;
+    }
+  }
+}

@@ -1,0 +1,69 @@
+// =============================================
+// ダークモード 上書きスタイル
+// data-theme="dark" 時の追加調整
+// CSS Custom Propertiesで大半は自動切替。
+// ここではCSS変数だけでは対応できないケースのみ記述。
+// =============================================
+
+[data-theme="dark"] {
+
+  // ----- Glassmorphism -----
+  .header {
+    background: rgba($color-gray-950, 0.92);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  // ----- カード -----
+  .feature-card,
+  .pricing-card,
+  .use-case-content,
+  .faq-item {
+    border-color: $color-gray-700;
+
+    &:hover {
+      border-color: $color-primary;
+    }
+  }
+
+  // ----- Pricing Popular -----
+  .pricing-card.popular {
+    border-color: $color-primary;
+    box-shadow: $shadow-lg, 0 0 0 1px $color-primary;
+  }
+
+  // ----- 比較テーブル -----
+  .comp-paid-highlight {
+    background: linear-gradient(180deg, rgba($color-primary, 0.08) 0%, var(--surface-sunken) 100%);
+  }
+
+  // ----- Store badges -----
+  .store-badge svg rect {
+    fill: $color-gray-700;
+  }
+
+  // ----- フォンモックアップ -----
+  .phone-mockup {
+    background: $color-gray-700;
+  }
+
+  // ----- Showcase -----
+  .showcase-phone {
+    background: $color-gray-700;
+  }
+
+  // ----- Pricing feature check -----
+  .pricing-features li::before {
+    background-color: rgba($color-success, 0.15);
+  }
+
+  .pricing-features li.disabled::before {
+    background-color: $color-gray-800;
+  }
+
+  // ----- 比較テーブルのボーダー -----
+  .comp-table td.comp-paid-col,
+  .comp-table th.comp-paid-col {
+    border-left-color: $color-primary;
+    border-right-color: $color-primary;
+  }
+}

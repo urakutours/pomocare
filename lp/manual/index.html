@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Manual - PomoCare</title>
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ==================== Header ==================== -->
+  <header class="header" id="header">
+    <nav class="nav container">
+      <a href="../" class="logo" aria-label="PomoCare">
+        <svg class="logo-icon" viewBox="0 0 512 512" width="36" height="36">
+          <circle cx="256" cy="256" r="256" fill="#0abab5"/>
+          <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
+        </svg>
+        <span class="logo-text">PomoCare</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="../#features" data-i18n="navFeatures">機能</a></li>
+        <li><a href="../#pricing" data-i18n="navPricing">料金</a></li>
+        <li><a href="../#faq" data-i18n="navFaq">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-dropdown-btn" id="langDropdownBtn" aria-haspopup="listbox" aria-expanded="false">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="langDropdownLabel">JP</span>
+            <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <ul class="lang-dropdown-menu" id="langDropdownMenu" role="listbox">
+            <li><button class="lang-option active" data-lang="ja" role="option">&#x1F1EF;&#x1F1F5; 日本語</button></li>
+            <li><button class="lang-option" data-lang="en" role="option">&#x1F1FA;&#x1F1F8; English</button></li>
+          </ul>
+        </div>
+
+        <a href="https://app.pomocare.com" class="btn btn-sm btn-primary nav-cta" data-i18n="navOpenApp">アプリを開く</a>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- モバイルナビ -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="../#features" data-i18n="navFeatures">機能</a>
+    <a href="../#pricing" data-i18n="navPricing">料金</a>
+    <a href="../#faq" data-i18n="navFaq">FAQ</a>
+    <a href="https://app.pomocare.com" class="btn btn-primary" data-i18n="navOpenApp">アプリを開く</a>  </div>
+
+  <!-- ==================== JAPANESE ==================== -->
+  <div id="manual-ja">
+
+  <!-- Hero -->
+  <section class="manual-hero">
+    <h1>PomoCare ユーザーマニュアル</h1>
+    <p>集中と休息のリズムを整えるポモドーロタイマーアプリ。<br>基本の使い方からすべての機能まで、わかりやすく解説します。</p>
+  </section>
+
+  <!-- TOC -->
+  <nav class="manual-toc">
+    <h2>目次</h2>
+    <ol>
+      <li><a href="#s1-ja"><span class="toc-num">1</span>はじめに</a></li>
+      <li><a href="#s2-ja"><span class="toc-num">2</span>画面の見かた</a></li>
+      <li><a href="#s3-ja"><span class="toc-num">3</span>タイマーを使う</a></li>
+      <li><a href="#s4-ja"><span class="toc-num">4</span>フォーカスモード</a></li>
+      <li><a href="#s5-ja"><span class="toc-num">5</span>休憩モード</a></li>
+      <li><a href="#s6-ja"><span class="toc-num">6</span>ラベルで分類する</a></li>
+      <li><a href="#s7-ja"><span class="toc-num">7</span>セッションメモ</a></li>
+      <li><a href="#s8-ja"><span class="toc-num">8</span>統計・グラフ</a></li>
+      <li><a href="#s9-ja"><span class="toc-num">9</span>CSV管理</a></li>
+      <li><a href="#s10-ja"><span class="toc-num">10</span>設定</a></li>
+      <li><a href="#s11-ja"><span class="toc-num">11</span>アカウントと同期</a></li>
+      <li><a href="#s12-ja"><span class="toc-num">12</span>アプリのインストール</a></li>
+      <li><a href="#s13-ja"><span class="toc-num">13</span>FAQ</a></li>
+    </ol>
+  </nav>
+
+  <!-- Section 1: Introduction -->
+  <div id="s1-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">1</span>
+      <h2>はじめに</h2>
+    </div>
+    <div class="content-row">
+      <div class="content-text">
+        <h3>ポモドーロテクニックとは？</h3>
+        <p>ポモドーロテクニックは、1980年代にイタリアの Francesco Cirillo（フランチェスコ・シリロ）によって考案された時間管理術です。名前の由来は、彼が学生時代に使っていたトマト（イタリア語で pomodoro）型のキッチンタイマーから来ています。</p>
+        <p>基本的な考え方はとてもシンプルです。</p>
+        <ol class="manual-steps">
+          <li><strong>25分間</strong> 集中して作業する（= 1ポモドーロ）</li>
+          <li><strong>5分間</strong> の短い休憩を取る</li>
+          <li>これを繰り返し、<strong>4ポモドーロ完了後</strong> に <strong>15〜30分間</strong> の長い休憩を取る</li>
+        </ol>
+      </div>
+      <div class="content-illust">
+        <img src="../images/pomodoro-cycle.svg" alt="ポモドーロサイクル図">
+      </div>
+    </div>
+
+    <h3>なぜ効果があるのか？</h3>
+    <div class="benefit-cards">
+      <div class="benefit-card">
+        <div class="bc-icon">&#x1F9E0;</div>
+        <h4>「短い集中」が脳に優しい</h4>
+        <p>25分という短い区切りにすることで、「あと少しだけ頑張ろう」と思える適度なプレッシャーが生まれ、高い集中力を維持しやすくなります。</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bc-icon">&#x1F680;</div>
+        <h4>「始めるハードル」が下がる</h4>
+        <p>「まず25分だけやってみよう」と思えば気軽に始められます。実際にやり始めると集中状態に入りやすくなります（作業興奮）。</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bc-icon">&#x2615;</div>
+        <h4>休憩が集中を持続させる</h4>
+        <p>こまめに休憩を挟むことで、1日を通して安定したパフォーマンスを保つことができます。長い休憩では体のケアも効果的です。</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bc-icon">&#x1F4CA;</div>
+        <h4>作業を「見える化」できる</h4>
+        <p>感覚ではなく数字で振り返れるため、計画の見積もり精度が上がり、日々の改善につながります。</p>
+      </div>
+    </div>
+
+    <h3>こんな方におすすめ</h3>
+    <ul class="audience-list">
+      <li>集中が続かず他のことに気を取られてしまう方</li>
+      <li>大きなタスクになかなか手をつけられない方</li>
+      <li>長時間作業して疲れ切ってしまう方</li>
+      <li>作業量を把握して計画的に進めたい方</li>
+      <li>リモートワーク・フリーランスの方</li>
+    </ul>
+
+    <h3>PomoCare でできること</h3>
+    <div class="feature-box">
+      <ul>
+        <li>タイマーが作業→休憩→作業のサイクルを<strong>自動で管理</strong></li>
+        <li>セッションごとに<strong>ラベルやメモ</strong>を付けて記録</li>
+        <li><strong>統計グラフ</strong>で日別・週別・月別の作業量を振り返り</li>
+        <li>アラーム音やテーマなど、自分好みに<strong>カスタマイズ</strong></li>
+        <li>アカウント登録で<strong>複数デバイスからデータ同期</strong></li>
+      </ul>
+    </div>
+    <p>PomoCare はログインしなくてもすべての基本機能を利用できます。データはブラウザに保存され、アカウントを作成するとクラウドに同期されます。</p>
+  </section>
+  </div>
+
+  <!-- Section 2: App Layout -->
+  <div class="manual-section-alt" id="s2-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">2</span>
+      <h2>画面の見かた</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>アプリは大きく3つの画面で構成されています。</p>
+        <table class="info-table">
+          <tr><th>ロゴ</th><td>タイマー画面（ホーム）に戻る</td></tr>
+          <tr><th>統計</th><td>統計・グラフ画面を開く</td></tr>
+          <tr><th>設定</th><td>設定画面を開く</td></tr>
+          <tr><th>ユーザー</th><td>ログイン / ユーザーメニューを表示</td></tr>
+        </table>
+      </div>
+      <div class="content-illust">
+        <img src="../images/app-overview.svg" alt="アプリ画面概要">
+      </div>
+    </div>
+    <div class="screenshot-slot" data-screenshot="home-screen-ja">ホーム画面（タイマー画面）のスクリーンショット</div>
+  </section>
+  </div>
+
+  <!-- Section 3: Timer -->
+  <div id="s3-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">3</span>
+      <h2>タイマーを使う</h2>
+    </div>
+    <div class="content-row">
+      <div class="content-text">
+        <h3>基本操作</h3>
+        <table class="info-table">
+          <tr><th>開始</th><td>&#x25B6; ボタンをタップ。フォーカスモードに切り替わります</td></tr>
+          <tr><th>一時停止</th><td>フォーカスモード中に &#x23F8; ボタンをタップ</td></tr>
+          <tr><th>再開</th><td>一時停止中に &#x25B6; ボタンをタップ</td></tr>
+          <tr><th>リセット</th><td>一時停止中にリセットボタンをタップ（確認あり）</td></tr>
+          <tr><th>早期完了</th><td>途中で「完了」をタップ → 経過時間が記録されます</td></tr>
+        </table>
+        <h3>自動サイクル</h3>
+        <p>タイマーが0になると自動で次のモードに切り替わります。</p>
+        <div class="cycle-flow">
+          <span class="cycle-item cycle-work">作業</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-sbreak">短い休憩</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-work">作業</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-sbreak">短い休憩</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-work">作業</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-lbreak">長い休憩</span>
+        </div>
+      </div>
+      <div class="content-illust">
+        <img src="../images/timer-controls.svg" alt="タイマーコントロール">
+      </div>
+    </div>
+    <div class="screenshot-slot" data-screenshot="timer-running-ja">タイマー実行中のスクリーンショット</div>
+  </section>
+  </div>
+
+  <!-- Section 4: Focus Mode -->
+  <div class="manual-section-alt" id="s4-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">4</span>
+      <h2>フォーカスモード</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>タイマーを開始すると、全画面の集中表示に切り替わります。余計な情報を排除し、タイマーだけに集中できます。</p>
+        <h3>実行中のボタン</h3>
+        <table class="info-table">
+          <tr><th>停止</th><td>タイマーを一時停止する</td></tr>
+          <tr><th>完了</th><td>セッションを途中で完了する（経過時間が記録されます）</td></tr>
+        </table>
+        <h3>一時停止中のボタン</h3>
+        <table class="info-table">
+          <tr><th>再開</th><td>タイマーを再開する</td></tr>
+          <tr><th>リセット</th><td>タイマーをリセットしてタイマー画面に戻る</td></tr>
+        </table>
+        <p>リセットや早期完了時は、誤操作防止のための確認ダイアログが表示されます。</p>
+      </div>
+      <div class="content-illust">
+        <img src="../images/focus-mode.svg" alt="フォーカスモード">
+      </div>
+    </div>
+    <img src="../images/screenshot-focus-mode.jpg" alt="フォーカスモード画面" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 5: Break Mode -->
+  <div id="s5-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">5</span>
+      <h2>休憩モード</h2>
+    </div>
+    <div class="content-row">
+      <div class="content-text">
+        <p>作業セッション完了後、自動的に休憩モードに切り替わります。</p>
+        <ul>
+          <li><strong>短い休憩</strong>: 通常のセッション後（デフォルト: 5分）</li>
+          <li><strong>長い休憩</strong>: 設定回数の完了後（デフォルト: 4回ごとに20分）</li>
+        </ul>
+        <table class="info-table">
+          <tr><th>タイマー開始</th><td>休憩タイマーを開始する</td></tr>
+          <tr><th>スキップ</th><td>休憩をスキップして次の作業セッションへ進む</td></tr>
+        </table>
+        <p>休憩中は、設定で登録したカスタムメッセージが表示されます。<br>例:「水を飲みましょう」「ストレッチしましょう」</p>
+      </div>
+      <div class="content-illust">
+        <img src="../images/break-mode.svg" alt="休憩モード">
+      </div>
+    </div>
+    <img src="../images/screenshot-break-start.jpg" alt="休憩モード画面" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 6: Labels -->
+  <div class="manual-section-alt" id="s6-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">6</span>
+      <h2>ラベルでタスクを分類する</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>ラベルを使うと、何の作業をしたかを色分けして記録できます。</p>
+        <h3>使い方</h3>
+        <ol class="manual-steps">
+          <li>タイマー画面の<strong>ラベル選択ドロップダウン</strong>からラベルを選ぶ</li>
+          <li>タイマーを開始すると、選択中のラベルがセッションに自動的に記録される</li>
+          <li>ラベルなしでもセッションの記録は可能</li>
+        </ol>
+        <h3>ラベルの管理</h3>
+        <table class="info-table">
+          <tr><th>新規作成</th><td>タイマー画面から直接、または設定画面から</td></tr>
+          <tr><th>色を変更</th><td>56色パレットまたはカスタムカラーから選択</td></tr>
+          <tr><th>名前を変更</th><td>ラベル名をタップして直接編集</td></tr>
+          <tr><th>並び替え</th><td>ドラッグ&ドロップ（タッチ対応）</td></tr>
+          <tr><th>削除</th><td>確認ダイアログ付き</td></tr>
+        </table>
+      </div>
+      <div class="content-illust">
+        <img src="../images/labels-system.svg" alt="ラベルシステム">
+      </div>
+    </div>
+    <img src="../images/screenshot-labels.jpg" alt="ラベル管理画面" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 7: Notes -->
+  <div id="s7-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">7</span>
+      <h2>セッションにメモを残す</h2>
+    </div>
+    <p>作業内容の詳細をメモとして記録できます。</p>
+    <ol class="manual-steps">
+      <li>タイマー画面でラベルを選択すると、<strong>メモ入力欄</strong>が表示されます</li>
+      <li>テキストを入力してからタイマーを開始すると、セッションと一緒に保存されます</li>
+      <li>後から編集する場合は、統計画面の<strong>セッション詳細モーダル</strong>からメモ欄を直接編集</li>
+    </ol>
+  </section>
+  </div>
+
+  <!-- Section 8: Statistics -->
+  <div class="manual-section-alt" id="s8-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">8</span>
+      <h2>統計・グラフで振り返る</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>ヘッダーの<strong>統計ボタン</strong>をタップすると、作業の記録をグラフで確認できます。</p>
+        <h3>セッションサマリー</h3>
+        <table class="info-table">
+          <tr><th>今日</th><td>本日のセッション数と合計作業時間</td></tr>
+          <tr><th>今週</th><td>セッション数、アクティブ日数（X/7）、合計時間</td></tr>
+        </table>
+        <h3>表示期間</h3>
+        <table class="info-table">
+          <tr><th>週間</th><td>過去7日間の日別グラフ</td></tr>
+          <tr><th>月間</th><td>当月の日別グラフ</td></tr>
+          <tr><th>年間</th><td>12ヶ月の月別グラフ</td></tr>
+        </table>
+        <p>&#x25C0; &#x25B6; ボタンで前後の期間に移動できます。セッション数と合計時間の表示を切り替えられます。</p>
+        <h3>その他の機能</h3>
+        <ul>
+          <li><strong>積み上げ棒グラフ</strong>: ラベルごとに色分けして表示</li>
+          <li><strong>ラベルフィルター</strong>: 特定ラベルだけを表示</li>
+          <li><strong>グラフ高さの変更</strong>: ドラッグで調整（40px〜300px）</li>
+          <li><strong>セッション詳細</strong>: 日付バーをタップでラベル変更・メモ編集・削除が可能</li>
+        </ul>
+      </div>
+      <div class="content-illust">
+        <img src="../images/statistics-chart.svg" alt="統計グラフ">
+      </div>
+    </div>
+    <img src="../images/screenshot-stats-weekly.jpg" alt="統計グラフ画面（週間）" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 9: CSV -->
+  <div id="s9-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">9</span>
+      <h2>セッションデータの管理（CSV）</h2>
+    </div>
+    <h3>エクスポート（書き出し）</h3>
+    <p>設定画面 →「<strong>CSVエクスポート</strong>」をタップすると、全セッションデータがCSVファイルとしてダウンロードされます。</p>
+    <h3>インポート（読み込み）</h3>
+    <p>設定画面 →「<strong>CSVインポート</strong>」で、CSVファイルを読み込めます。</p>
+    <ul>
+      <li>ファイルをドラッグ&ドロップ、またはファイル選択で読み込み</li>
+      <li>Shift-JIS / UTF-8 のエンコーディングを自動判別</li>
+      <li>同一日付のデータは重複排除されます</li>
+      <li>CSVに含まれる未登録のラベルは自動作成されます</li>
+    </ul>
+  </section>
+  </div>
+
+  <!-- Section 10: Settings -->
+  <div class="manual-section-alt" id="s10-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>設定を変更する</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <h3>タイマー時間</h3>
+        <table class="info-table">
+          <tr><th>作業時間</th><td>プリセット選択またはカスタム入力（デフォルト: 25分）</td></tr>
+          <tr><th>短い休憩</th><td>プリセット選択またはカスタム入力（デフォルト: 5分）</td></tr>
+          <tr><th>長い休憩</th><td>ON/OFF切替、間隔と時間を設定（デフォルト: 4回ごと/20分）</td></tr>
+        </table>
+        <h3>アラーム</h3>
+        <table class="info-table">
+          <tr><th>Bell</th><td>ハンドベル風の澄んだ音</td></tr>
+          <tr><th>Digital</th><td>目覚まし時計風のデジタル音</td></tr>
+          <tr><th>Chime</th><td>3音のアルペジオ（ド-ミ-ソ）</td></tr>
+          <tr><th>Kitchen</th><td>キッチンタイマー風の音</td></tr>
+          <tr><th>Classic</th><td>クラシックなアラーム音</td></tr>
+          <tr><th>Gentle</th><td>穏やかな通知音</td></tr>
+          <tr><th>Soft</th><td>柔らかいソフトな音</td></tr>
+          <tr><th>なし</th><td>サイレント（音なし）</td></tr>
+        </table>
+        <p>リピート回数（1〜5回）とプレビュー再生が設定できます。</p>
+        <h3>外観・その他</h3>
+        <ul>
+          <li><strong>テーマ</strong>: ライト / ダークモードの切替</li>
+          <li><strong>言語</strong>: 7言語から選択</li>
+          <li><strong>カスタムメッセージ</strong>: 休憩中に表示するメッセージを設定</li>
+          <li><strong>データリセット</strong>: 全データ消去（確認付き）</li>
+          <li><strong>アカウント削除</strong>: ログイン中のアカウントを削除（確認付き）</li>
+        </ul>
+      </div>
+      <div class="content-illust">
+        <img src="../images/settings-panel.svg" alt="設定画面">
+      </div>
+    </div>
+    <img src="../images/screenshot-settings.jpg" alt="設定画面" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 11: Account -->
+  <div id="s11-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2>アカウントとデータ同期</h2>
+    </div>
+    <div class="content-row">
+      <div class="content-text">
+        <h3>ログイン方法</h3>
+        <table class="info-table">
+          <tr><th>Google</th><td>Googleアカウントでワンタップログイン</td></tr>
+          <tr><th>メール</th><td>メールアドレスとパスワードで新規登録またはログイン</td></tr>
+        </table>
+        <h3>アカウント作成の流れ</h3>
+        <ol class="manual-steps">
+          <li>メールアドレスとパスワードを入力して<strong>サインアップ</strong></li>
+          <li>確認メールが届くので、メール内のリンクをクリック</li>
+          <li>メール認証完了。すべての機能が利用可能に</li>
+        </ol>
+        <h3>データの保存先</h3>
+        <table class="info-table">
+          <tr><th>未ログイン</th><td>ブラウザのローカルストレージ（そのブラウザでのみ利用可能）</td></tr>
+          <tr><th>ログイン済み</th><td>クラウド（Firestore）に同期 → 複数デバイスで利用可能</td></tr>
+        </table>
+        <p>未ログインの状態で記録したデータは、初回ログイン時に自動的にクラウドへ移行されます。</p>
+      </div>
+      <div class="content-illust">
+        <img src="../images/cloud-sync.svg" alt="クラウド同期">
+      </div>
+    </div>
+    <div class="screenshot-slot" data-screenshot="login-ja">ログイン画面のスクリーンショット</div>
+  </section>
+  </div>
+
+  <!-- Section 12: PWA -->
+  <div class="manual-section-alt" id="s12-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2>アプリのインストール（PWA）</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>PomoCare はブラウザからインストールして、ネイティブアプリのように使えます。</p>
+        <h3>インストール方法</h3>
+        <ol class="manual-steps">
+          <li>ブラウザでPomoCareを開く</li>
+          <li>画面下部に表示される<strong>インストールバナー</strong>をタップ</li>
+          <li>ブラウザの案内に従ってインストール</li>
+        </ol>
+        <h3>インストール後の特徴</h3>
+        <ul>
+          <li>ホーム画面 / デスクトップからアプリとして起動</li>
+          <li>ブラウザのアドレスバーなしのフルスクリーン表示</li>
+          <li>オフラインでも動作</li>
+          <li>アプリの更新は自動で適用</li>
+        </ul>
+      </div>
+      <div class="content-illust">
+        <img src="../images/pwa-install.svg" alt="PWAインストール">
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <!-- Section 13: FAQ -->
+  <div id="s13-ja">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <h2>よくある質問（FAQ）</h2>
+    </div>
+    <div class="manual-faq">
+      <details>
+        <summary>ブラウザを閉じてもデータは消えませんか？</summary>
+        <p>未ログインの場合、データはブラウザのローカルストレージに保存されます。ブラウザのデータを消去しない限り残ります。ログイン済みの場合はクラウドに保存されるため、別のデバイスからもアクセスできます。</p>
+      </details>
+      <details>
+        <summary>作業時間を25分以外に変えられますか？</summary>
+        <p>はい。設定画面の「作業時間」からプリセットを選ぶか、カスタム値を入力できます。休憩時間も同様にカスタマイズ可能です。</p>
+      </details>
+      <details>
+        <summary>長い休憩を使わないことはできますか？</summary>
+        <p>はい。設定画面で長い休憩をOFFにできます。</p>
+      </details>
+      <details>
+        <summary>セッションを途中で終わらせた場合はどうなりますか？</summary>
+        <p>「早期完了」を選ぶと、実際に作業した時間がそのまま記録されます。例えば25分のタイマーで15分経過後に完了した場合、15分のセッションとして記録されます。</p>
+      </details>
+      <details>
+        <summary>他のアプリで記録したデータを移行できますか？</summary>
+        <p>CSV形式のデータであればインポート機能で読み込めます。設定画面の「CSVインポート」から、ファイルをドラッグ&ドロップまたは選択して読み込んでください。</p>
+      </details>
+      <details>
+        <summary>オフラインでも使えますか？</summary>
+        <p>はい。アプリをインストール（PWA）すれば、オフラインでもタイマーや記録機能を利用できます。ただし、クラウド同期はインターネット接続時に行われます。</p>
+      </details>
+      <details>
+        <summary>対応しているブラウザは？</summary>
+        <p>Chrome, Edge, Safari, Firefox など主要なモダンブラウザに対応しています。PWAのインストール機能はChromeとEdgeで最も安定して動作します。</p>
+      </details>
+    </div>
+  </section>
+  </div>
+
+  <!-- CTA -->
+  <section class="manual-cta">
+    <h2>さあ、集中を始めましょう</h2>
+    <p>PomoCareで、より生産的な毎日を。</p>
+    <a href="https://app.pomocare.com" class="btn btn-white btn-lg">アプリを開く</a>
+  </section>
+
+  </div><!-- /manual-ja -->
+
+
+  <!-- ==================== ENGLISH ==================== -->
+  <div id="manual-en" style="display:none;">
+
+  <!-- Hero -->
+  <section class="manual-hero">
+    <h1>PomoCare User Manual</h1>
+    <p>A Pomodoro timer app that helps you build a rhythm of focus and rest.<br>From the basics to every feature, explained clearly.</p>
+  </section>
+
+  <!-- TOC -->
+  <nav class="manual-toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#s1-en"><span class="toc-num">1</span>Introduction</a></li>
+      <li><a href="#s2-en"><span class="toc-num">2</span>App Layout</a></li>
+      <li><a href="#s3-en"><span class="toc-num">3</span>Using the Timer</a></li>
+      <li><a href="#s4-en"><span class="toc-num">4</span>Focus Mode</a></li>
+      <li><a href="#s5-en"><span class="toc-num">5</span>Break Mode</a></li>
+      <li><a href="#s6-en"><span class="toc-num">6</span>Labels</a></li>
+      <li><a href="#s7-en"><span class="toc-num">7</span>Session Notes</a></li>
+      <li><a href="#s8-en"><span class="toc-num">8</span>Statistics & Charts</a></li>
+      <li><a href="#s9-en"><span class="toc-num">9</span>CSV Management</a></li>
+      <li><a href="#s10-en"><span class="toc-num">10</span>Settings</a></li>
+      <li><a href="#s11-en"><span class="toc-num">11</span>Account & Sync</a></li>
+      <li><a href="#s12-en"><span class="toc-num">12</span>PWA Install</a></li>
+      <li><a href="#s13-en"><span class="toc-num">13</span>FAQ</a></li>
+    </ol>
+  </nav>
+
+  <!-- Section 1: Introduction -->
+  <div id="s1-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">1</span>
+      <h2>Introduction</h2>
+    </div>
+    <div class="content-row">
+      <div class="content-text">
+        <h3>What is the Pomodoro Technique?</h3>
+        <p>The Pomodoro Technique is a time management method developed in the 1980s by Italian Francesco Cirillo. The name comes from the tomato-shaped kitchen timer (pomodoro means "tomato" in Italian) he used as a university student.</p>
+        <p>The basic concept is very simple:</p>
+        <ol class="manual-steps">
+          <li>Work with full focus for <strong>25 minutes</strong> (= 1 Pomodoro)</li>
+          <li>Take a short <strong>5-minute</strong> break</li>
+          <li>Repeat, and after <strong>4 Pomodoros</strong>, take a longer break of <strong>15 to 30 minutes</strong></li>
+        </ol>
+      </div>
+      <div class="content-illust">
+        <img src="../images/pomodoro-cycle.svg" alt="Pomodoro Cycle Diagram">
+      </div>
+    </div>
+
+    <h3>Why Does It Work?</h3>
+    <div class="benefit-cards">
+      <div class="benefit-card">
+        <div class="bc-icon">&#x1F9E0;</div>
+        <h4>Short Bursts Are Brain-Friendly</h4>
+        <p>Breaking work into 25-minute intervals creates just the right amount of pressure to think "I can push through a little longer," making it easier to maintain high focus.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bc-icon">&#x1F680;</div>
+        <h4>Lowers the Barrier to Start</h4>
+        <p>Telling yourself "I'll just work for 25 minutes" makes it easy to begin. Once you start, you naturally enter a state of flow (action-driven motivation).</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bc-icon">&#x2615;</div>
+        <h4>Breaks Sustain Your Focus</h4>
+        <p>Regular breaks refresh your brain, helping you maintain steady performance throughout the day. Light exercise during long breaks makes them even more effective.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bc-icon">&#x1F4CA;</div>
+        <h4>Make Your Work Visible</h4>
+        <p>Recording your Pomodoros turns your work into concrete numbers, improving planning accuracy and driving daily improvement.</p>
+      </div>
+    </div>
+
+    <h3>Who Is This For?</h3>
+    <ul class="audience-list">
+      <li>People who struggle to stay focused</li>
+      <li>People who find it hard to start large tasks</li>
+      <li>People who often work long hours and burn out</li>
+      <li>People who want to track and plan effectively</li>
+      <li>Remote workers and freelancers</li>
+    </ul>
+
+    <h3>What PomoCare Offers</h3>
+    <div class="feature-box">
+      <ul>
+        <li>The timer <strong>automatically manages</strong> work, break, work cycles</li>
+        <li>Attach <strong>labels and notes</strong> to each session</li>
+        <li>Review work output with <strong>statistical charts</strong> by day, week, or month</li>
+        <li><strong>Customize</strong> alarm sounds, themes, and more</li>
+        <li>Create an account to <strong>sync data across devices</strong></li>
+      </ul>
+    </div>
+    <p>PomoCare provides full access to all core features without logging in. Data is saved to your browser, and creating an account syncs it to the cloud.</p>
+  </section>
+  </div>
+
+  <!-- Section 2: App Layout -->
+  <div class="manual-section-alt" id="s2-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">2</span>
+      <h2>App Layout</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>The app is organized into three main screens.</p>
+        <table class="info-table">
+          <tr><th>Logo</th><td>Returns to the Timer screen (Home)</td></tr>
+          <tr><th>Stats</th><td>Opens the Statistics and Charts screen</td></tr>
+          <tr><th>Settings</th><td>Opens the Settings screen</td></tr>
+          <tr><th>User</th><td>Login or User menu (Logout, etc.)</td></tr>
+        </table>
+      </div>
+      <div class="content-illust">
+        <img src="../images/app-overview.svg" alt="App Overview">
+      </div>
+    </div>
+    <div class="screenshot-slot" data-screenshot="home-screen-en">Home screen (Timer) screenshot</div>
+  </section>
+  </div>
+
+  <!-- Section 3: Timer -->
+  <div id="s3-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">3</span>
+      <h2>Using the Timer</h2>
+    </div>
+    <div class="content-row">
+      <div class="content-text">
+        <h3>Basic Controls</h3>
+        <table class="info-table">
+          <tr><th>Start</th><td>Tap the play button. Switches to Focus Mode.</td></tr>
+          <tr><th>Pause</th><td>Tap the pause button while in Focus Mode.</td></tr>
+          <tr><th>Resume</th><td>Tap the play button while paused.</td></tr>
+          <tr><th>Reset</th><td>Tap the reset button while paused (confirmation dialog).</td></tr>
+          <tr><th>Complete Early</th><td>Tap "Complete" mid-session to record elapsed time.</td></tr>
+        </table>
+        <h3>Auto Cycle</h3>
+        <p>When the timer reaches zero, it automatically switches to the next mode.</p>
+        <div class="cycle-flow">
+          <span class="cycle-item cycle-work">Work</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-sbreak">Short Break</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-work">Work</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-sbreak">Short Break</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-work">Work</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-lbreak">Long Break</span>
+        </div>
+      </div>
+      <div class="content-illust">
+        <img src="../images/timer-controls.svg" alt="Timer Controls">
+      </div>
+    </div>
+    <div class="screenshot-slot" data-screenshot="timer-running-en">Timer running screenshot</div>
+  </section>
+  </div>
+
+  <!-- Section 4: Focus Mode -->
+  <div class="manual-section-alt" id="s4-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">4</span>
+      <h2>Focus Mode</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>When you start the timer, the display switches to a full-screen focused view. All unnecessary information is hidden so you can concentrate solely on the timer.</p>
+        <h3>While Running</h3>
+        <table class="info-table">
+          <tr><th>Pause</th><td>Pause the timer</td></tr>
+          <tr><th>Complete</th><td>Complete the session early (elapsed time is recorded)</td></tr>
+        </table>
+        <h3>While Paused</h3>
+        <table class="info-table">
+          <tr><th>Resume</th><td>Resume the timer</td></tr>
+          <tr><th>Reset</th><td>Reset and return to the Timer screen</td></tr>
+        </table>
+        <p>A confirmation dialog appears when resetting or completing early to prevent accidental actions.</p>
+      </div>
+      <div class="content-illust">
+        <img src="../images/focus-mode.svg" alt="Focus Mode">
+      </div>
+    </div>
+    <img src="../images/screenshot-focus-mode.jpg" alt="Focus Mode screen" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 5: Break Mode -->
+  <div id="s5-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">5</span>
+      <h2>Break Mode</h2>
+    </div>
+    <div class="content-row">
+      <div class="content-text">
+        <p>After completing a work session, the app automatically switches to break mode.</p>
+        <ul>
+          <li><strong>Short break</strong>: After a regular session (default: 5 minutes)</li>
+          <li><strong>Long break</strong>: After completing the set number of sessions (default: every 4, 20 minutes)</li>
+        </ul>
+        <table class="info-table">
+          <tr><th>Start Timer</th><td>Start the break timer</td></tr>
+          <tr><th>Skip</th><td>Skip the break and start the next work session</td></tr>
+        </table>
+        <p>During breaks, custom messages you've set will be displayed.<br>Example: "Drink some water", "Do some stretching"</p>
+      </div>
+      <div class="content-illust">
+        <img src="../images/break-mode.svg" alt="Break Mode">
+      </div>
+    </div>
+    <img src="../images/screenshot-break-start.jpg" alt="Break Mode screen" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 6: Labels -->
+  <div class="manual-section-alt" id="s6-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">6</span>
+      <h2>Organize with Labels</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>Labels let you color-code and categorize your work sessions.</p>
+        <h3>How to Use</h3>
+        <ol class="manual-steps">
+          <li>Select a label from the <strong>dropdown</strong> on the Timer screen</li>
+          <li>Start the timer — the selected label is automatically recorded with the session</li>
+          <li>Sessions can also be recorded without a label</li>
+        </ol>
+        <h3>Managing Labels</h3>
+        <table class="info-table">
+          <tr><th>Create</th><td>Directly from the Timer screen or from Settings</td></tr>
+          <tr><th>Change Color</th><td>Choose from 56-color palette or custom color</td></tr>
+          <tr><th>Rename</th><td>Tap the label name to edit directly</td></tr>
+          <tr><th>Reorder</th><td>Drag and drop (touch-friendly)</td></tr>
+          <tr><th>Delete</th><td>With confirmation dialog</td></tr>
+        </table>
+      </div>
+      <div class="content-illust">
+        <img src="../images/labels-system.svg" alt="Labels System">
+      </div>
+    </div>
+    <img src="../images/screenshot-labels.jpg" alt="Labels management screen" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 7: Notes -->
+  <div id="s7-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">7</span>
+      <h2>Session Notes</h2>
+    </div>
+    <p>You can record detailed notes about your work for each session.</p>
+    <ol class="manual-steps">
+      <li>Select a label on the Timer screen to reveal the <strong>notes field</strong></li>
+      <li>Enter your notes before starting the timer — they're saved with the session</li>
+      <li>To edit later, open the <strong>session detail modal</strong> from the Statistics screen</li>
+    </ol>
+  </section>
+  </div>
+
+  <!-- Section 8: Statistics -->
+  <div class="manual-section-alt" id="s8-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">8</span>
+      <h2>Statistics & Charts</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>Tap the <strong>Stats button</strong> in the header to view your work history as charts.</p>
+        <h3>Session Summary</h3>
+        <table class="info-table">
+          <tr><th>Today</th><td>Number of sessions and total work time</td></tr>
+          <tr><th>This Week</th><td>Sessions, active days (X/7), and total time</td></tr>
+        </table>
+        <h3>View Periods</h3>
+        <table class="info-table">
+          <tr><th>Weekly</th><td>Daily chart for the past 7 days</td></tr>
+          <tr><th>Monthly</th><td>Daily chart for the current month</td></tr>
+          <tr><th>Yearly</th><td>Monthly chart for 12 months</td></tr>
+        </table>
+        <p>Use &#x25C0; &#x25B6; buttons to navigate. Toggle between session count and total time.</p>
+        <h3>Additional Features</h3>
+        <ul>
+          <li><strong>Stacked bar chart</strong>: Color-coded by label</li>
+          <li><strong>Label filter</strong>: Show specific labels only</li>
+          <li><strong>Resizable chart</strong>: Drag to adjust height (40–300px)</li>
+          <li><strong>Session details</strong>: Tap a bar to change labels, edit notes, or delete sessions</li>
+        </ul>
+      </div>
+      <div class="content-illust">
+        <img src="../images/statistics-chart.svg" alt="Statistics Chart">
+      </div>
+    </div>
+    <img src="../images/screenshot-stats-weekly.jpg" alt="Weekly Statistics screen" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 9: CSV -->
+  <div id="s9-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">9</span>
+      <h2>CSV Data Management</h2>
+    </div>
+    <h3>Export</h3>
+    <p>Go to Settings → "<strong>CSV Export</strong>" to download all session data as a CSV file.</p>
+    <h3>Import</h3>
+    <p>Go to Settings → "<strong>CSV Import</strong>" to load a CSV file.</p>
+    <ul>
+      <li>Drag and drop or use the file picker</li>
+      <li>Automatic encoding detection (Shift-JIS / UTF-8)</li>
+      <li>Duplicate entries by date are excluded</li>
+      <li>Unregistered labels in the CSV are created automatically</li>
+    </ul>
+  </section>
+  </div>
+
+  <!-- Section 10: Settings -->
+  <div class="manual-section-alt" id="s10-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Settings</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <h3>Timer Duration</h3>
+        <table class="info-table">
+          <tr><th>Work</th><td>Preset or custom input (default: 25 min)</td></tr>
+          <tr><th>Short Break</th><td>Preset or custom input (default: 5 min)</td></tr>
+          <tr><th>Long Break</th><td>ON/OFF, interval and duration (default: every 4 / 20 min)</td></tr>
+        </table>
+        <h3>Alarm Sounds</h3>
+        <table class="info-table">
+          <tr><th>Bell</th><td>Clear hand bell tone</td></tr>
+          <tr><th>Digital</th><td>Alarm clock style digital sound</td></tr>
+          <tr><th>Chime</th><td>3-note arpeggio (C-E-G)</td></tr>
+          <tr><th>Kitchen</th><td>Kitchen timer sound</td></tr>
+          <tr><th>Classic</th><td>Classic alarm tone</td></tr>
+          <tr><th>Gentle</th><td>Calm notification sound</td></tr>
+          <tr><th>Soft</th><td>Soft, gentle tone</td></tr>
+          <tr><th>None</th><td>Silent (no sound)</td></tr>
+        </table>
+        <p>Repeat count (1–5 times) and preview playback available.</p>
+        <h3>Appearance & More</h3>
+        <ul>
+          <li><strong>Theme</strong>: Switch between Light and Dark mode</li>
+          <li><strong>Language</strong>: Choose from 7 languages</li>
+          <li><strong>Custom message</strong>: Set a message to display during breaks</li>
+          <li><strong>Reset data</strong>: Clear all data (with confirmation)</li>
+          <li><strong>Delete account</strong>: Remove logged-in account (with confirmation)</li>
+        </ul>
+      </div>
+      <div class="content-illust">
+        <img src="../images/settings-panel.svg" alt="Settings Panel">
+      </div>
+    </div>
+    <img src="../images/screenshot-settings.jpg" alt="Settings screen" class="screenshot-img">
+  </section>
+  </div>
+
+  <!-- Section 11: Account -->
+  <div id="s11-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2>Account & Data Sync</h2>
+    </div>
+    <div class="content-row">
+      <div class="content-text">
+        <h3>Login Methods</h3>
+        <table class="info-table">
+          <tr><th>Google</th><td>One-tap login with Google account</td></tr>
+          <tr><th>Email</th><td>Sign up or log in with email and password</td></tr>
+        </table>
+        <h3>Creating an Account</h3>
+        <ol class="manual-steps">
+          <li>Enter your email and password, then <strong>Sign Up</strong></li>
+          <li>Check your email and click the confirmation link</li>
+          <li>Verification complete — all features unlocked</li>
+        </ol>
+        <h3>Data Storage</h3>
+        <table class="info-table">
+          <tr><th>Not logged in</th><td>Browser local storage (available on that browser only)</td></tr>
+          <tr><th>Logged in</th><td>Cloud (Firestore) sync — available on multiple devices</td></tr>
+        </table>
+        <p>Data recorded while not logged in is automatically migrated to the cloud on your first login.</p>
+      </div>
+      <div class="content-illust">
+        <img src="../images/cloud-sync.svg" alt="Cloud Sync">
+      </div>
+    </div>
+    <div class="screenshot-slot" data-screenshot="login-en">Login screen screenshot</div>
+  </section>
+  </div>
+
+  <!-- Section 12: PWA -->
+  <div class="manual-section-alt" id="s12-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2>Install as an App (PWA)</h2>
+    </div>
+    <div class="content-row reverse">
+      <div class="content-text">
+        <p>PomoCare can be installed from your browser and used like a native app.</p>
+        <h3>How to Install</h3>
+        <ol class="manual-steps">
+          <li>Open PomoCare in your browser</li>
+          <li>Tap the <strong>install banner</strong> at the bottom of the screen</li>
+          <li>Follow the browser prompts to install</li>
+        </ol>
+        <h3>After Installing</h3>
+        <ul>
+          <li>Launch from your home screen or desktop</li>
+          <li>Full-screen display without the browser address bar</li>
+          <li>Works offline</li>
+          <li>Updates are applied automatically</li>
+        </ul>
+      </div>
+      <div class="content-illust">
+        <img src="../images/pwa-install.svg" alt="PWA Install">
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <!-- Section 13: FAQ -->
+  <div id="s13-en">
+  <section class="manual-section">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <h2>Frequently Asked Questions</h2>
+    </div>
+    <div class="manual-faq">
+      <details>
+        <summary>Will my data be lost if I close the browser?</summary>
+        <p>If not logged in, data is saved to your browser's local storage and persists unless you clear browser data. If logged in, data is saved to the cloud and accessible from other devices.</p>
+      </details>
+      <details>
+        <summary>Can I change the work duration to something other than 25 minutes?</summary>
+        <p>Yes. Use a preset value or enter a custom duration in Settings. Break times can also be customized.</p>
+      </details>
+      <details>
+        <summary>Can I disable long breaks?</summary>
+        <p>Yes. Long breaks can be turned OFF in Settings.</p>
+      </details>
+      <details>
+        <summary>What happens if I end a session early?</summary>
+        <p>Choosing "Complete Early" records the session with the actual elapsed time. For example, if you complete after 15 minutes of a 25-minute timer, it's recorded as a 15-minute session.</p>
+      </details>
+      <details>
+        <summary>Can I migrate data from another app?</summary>
+        <p>Yes. You can import data in CSV format. Go to Settings → "CSV Import" and drag-and-drop or select your file.</p>
+      </details>
+      <details>
+        <summary>Can I use it offline?</summary>
+        <p>Yes. Install the app as a PWA for offline timer and recording functionality. Cloud sync occurs when you're back online.</p>
+      </details>
+      <details>
+        <summary>Which browsers are supported?</summary>
+        <p>Chrome, Edge, Safari, Firefox, and other modern browsers. For PWA installation, Chrome and Edge provide the most stable experience.</p>
+      </details>
+    </div>
+  </section>
+  </div>
+
+  <!-- CTA -->
+  <section class="manual-cta">
+    <h2>Ready to Focus?</h2>
+    <p>Start your most productive day with PomoCare.</p>
+    <a href="https://app.pomocare.com" class="btn btn-white btn-lg">Open App</a>
+  </section>
+
+  </div><!-- /manual-en -->
+
+
+  <!-- ==================== Footer ==================== -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-top">
+        <div>
+          <div class="footer-brand">
+            <svg class="logo-icon" viewBox="0 0 512 512" width="28" height="28">
+              <circle cx="256" cy="256" r="256" fill="#0abab5"/>
+              <polygon points="214,160 214,352 362,256" fill="#ffffff"/>
+            </svg>
+            <span class="logo-text">PomoCare</span>
+          </div>
+          <p class="footer-brand-desc" data-i18n="footerDesc">ポモドーロ・テクニックで集中力を高めるフォーカスタイマーアプリ</p>
+        </div>
+        <div class="footer-columns">
+          <div class="footer-col">
+            <h4 data-i18n="footerProduct">プロダクト</h4>
+            <ul>
+              <li><a href="../#features" data-i18n="navFeatures">機能</a></li>
+              <li><a href="../#pricing" data-i18n="navPricing">料金</a></li>
+              <li><a href="../#faq" data-i18n="navFaq">FAQ</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footerResources">リソース</h4>
+            <ul>
+              <li><a href="../manual/" data-i18n="footerManual">マニュアル</a></li>
+              <li><a href="../support/" data-i18n="footerSupport">サポート</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footerLegal">法的情報</h4>
+            <ul>
+              <li><a href="../privacy/" data-i18n="footerPrivacy">プライバシーポリシー</a></li>
+              <li><a href="../terms/" data-i18n="footerTerms">利用規約</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-copy">
+          <p>&copy; 2026 PomoCare by URAKU Inc. All rights reserved.</p>
+        </div>
+        <div class="footer-controls">
+          <div class="lang-dropdown" id="footerLangDropdown">
+            <button class="lang-dropdown-btn" id="footerLangBtn" aria-haspopup="listbox" aria-expanded="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span id="footerLangLabel">JP</span>
+              <svg class="lang-chevron" width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+            </button>
+            <ul class="lang-dropdown-menu" id="footerLangMenu" role="listbox">
+              <li><button class="lang-option active" data-lang="ja" role="option">&#x1F1EF;&#x1F1F5; 日本語</button></li>
+              <li><button class="lang-option" data-lang="en" role="option">&#x1F1FA;&#x1F1F8; English</button></li>
+            </ul>
+          </div>        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/i18n.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    // Bilingual content toggle for manual page
+    function setPageLang(lang) {
+      document.getElementById('manual-ja').style.display = lang === 'ja' ? 'block' : 'none';
+      document.getElementById('manual-en').style.display = lang === 'en' ? 'block' : 'none';
+    }
+    var _origSetLang = window.setLanguage;
+    window.setLanguage = function(lang) {
+      if (_origSetLang) _origSetLang(lang);
+      setPageLang(lang);
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = localStorage.getItem('pomocare-lp-lang');
+      var lang = saved || (navigator.language.startsWith('ja') ? 'ja' : 'en');
+      setPageLang(lang);
+    });
+  </script>
+</body>
+</html>

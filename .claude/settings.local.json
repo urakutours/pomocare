@@ -41,7 +41,32 @@
       "Bash(python:*)",
       "Bash(npx tailwindcss:*)",
       "Bash(Remove-Item -Recurse -Force C:tmppomodoro-builddist)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(/c/tmp/pomodoro-build/src/services/auth/AuthService.ts:*)",
+      "Bash(/c/tmp/pomodoro-build/src/components/auth/EmailActionHandler.tsx:*)",
+      "Bash(printf:*)",
+      "Bash(/c/tmp/pomodoro-build/src/contexts/AuthContext.tsx:*)",
+      "Bash(/c/tmp/pomodoro-build/src/components/auth/LoginModal.tsx:*)",
+      "Bash(/c/tmp/pomodoro-build/src/components/auth/_write_backtick_section.js:*)",
+      "Bash(\")",
+      "Bash(git status:*)",
+      "Bash(npx firebase deploy:*)",
+      "Bash(firebase deploy:*)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebFetch(domain:sabameijin.com)",
+      "WebFetch(domain:turso.tech)",
+      "Bash(git -C \"C:\\\\tmp\\\\pomodoro-build\" diff)",
+      "Bash(git -C \"C:\\\\tmp\\\\pomodoro-build\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\tmp\\\\pomodoro-build\" add src/types/settings.ts src/services/storage/FirestoreAdapter.ts src/services/storage/LocalStorageAdapter.ts src/services/storage/index.ts src/App.tsx src/utils/date.ts)",
+      "Bash(git -C:*)",
+      "Bash(Get-ChildItem -Path \"C:\\\\tmp\\\\pomodoro-build\" -Recurse -File)",
+      "Bash(Where-Object { $_FullName -notmatch '\\\\\\\\node_modules\\\\\\\\' -and $_FullName -notmatch '\\\\\\\\.git\\\\\\\\' -and $_FullName -notmatch '\\\\\\\\dist\\\\\\\\' })",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(ls:*)",
+      "Bash(curl:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx gh-pages:*)"
     ]
   }
 }

@@ -324,7 +324,14 @@
   .comp-table td, .comp-table th { padding: 9px $space-2; }
   .comp-plan-name { font-size: $text-sm; }
   .comp-plan-price { font-size: 0.72rem; }
-  .comp-plan-badge { font-size: 0.6rem; padding: 1px 6px; }
+  .comp-plan-badge {
+    font-size: 0.6rem;
+    padding: 1px 6px;
+    white-space: normal;
+    text-align: center;
+    display: block;
+    margin: 0 auto 6px;
+  }
   .comp-check, .comp-cross { font-size: $text-base; }
   .comp-limit { font-size: 0.72rem; }
   .comp-table .btn { font-size: $text-xs; padding: 6px 10px; }

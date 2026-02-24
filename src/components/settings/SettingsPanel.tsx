@@ -268,8 +268,8 @@ function ThemeToggle({
           onClick={() => onChange('dark')}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm transition-colors ${
             value === 'dark'
-              ? 'border-tiffany font-medium ring-2 ring-tiffany'
-              : 'border-gray-300 dark:border-neutral-600 text-gray-300 hover:bg-neutral-600'
+              ? 'border-tiffany text-gray-400 font-medium ring-2 ring-tiffany'
+              : 'border-gray-300 dark:border-neutral-600 text-gray-400 hover:bg-neutral-600'
           }`}
           style={{ backgroundColor: value === 'dark' ? 'rgb(44, 47, 50)' : 'rgb(30, 33, 37)' }}
         >

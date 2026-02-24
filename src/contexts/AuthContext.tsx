@@ -40,11 +40,18 @@ async function fetchUserTier(userId: string): Promise<UserTier> {
     .eq('user_id', userId)
     .single();
 
-  if (error || !data) {
-    // Row doesn't exist yet — insert a free row
-    await supabase.from('user_profiles').insert({ user_id: userId, tier: 'free' });
+  if (error) {
+    // PGRST116 = "Row not found" — the only case where we should create a new row
+    if (error.code === 'PGRST116') {
+      console.log('[Auth] No profile row found, creating free tier for', userId);
+      await supabase.from('user_profiles').insert({ user_id: userId, tier: 'free' });
+      return 'free';
+    }
+    // Any other error (RLS, network, etc.) — log and return free without overwriting
+    console.error('[Auth] fetchUserTier failed:', error.code, error.message);
     return 'free';
   }
+
   return (data.tier as UserTier) ?? 'free';
 }
 
@@ -68,30 +75,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const sbUser = session.user;
 
-        // Build user with free tier first for quick render
-        const baseUser: User = {
-          id: sbUser.id,
-          email: sbUser.email ?? null,
-          displayName:
-            sbUser.user_metadata?.full_name ??
-            sbUser.user_metadata?.name ??
-            null,
-          photoURL:
-            sbUser.user_metadata?.avatar_url ??
-            sbUser.user_metadata?.picture ??
-            null,
-          tier: 'free',
-          isAnonymous: false,
-          emailVerified: sbUser.email_confirmed_at != null,
-        };
-        setUser(baseUser);
+        // Build user — preserve existing tier if same user (avoids flash to 'free' on TOKEN_REFRESHED)
+        setUser(prev => {
+          const preservedTier = (prev && prev.id === sbUser.id) ? prev.tier : 'free';
+          return {
+            id: sbUser.id,
+            email: sbUser.email ?? null,
+            displayName:
+              sbUser.user_metadata?.full_name ??
+              sbUser.user_metadata?.name ??
+              null,
+            photoURL:
+              sbUser.user_metadata?.avatar_url ??
+              sbUser.user_metadata?.picture ??
+              null,
+            tier: preservedTier,
+            isAnonymous: false,
+            emailVerified: sbUser.email_confirmed_at != null,
+          };
+        });
         setIsLoading(false);
 
-        // Fetch actual tier asynchronously
+        // Fetch actual tier asynchronously and always apply it
         const tier = await fetchUserTier(sbUser.id);
-        if (tier !== 'free') {
-          setUser(prev => prev ? { ...prev, tier } : prev);
-        }
+        setUser(prev => prev && prev.id === sbUser.id ? { ...prev, tier } : prev);
       },
     );
     return () => subscription.unsubscribe();
@@ -131,8 +138,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshTier = useCallback(async () => {
     const { data: { user: sbUser } } = await supabase.auth.getUser();
-    if (!sbUser) return;
+    if (!sbUser) {
+      console.warn('[Auth] refreshTier: no authenticated user');
+      return;
+    }
     const tier = await fetchUserTier(sbUser.id);
+    console.log('[Auth] refreshTier result:', tier);
     setUser(prev => prev ? { ...prev, tier } : prev);
   }, []);
 

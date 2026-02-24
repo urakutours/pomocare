@@ -57,6 +57,8 @@
     padding: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(7, auto);
+    grid-auto-flow: column;
     gap: 6px $space-8;
 
     @include mq-down(sm) {
@@ -422,7 +424,7 @@
   margin: $space-8 0 $space-4;
 
   img {
-    max-width: 500px;
+    max-width: 600px;
     width: 100%;
     height: auto;
     margin: 0 auto;

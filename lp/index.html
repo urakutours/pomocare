@@ -94,7 +94,7 @@
           <div class="hero-trust">
             <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="trustInstantStart">登録なしですぐ使える</span></span>
             <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="trustPlatforms">Web・Windows・Android対応</span></span>
-            <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="trustCloudSync">クラウドでデバイス間同期</span></span>
+            <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="trustCloudSync">無料登録でクラウド同期</span></span>
           </div>
         </div>
       </div>
@@ -169,7 +169,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="#0abab5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <h3 data-i18n="feature6Title">プライバシー重視 &amp; クラウド同期</h3>
-          <p data-i18n="feature6Desc">無料版はデバイス内にデータを保存し、アカウント登録も不要。有料版ではクラウド同期で複数デバイスから同じデータにアクセスできます。</p>
+          <p data-i18n="feature6Desc">登録なしでもすぐに使えますが、データはブラウザに保存されるためキャッシュクリアで消失する可能性があります。無料アカウントを作成すれば、クラウドに安全に保存され、複数デバイスからアクセス可能です。</p>
         </div>
       </div>
     </div>
@@ -310,8 +310,8 @@
           </div>
           <div class="use-case-body">
             <h3 data-i18n="useCase3Title">デスクワーク・テレワーク</h3>
-            <p data-i18n="useCase3Desc">「会議資料」「コーディング」「メール対応」など、業務をラベルで分けるだけ。有料版のクラウド同期なら、オフィスでも在宅でも同じデータを引き継いで仕事のバランスを可視化できます。</p>
-            <span class="use-case-tag use-case-tag--paid" data-i18n="useCase3Tag">有料版：複数デバイスで継続</span>
+            <p data-i18n="useCase3Desc">「会議資料」「コーディング」「メール対応」など、業務をラベルで分けるだけ。無料アカウント登録でクラウド同期が有効になり、オフィスでも在宅でも同じデータを引き継いで仕事のバランスを可視化できます。</p>
+            <span class="use-case-tag" data-i18n="useCase3Tag">無料登録で複数デバイス同期</span>
           </div>
         </div>
       </div>
@@ -389,9 +389,9 @@
           </div>
           <ul class="pricing-features">
             <li data-i18n="pricingFreeF1">ポモドーロタイマー</li>
-            <li data-i18n="pricingFreeF2">基本統計</li>
+            <li data-i18n="pricingFreeF2">基本統計（今日・今週）</li>
             <li data-i18n="pricingFreeF3">ラベル管理（2個まで）</li>
-            <li data-i18n="pricingFreeF4">ライト/ダークテーマ</li>
+            <li data-i18n="pricingFreeF4">無料登録でクラウド同期（複数デバイス対応）</li>
             <li class="disabled" data-i18n="pricingFreeF5">広告表示あり</li>
           </ul>
           <a href="https://app.pomocare.com" class="btn btn-outline" data-i18n="pricingFreeCta">無料で始める</a>
@@ -406,9 +406,9 @@
             </div>
           </div>
           <ul class="pricing-features">
-            <li data-i18n="pricingSubF1">すべての機能が使い放題</li>
+            <li data-i18n="pricingSubF1">Freeの全機能に加えて</li>
             <li data-i18n="pricingSubF2">無制限のラベル</li>
-            <li data-i18n="pricingSubF3">クラウド同期（複数デバイス対応）</li>
+            <li data-i18n="pricingSubF3">月別・年別の詳細統計・セッションメモ</li>
             <li data-i18n="pricingSubF4">CSVエクスポート</li>
             <li data-i18n="pricingSubF5">広告非表示</li>
           </ul>
@@ -425,7 +425,7 @@
           <ul class="pricing-features">
             <li data-i18n="pricingProF1">すべての機能が永久に使い放題</li>
             <li data-i18n="pricingProF2">無制限のラベル</li>
-            <li data-i18n="pricingProF3">クラウド同期（複数デバイス対応）</li>
+            <li data-i18n="pricingProF3">月別・年別の詳細統計・セッションメモ</li>
             <li data-i18n="pricingProF4">CSVエクスポート・広告非表示</li>
             <li data-i18n="pricingProF5">将来のアップデート含む</li>
           </ul>
@@ -535,8 +535,13 @@
               </tr>
               <tr>
                 <td data-i18n="compR12">クラウド同期（複数デバイス対応）</td>
-                <td class="comp-cross">—</td>
+                <td class="comp-limit" data-i18n="compR12Free">✓（要無料登録）</td>
                 <td class="comp-check comp-paid-col">✓</td>
+              </tr>
+              <tr>
+                <td data-i18n="compR14">データ保存（未ログイン時）</td>
+                <td class="comp-limit" data-i18n="compR14Free">ブラウザのみ（消失リスクあり）</td>
+                <td class="comp-check comp-paid-col" data-i18n="compR14Paid">クラウドに安全に保存</td>
               </tr>
               <tr>
                 <td data-i18n="compR13">広告表示</td>
@@ -565,19 +570,19 @@
         </details>
         <details class="faq-item animate-on-scroll">
           <summary data-i18n="faq2Q">登録なしで本当にすぐ使えますか？</summary>
-          <p data-i18n="faq2A">はい。アプリを開いたらすぐにタイマーをスタートできます。アカウント登録なしでもタイマー、基本統計、ラベル管理などのコア機能をすべて利用可能です。アカウント登録は無料ですが、複数デバイス間のクラウド同期を利用するには有料プランへのアップグレードが必要です。</p>
+          <p data-i18n="faq2A">はい。アプリを開いたらすぐにタイマーをスタートできます。アカウント登録なしでもタイマー、基本統計、ラベル管理などのコア機能をすべて利用可能です。ただし、未ログイン時のデータはブラウザのローカルストレージに保存されるため、キャッシュクリアなどで消失する可能性があります。無料のアカウント登録をすると、データがクラウドに安全に保存され、複数デバイスからアクセスできるようになります。</p>
         </details>
         <details class="faq-item animate-on-scroll">
           <summary data-i18n="faq3Q">無料版でも十分に使えますか？</summary>
-          <p data-i18n="faq3A">もちろんです。ポモドーロタイマー、今日・今週の統計、ラベル管理（2個まで）、ライト/ダークテーマなど、集中に必要なコア機能はすべて無料で利用できます。月別・年別の詳細統計、無制限のラベル、クラウド同期、CSVエクスポートが必要な場合は有料プランをご検討ください。</p>
+          <p data-i18n="faq3A">もちろんです。ポモドーロタイマー、今日・今週の統計、ラベル管理（2個まで）、ライト/ダークテーマなど、集中に必要なコア機能はすべて無料で利用できます。さらに、無料アカウントを作成するだけでクラウド同期が有効になり、複数デバイスでデータにアクセスできます。月別・年別の詳細統計、無制限のラベル、CSVエクスポートが必要な場合は有料プランをご検討ください。</p>
         </details>
         <details class="faq-item animate-on-scroll">
           <summary data-i18n="faq4Q">データはどこに保存されますか？</summary>
-          <p data-i18n="faq4A">無料版ではお使いのデバイスのローカルストレージに保存されるため、外部にデータが送信されることはありません。有料プランでクラウド同期を有効にすると、暗号化されたサーバーにも保存され、複数デバイスからアクセスできます。</p>
+          <p data-i18n="faq4A">未ログインの場合、データはお使いのブラウザのローカルストレージに保存されます。この場合、ブラウザのキャッシュクリアやデータ消去でデータが失われる可能性があります。無料アカウントを作成してログインすると、データはクラウドに安全に保存され、複数デバイスからアクセスできます。大切なデータを守るために、アカウント登録をおすすめします。</p>
         </details>
         <details class="faq-item animate-on-scroll">
           <summary data-i18n="faq5Q">オフラインでも使えますか？</summary>
-          <p data-i18n="faq5A">はい。PWA（Progressive Web App）対応のため、一度アクセスすればオフラインでもタイマーや記録機能を利用できます。オンラインに戻った際に、有料プランのクラウド同期で自動的にデータが同期されます。</p>
+          <p data-i18n="faq5A">はい。PWA（Progressive Web App）対応のため、一度アクセスすればオフラインでもタイマーや記録機能を利用できます。オンラインに戻った際に、ログイン済みであれば自動的にクラウドへデータが同期されます。</p>
         </details>
         <details class="faq-item animate-on-scroll">
           <summary data-i18n="faq6Q">どのデバイスで使えますか？</summary>

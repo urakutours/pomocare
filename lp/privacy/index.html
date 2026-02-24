@@ -92,18 +92,18 @@
       <h2>2. 収集する情報</h2>
       <p>本アプリで収集する情報は、ご利用のプランによって異なります。</p>
 
-      <h3>2-1. 無料版（アカウント登録不要）</h3>
+      <h3>2-1. ゲスト利用（未ログイン）</h3>
       <ul>
-        <li><strong>個人情報:</strong> 無料版ではアカウント登録を必要としないため、氏名、メールアドレス等の個人情報を収集しません。</li>
-        <li><strong>利用データ:</strong> タイマーの設定、セッション履歴、ラベル情報等の利用データはすべてお使いのデバイスのローカルストレージに保存され、当社のサーバーには送信されません。</li>
-        <li><strong>広告:</strong> 無料版では第三者の広告サービスを利用する場合があります。広告サービスは、広告のパーソナライズのためにCookieやデバイス識別子を使用する場合があります。</li>
+        <li><strong>個人情報:</strong> アカウント登録なしでも本アプリの基本機能を利用できます。この場合、氏名、メールアドレス等の個人情報を収集しません。</li>
+        <li><strong>利用データ:</strong> タイマーの設定、セッション履歴、ラベル情報等の利用データはすべてお使いのデバイスのローカルストレージに保存され、当社のサーバーには送信されません。ブラウザのキャッシュクリアやデータ消去によりデータが失われる可能性があります。</li>
+        <li><strong>広告:</strong> 無料利用時（Free / ゲスト）では第三者の広告サービスを利用する場合があります。広告サービスは、広告のパーソナライズのためにCookieやデバイス識別子を使用する場合があります。</li>
       </ul>
 
-      <h3>2-2. 有料版（Standard / Pro）</h3>
+      <h3>2-2. ログイン済みユーザー（Free / Standard / Pro）</h3>
       <ul>
-        <li><strong>アカウント情報:</strong> 有料版では、クラウド同期およびライセンス管理のためにアカウント登録が必要です。Googleアカウント等の外部認証サービスを利用してサインインする場合、認証プロバイダーから提供されるメールアドレス、表示名、プロフィール画像URLを取得します。</li>
-        <li><strong>利用データ:</strong> クラウド同期機能を有効にした場合、セッション履歴、設定、ラベル情報等の利用データが当社のサーバーに保存されます。これにより、複数のデバイス間でデータを同期できます。</li>
-        <li><strong>決済情報:</strong> Web版の決済はStripe, Inc.（米国）を通じて処理されます。当社がクレジットカード番号等の決済情報を直接取得・保存することはありません。Stripeのプライバシーポリシーは <a href="https://stripe.com/privacy" target="_blank" rel="noopener">https://stripe.com/privacy</a> をご参照ください。アプリストア経由の購入はGoogle Play / Microsoft Storeの規約に従います。</li>
+        <li><strong>アカウント情報:</strong> クラウド同期を利用するにはアカウント登録が必要です（無料で登録可能）。Googleアカウント等の外部認証サービスを利用してサインインする場合、認証プロバイダーから提供されるメールアドレス、表示名、プロフィール画像URLを取得します。</li>
+        <li><strong>利用データ:</strong> ログイン済みのすべてのユーザー（Freeプラン含む）のセッション履歴、設定、ラベル情報等の利用データが当社のサーバーに保存されます。これにより、複数のデバイス間でデータを安全に同期できます。</li>
+        <li><strong>決済情報:</strong> 有料プラン（Standard / Pro）をご利用の場合、Web版の決済はStripe, Inc.（米国）を通じて処理されます。当社がクレジットカード番号等の決済情報を直接取得・保存することはありません。Stripeのプライバシーポリシーは <a href="https://stripe.com/privacy" target="_blank" rel="noopener">https://stripe.com/privacy</a> をご参照ください。アプリストア経由の購入はGoogle Play / Microsoft Storeの規約に従います。</li>
       </ul>
 
       <h3>2-3. 自動的に収集される情報</h3>
@@ -114,8 +114,8 @@
 
       <h2>3. データの保存場所</h2>
       <ul>
-        <li><strong>無料版:</strong> すべてのデータはお使いのデバイスのローカルストレージに保存されます。当社はこれらのデータにアクセスしません。</li>
-        <li><strong>有料版:</strong> クラウド同期を有効にした場合、利用データは当社が利用するSupabase（米国）のサーバーに暗号化して保存されます。クラウド同期を無効にした場合は、無料版と同様にデバイスのみに保存されます。</li>
+        <li><strong>ゲスト利用（未ログイン）:</strong> すべてのデータはお使いのデバイスのローカルストレージに保存されます。当社はこれらのデータにアクセスしません。ブラウザのキャッシュクリアやデータ消去によりデータが失われる可能性があります。</li>
+        <li><strong>ログイン済みユーザー（Free / Standard / Pro）:</strong> 利用データは当社が利用するSupabase（米国）のサーバーに暗号化して保存され、複数デバイス間で同期されます。</li>
       </ul>
 
       <h2>4. データの利用目的と法的根拠</h2>
@@ -126,11 +126,11 @@
         </thead>
         <tbody>
           <tr><td>本アプリの機能提供およびサービスの維持</td><td>契約の履行（第6条1項b号）</td></tr>
-          <tr><td>クラウド同期機能の提供（有料版）</td><td>契約の履行（第6条1項b号）</td></tr>
+          <tr><td>クラウド同期機能の提供（ログイン済みユーザー）</td><td>契約の履行（第6条1項b号）</td></tr>
           <tr><td>ユーザーサポートへの対応</td><td>契約の履行 / 正当な利益（第6条1項f号）</td></tr>
           <tr><td>利用状況の分析によるサービス改善</td><td>正当な利益（第6条1項f号）</td></tr>
           <tr><td>不正利用の防止・セキュリティ確保</td><td>正当な利益（第6条1項f号）</td></tr>
-          <tr><td>広告の表示（無料版）</td><td>同意（第6条1項a号）</td></tr>
+          <tr><td>広告の表示（Free / ゲスト）</td><td>同意（第6条1項a号）</td></tr>
           <tr><td>法的義務の履行</td><td>法的義務（第6条1項c号）</td></tr>
         </tbody>
       </table>
@@ -164,9 +164,9 @@
         </thead>
         <tbody>
           <tr><td>ローカルストレージ（言語・テーマ設定）</td><td>サイトの表示言語とテーマの保存</td><td>無期限（ブラウザデータ消去まで）</td><td>必須</td></tr>
-          <tr><td>ローカルストレージ（セッションデータ）</td><td>タイマー・統計データの保存（無料版）</td><td>無期限（ブラウザデータ消去まで）</td><td>必須</td></tr>
+          <tr><td>ローカルストレージ（セッションデータ）</td><td>タイマー・統計データの保存（未ログイン時）</td><td>無期限（ブラウザデータ消去まで）</td><td>必須</td></tr>
           <tr><td>Cookie同意ステータス</td><td>Cookie同意の記録</td><td>無期限</td><td>必須</td></tr>
-          <tr><td>第三者Cookie（広告）</td><td>広告配信・パーソナライズ（無料版）</td><td>サービスにより異なる</td><td>任意（同意が必要）</td></tr>
+          <tr><td>第三者Cookie（広告）</td><td>広告配信・パーソナライズ（Free / ゲスト）</td><td>サービスにより異なる</td><td>任意（同意が必要）</td></tr>
         </tbody>
       </table>
 
@@ -178,7 +178,7 @@
       <p>一部のブラウザが送信する「Do Not Track」（DNT）シグナルについて、現時点では業界統一の技術標準が確立されていないため、当社は現在DNTシグナルに対する自動応答は行っておりません。ただし、Cookie同意バナーで「拒否する」を選択いただくことで、任意のトラッキングCookieを無効にできます。</p>
 
       <h2>7. アカウントの削除</h2>
-      <p>有料版のアカウントを削除する場合、アプリ内の設定画面または <a href="mailto:support@pomocare.com">support@pomocare.com</a> へのご連絡により、アカウントおよびクラウド上のすべてのデータを削除できます。削除リクエストから30日以内にすべてのデータを消去します。削除されたデータは復元できません。</p>
+      <p>アカウントを削除する場合、アプリ内の設定画面または <a href="mailto:support@pomocare.com">support@pomocare.com</a> へのご連絡により、アカウントおよびクラウド上のすべてのデータを削除できます。削除リクエストから30日以内にすべてのデータを消去します。削除されたデータは復元できません。</p>
 
       <h2>8. データセキュリティ</h2>
       <p>当社は、お客様の個人データを不正アクセス、紛失、改ざんから保護するために、以下を含む合理的な技術的・組織的措置を講じています。</p>
@@ -279,18 +279,18 @@
       <h2>2. Information We Collect</h2>
       <p>The information we collect varies depending on your plan.</p>
 
-      <h3>2-1. Free Version (No Account Required)</h3>
+      <h3>2-1. Guest Use (Not Logged In)</h3>
       <ul>
-        <li><strong>Personal Information:</strong> The free version does not require account registration and does not collect personal information such as names or email addresses.</li>
-        <li><strong>Usage Data:</strong> All usage data including timer settings, session history, and labels is stored locally on your device and is never transmitted to our servers.</li>
-        <li><strong>Advertising:</strong> The free version may use third-party advertising services. These services may use cookies or device identifiers for ad personalization.</li>
+        <li><strong>Personal Information:</strong> You can use the App's core features without creating an account. In this case, we do not collect personal information such as names or email addresses.</li>
+        <li><strong>Usage Data:</strong> All usage data including timer settings, session history, and labels is stored locally on your device and is never transmitted to our servers. This data may be lost if you clear your browser cache or data.</li>
+        <li><strong>Advertising:</strong> Non-paid users (Free / Guest) may see third-party advertising. These services may use cookies or device identifiers for ad personalization.</li>
       </ul>
 
-      <h3>2-2. Paid Versions (Standard / Pro)</h3>
+      <h3>2-2. Logged-In Users (Free / Standard / Pro)</h3>
       <ul>
-        <li><strong>Account Information:</strong> Paid versions require account registration for cloud sync and license management. When signing in through an external authentication provider (such as Google), we receive your email address, display name, and profile image URL from the provider.</li>
-        <li><strong>Usage Data:</strong> When cloud sync is enabled, your session history, settings, and label data are stored on our servers to synchronize across multiple devices.</li>
-        <li><strong>Payment Information:</strong> Web payments are processed by Stripe, Inc. (USA). We do not directly collect or store credit card numbers or payment details. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's Privacy Policy</a>. App store purchases are governed by Google Play / Microsoft Store terms.</li>
+        <li><strong>Account Information:</strong> Cloud sync requires account registration (available for free). When signing in through an external authentication provider (such as Google), we receive your email address, display name, and profile image URL from the provider.</li>
+        <li><strong>Usage Data:</strong> For all logged-in users (including the Free plan), session history, settings, and label data are stored on our servers to synchronize safely across multiple devices.</li>
+        <li><strong>Payment Information:</strong> For paid plans (Standard / Pro), web payments are processed by Stripe, Inc. (USA). We do not directly collect or store credit card numbers or payment details. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's Privacy Policy</a>. App store purchases are governed by Google Play / Microsoft Store terms.</li>
       </ul>
 
       <h3>2-3. Automatically Collected Information</h3>
@@ -301,8 +301,8 @@
 
       <h2>3. Data Storage</h2>
       <ul>
-        <li><strong>Free Version:</strong> All data is stored in your device's local storage. We do not access this data.</li>
-        <li><strong>Paid Versions:</strong> When cloud sync is enabled, usage data is encrypted and stored on Supabase (USA) servers. If cloud sync is disabled, data is stored only on your device, same as the free version.</li>
+        <li><strong>Guest Use (Not Logged In):</strong> All data is stored in your device's local storage. We do not access this data. Data may be lost if you clear your browser cache or data.</li>
+        <li><strong>Logged-In Users (Free / Standard / Pro):</strong> Usage data is encrypted and stored on Supabase (USA) servers, enabling safe synchronization across multiple devices.</li>
       </ul>
 
       <h2>4. Purpose of Data Use &amp; Legal Basis</h2>
@@ -313,11 +313,11 @@
         </thead>
         <tbody>
           <tr><td>Providing and maintaining the App's features</td><td>Performance of contract (Art. 6(1)(b))</td></tr>
-          <tr><td>Cloud sync functionality (paid versions)</td><td>Performance of contract (Art. 6(1)(b))</td></tr>
+          <tr><td>Cloud sync functionality (logged-in users)</td><td>Performance of contract (Art. 6(1)(b))</td></tr>
           <tr><td>Responding to user support inquiries</td><td>Contract / Legitimate interests (Art. 6(1)(f))</td></tr>
           <tr><td>Analyzing usage for service improvement</td><td>Legitimate interests (Art. 6(1)(f))</td></tr>
           <tr><td>Fraud prevention and security</td><td>Legitimate interests (Art. 6(1)(f))</td></tr>
-          <tr><td>Advertising (free version)</td><td>Consent (Art. 6(1)(a))</td></tr>
+          <tr><td>Advertising (Free / Guest)</td><td>Consent (Art. 6(1)(a))</td></tr>
           <tr><td>Compliance with legal obligations</td><td>Legal obligation (Art. 6(1)(c))</td></tr>
         </tbody>
       </table>
@@ -351,9 +351,9 @@
         </thead>
         <tbody>
           <tr><td>Local storage (language &amp; theme)</td><td>Saves site language and theme preferences</td><td>Persistent (until browser data cleared)</td><td>Required</td></tr>
-          <tr><td>Local storage (session data)</td><td>Stores timer and stats data (free version)</td><td>Persistent (until browser data cleared)</td><td>Required</td></tr>
+          <tr><td>Local storage (session data)</td><td>Stores timer and stats data (when not logged in)</td><td>Persistent (until browser data cleared)</td><td>Required</td></tr>
           <tr><td>Cookie consent status</td><td>Records cookie consent preference</td><td>Persistent</td><td>Required</td></tr>
-          <tr><td>Third-party cookies (advertising)</td><td>Ad delivery and personalization (free version)</td><td>Varies by service</td><td>Optional (consent required)</td></tr>
+          <tr><td>Third-party cookies (advertising)</td><td>Ad delivery and personalization (Free / Guest)</td><td>Varies by service</td><td>Optional (consent required)</td></tr>
         </tbody>
       </table>
 
@@ -365,7 +365,7 @@
       <p>Some browsers send a "Do Not Track" (DNT) signal. Because there is no universally accepted standard for responding to DNT signals, we do not currently respond to them automatically. However, you can decline optional tracking cookies via the cookie consent banner.</p>
 
       <h2>7. Account Deletion</h2>
-      <p>To delete a paid account, use the in-app settings or contact <a href="mailto:support@pomocare.com">support@pomocare.com</a>. All cloud data associated with your account will be deleted within 30 days of the request. Deleted data cannot be recovered.</p>
+      <p>To delete your account, use the in-app settings or contact <a href="mailto:support@pomocare.com">support@pomocare.com</a>. All cloud data associated with your account will be deleted within 30 days of the request. Deleted data cannot be recovered.</p>
 
       <h2>8. Data Security</h2>
       <p>We implement reasonable technical and organizational measures to protect your personal data against unauthorized access, loss, and alteration, including:</p>

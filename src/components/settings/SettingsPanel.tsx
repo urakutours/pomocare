@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Download, Lock } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
@@ -655,6 +655,15 @@ function LabelManager({
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
 
+  // Refs (declared early so all callbacks can access them)
+  const touchStartIdx = useRef<number | null>(null);
+  const touchCurrentIdx = useRef<number | null>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // FLIP animation refs
+  const prevRectsRef = useRef<Map<string, DOMRect> | null>(null);
+  const isAnimatingRef = useRef(false);
+
   const handleAdd = (label: LabelDefinition) => {
     onChange([...labels, label]);
   };
@@ -666,6 +675,16 @@ function LabelManager({
   const handleDelete = (id: string) => {
     onChange(labels.filter((l) => l.id !== id));
   };
+
+  // ── FLIP: capture current bounding rects keyed by label id ──
+  const capturePositions = useCallback((): Map<string, DOMRect> => {
+    const rects = new Map<string, DOMRect>();
+    labels.forEach((l, i) => {
+      const el = rowRefs.current[i];
+      if (el) rects.set(l.id, el.getBoundingClientRect());
+    });
+    return rects;
+  }, [labels]);
 
   const handleDragStart = useCallback((idx: number) => {
     setDragIdx(idx);
@@ -683,13 +702,15 @@ function LabelManager({
       setOverIdx(null);
       return;
     }
+    // FLIP: capture positions before React re-renders
+    prevRectsRef.current = capturePositions();
     const reordered = [...labels];
     const [moved] = reordered.splice(dragIdx, 1);
     reordered.splice(dropIdx, 0, moved);
     onChange(reordered);
     setDragIdx(null);
     setOverIdx(null);
-  }, [dragIdx, labels, onChange]);
+  }, [dragIdx, labels, onChange, capturePositions]);
 
   const handleDragEnd = useCallback(() => {
     setDragIdx(null);
@@ -697,10 +718,6 @@ function LabelManager({
   }, []);
 
   // --- Touch-based reorder ---
-  const touchStartIdx = useRef<number | null>(null);
-  const touchCurrentIdx = useRef<number | null>(null);
-  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   const handleTouchStart = useCallback((idx: number) => {
     touchStartIdx.current = idx;
     setDragIdx(idx);
@@ -722,6 +739,8 @@ function LabelManager({
     const from = touchStartIdx.current;
     const to = touchCurrentIdx.current;
     if (from !== null && to !== null && from !== to) {
+      // FLIP: capture positions before React re-renders
+      prevRectsRef.current = capturePositions();
       const reordered = [...labels];
       const [moved] = reordered.splice(from, 1);
       reordered.splice(to, 0, moved);
@@ -731,7 +750,75 @@ function LabelManager({
     touchCurrentIdx.current = null;
     setDragIdx(null);
     setOverIdx(null);
-  }, [labels, onChange]);
+  }, [labels, onChange, capturePositions]);
+
+  // ── FLIP animation: runs after React re-renders with new label order ──
+  useLayoutEffect(() => {
+    const prevRects = prevRectsRef.current;
+    if (!prevRects) return;
+    prevRectsRef.current = null;
+
+    // If already animating, snap previous animation to end instantly
+    if (isAnimatingRef.current) {
+      labels.forEach((_, i) => {
+        const el = rowRefs.current[i];
+        if (el) { el.style.transition = ''; el.style.transform = ''; }
+      });
+    }
+
+    isAnimatingRef.current = true;
+    const animatingEls: HTMLDivElement[] = [];
+
+    labels.forEach((l, i) => {
+      const el = rowRefs.current[i];
+      if (!el) return;
+      const prevRect = prevRects.get(l.id);
+      if (!prevRect) return;
+
+      const newRect = el.getBoundingClientRect();
+      const deltaY = prevRect.top - newRect.top;
+      if (Math.abs(deltaY) < 1) return;
+
+      // Invert: place element at its old visual position
+      el.style.transition = '';
+      el.style.transform = `translateY(${deltaY}px)`;
+      animatingEls.push(el);
+    });
+
+    if (animatingEls.length === 0) { isAnimatingRef.current = false; return; }
+
+    // Force reflow so the browser registers the transforms
+    void document.body.offsetHeight;
+
+    // Play: animate to final position
+    const duration = 250;
+    let done = 0;
+    const onEnd = (e: TransitionEvent) => {
+      const el = e.currentTarget as HTMLDivElement;
+      el.style.transition = '';
+      el.style.transform = '';
+      el.removeEventListener('transitionend', onEnd);
+      if (++done >= animatingEls.length) isAnimatingRef.current = false;
+    };
+
+    animatingEls.forEach((el) => {
+      el.addEventListener('transitionend', onEnd);
+      el.style.transition = `transform ${duration}ms cubic-bezier(0.25,0.1,0.25,1)`;
+      el.style.transform = '';
+    });
+
+    // Safety cleanup
+    const timer = setTimeout(() => {
+      animatingEls.forEach((el) => {
+        el.style.transition = '';
+        el.style.transform = '';
+        el.removeEventListener('transitionend', onEnd);
+      });
+      isAnimatingRef.current = false;
+    }, duration + 100);
+
+    return () => clearTimeout(timer);
+  }, [labels]);
 
   return (
     <div>

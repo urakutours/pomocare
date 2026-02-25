@@ -571,8 +571,8 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
 // ---- Storage switcher based on auth state + tier ----
 // 未ログイン          → localStorage
-// ログイン + free     → localStorage (ログイン可能だがデータはローカル)
-// ログイン + standard/pro → Supabase (クラウド同期)
+// ログイン + cloudSync → Supabase (クラウド保存)
+//   free tier: 1デバイス制限あり / standard・pro: 複数デバイスOK
 function AppWithStorage() {
   const { user, isLoading: authLoading, isPasswordRecovery, clearPasswordRecovery } = useAuth();
   const features = useFeatures();
@@ -593,7 +593,33 @@ function AppWithStorage() {
     setStorage(null);
 
     if (useCloud) {
-      setStorage(createSupabaseStorageService(currentUid!));
+      const cloud = createSupabaseStorageService(currentUid!);
+
+      // localStorage → Supabase 自動マイグレーション
+      // 既存無料ユーザーが初めてクラウド保存に切り替わった際、
+      // localStorage にあるデータを Supabase へ移行する
+      const local = new LocalStorageAdapter();
+      (async () => {
+        try {
+          const [cloudSessions, localSessions] = await Promise.all([
+            cloud.getSessions(),
+            local.getSessions(),
+          ]);
+          // Supabase が空 & localStorage にデータがある → 移行
+          if (cloudSessions.length === 0 && localSessions.length > 0) {
+            const localSettings = await local.getSettings();
+            await Promise.all([
+              cloud.saveSessions(localSessions),
+              cloud.saveSettings(localSettings),
+            ]);
+            // 移行完了後に localStorage のデータを削除
+            await local.clearAll();
+          }
+        } catch {
+          // マイグレーション失敗時はスキップ（データは localStorage に残る）
+        }
+        setStorage(cloud);
+      })();
     } else {
       setStorage(createStorageService());
     }
@@ -633,6 +659,7 @@ function AppWithI18n({ storage }: { storage: StorageService }) {
   const { settings, updateSettings, isLoaded } = useSettings(storage);
   const { refreshTier } = useAuth();
   const [paymentSuccessPlan, setPaymentSuccessPlan] = useState<CheckoutPlan | null>(null);
+
 
   // Apply theme class to document
   useEffect(() => {

@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lp-preview",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["node_modules/serve/build/main.js", "lp", "-l", "3456"],
+      "port": 3456
+    },
+    {
+      "name": "app-dev",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--port", "5174", "--host"],
+      "port": 5174
+    }
+  ]
+}

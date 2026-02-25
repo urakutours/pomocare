@@ -61,6 +61,13 @@ export interface Translations {
   sessionChangeLabel: string;
   sessionEditNote: string;
   sessionDelete: string;
+  sessionDeleteConfirm: string;
+
+  // Focus mode confirmations
+  confirmCompleteSession: string;
+  confirmComplete: string;
+  confirmResetTimer: string;
+  confirmReset: string;
 
   // CSV import
   csvImportTitle: string;
@@ -189,4 +196,5 @@ export interface Translations {
   checkoutLoginRequired: string;
   checkoutProcessing: string;
   checkoutError: string;
+
 }

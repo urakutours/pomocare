@@ -2,6 +2,7 @@ import type { UserTier } from '@/services/auth/AuthService';
 
 export interface FeatureFlags {
   cloudSync: boolean;
+  multiDevice: boolean;
   exportData: boolean;
   advancedStats: boolean;
   sessionNotes: boolean;
@@ -12,6 +13,7 @@ export interface FeatureFlags {
 
 const PAID_FLAGS: FeatureFlags = {
   cloudSync: true,
+  multiDevice: true,
   exportData: true,
   advancedStats: true,
   sessionNotes: true,
@@ -22,7 +24,8 @@ const PAID_FLAGS: FeatureFlags = {
 
 export const FEATURE_FLAGS: Record<UserTier, FeatureFlags> = {
   free: {
-    cloudSync: false,
+    cloudSync: true,
+    multiDevice: true,
     exportData: false,
     advancedStats: false,
     sessionNotes: false,

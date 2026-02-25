@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Square, Check, Play, RotateCcw } from 'lucide-react';
 import { formatTime } from '@/utils/time';
+import { useI18n } from '@/contexts/I18nContext';
 
 interface FocusModeProps {
   timeLeft: number;
@@ -16,6 +17,7 @@ interface FocusModeProps {
 interface ConfirmModalProps {
   message: string;
   confirmLabel: string;
+  cancelLabel: string;
   confirmIcon: React.ReactNode;
   confirmClass: string;
   onConfirm: () => void;
@@ -25,6 +27,7 @@ interface ConfirmModalProps {
 function ConfirmModal({
   message,
   confirmLabel,
+  cancelLabel,
   confirmIcon,
   confirmClass,
   onConfirm,
@@ -50,7 +53,7 @@ function ConfirmModal({
             onClick={onCancel}
             className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-neutral-600 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
           >
-            キャンセル
+            {cancelLabel}
           </button>
           {/* Confirm */}
           <button
@@ -75,6 +78,7 @@ export function FocusMode({
   onComplete,
   onReset,
 }: FocusModeProps) {
+  const { t } = useI18n();
   const [confirmComplete, setConfirmComplete] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
 
@@ -83,8 +87,9 @@ export function FocusMode({
       {/* ── Confirm modals (rendered outside the layout flow) ── */}
       {confirmComplete && (
         <ConfirmModal
-          message="セッションを完了しますか？"
-          confirmLabel="完了"
+          message={t.confirmCompleteSession}
+          confirmLabel={t.confirmComplete}
+          cancelLabel={t.dataResetCancel}
           confirmIcon={<Check size={15} strokeWidth={2.5} />}
           confirmClass="bg-tiffany hover:bg-tiffany-hover"
           onConfirm={() => { setConfirmComplete(false); onComplete(); }}
@@ -93,8 +98,9 @@ export function FocusMode({
       )}
       {confirmReset && (
         <ConfirmModal
-          message="タイマーをリセットしますか？"
-          confirmLabel="リセット"
+          message={t.confirmResetTimer}
+          confirmLabel={t.confirmReset}
+          cancelLabel={t.dataResetCancel}
           confirmIcon={<RotateCcw size={14} />}
           confirmClass="bg-gray-500 hover:bg-gray-600 dark:bg-neutral-500 dark:hover:bg-neutral-400"
           onConfirm={() => { setConfirmReset(false); onReset(); }}

@@ -70,6 +70,11 @@ export const ja: Translations = {
   sessionChangeLabel: 'ラベルの変更',
   sessionEditNote: 'メモの修正',
   sessionDelete: '削除',
+  sessionDeleteConfirm: 'このセッションを削除しますか？',
+  confirmCompleteSession: 'セッションを完了しますか？',
+  confirmComplete: '完了',
+  confirmResetTimer: 'タイマーをリセットしますか？',
+  confirmReset: 'リセット',
   csvImportTitle: 'CSVインポート',
   csvImportDescription: 'エクスポートしたCSVファイルからセッションデータを読み込みます。重複するセッションはスキップされます。',
   csvImportButton: 'CSVをインポート',
@@ -148,4 +153,5 @@ export const ja: Translations = {
   checkoutLoginRequired: '購入にはログインが必要です。',
   checkoutProcessing: '決済ページへ移動中...',
   checkoutError: '決済処理に失敗しました。もう一度お試しください。',
+
 };

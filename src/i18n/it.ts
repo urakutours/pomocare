@@ -70,6 +70,11 @@ export const it: Translations = {
   sessionChangeLabel: 'Cambia etichetta',
   sessionEditNote: 'Modifica nota',
   sessionDelete: 'Elimina',
+  sessionDeleteConfirm: 'Eliminare questa sessione?',
+  confirmCompleteSession: 'Completare questa sessione?',
+  confirmComplete: 'Completa',
+  confirmResetTimer: 'Reimpostare il timer?',
+  confirmReset: 'Reimposta',
   csvImportTitle: 'Importa CSV',
   csvImportDescription: 'Carica i dati delle sessioni da un file CSV esportato. Le sessioni duplicate verranno saltate.',
   csvImportButton: 'Importa CSV',
@@ -148,4 +153,5 @@ export const it: Translations = {
   checkoutLoginRequired: 'Accedi per acquistare.',
   checkoutProcessing: 'Reindirizzamento al pagamento...',
   checkoutError: 'Pagamento fallito. Riprova.',
+
 };

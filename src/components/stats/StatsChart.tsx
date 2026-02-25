@@ -224,8 +224,9 @@ function BarDetailModal({
   const renderRow = (s: PomodoroSession, i: number) => {
     const lbl = s.label ? labelMap[s.label] : null;
     const isMenuOpen = openMenuDate === s.date;
+    const isEditing = editingSession?.date === s.date;
     return (
-      <div key={i} className="relative group flex items-start gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0">
+      <div key={i} className={`relative group flex items-start gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0 rounded transition-colors ${isEditing ? 'bg-tiffany/10 ring-1 ring-tiffany/30' : ''}`}>
         {lbl ? (
           <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: lbl.color }} />
         ) : (
@@ -334,7 +335,7 @@ function BarDetailModal({
         )}
         {editingSession && editMode === 'delete' && (
           <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-neutral-700 flex-shrink-0">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{t.sessionDelete}?</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{t.sessionDeleteConfirm}</p>
             <div className="flex gap-1.5">
               <button onClick={() => handleDelete(editingSession.date)} className="flex-1 py-1.5 text-xs bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">{t.sessionDelete}</button>
               <button onClick={closeMenu} className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors">{t.dataResetCancel}</button>
@@ -408,11 +409,28 @@ export function StatsChart({
   const [displayMode, setDisplayMode] = useState<StatsDisplayMode>('sets');
   const [showUpgrade, setShowUpgrade] = useState(false);
 
-  // Bar detail modal state
-  const [barModal, setBarModal] = useState<{ title: string; sessions: PomodoroSession[]; groupByDay?: boolean } | null>(null);
+  // Bar detail modal state — stores session dates (not snapshots) so data stays reactive
+  const [barModal, setBarModal] = useState<{ title: string; sessionDates: string[]; groupByDay?: boolean } | null>(null);
 
   // Label stat modal state (label name/bar click)
-  const [labelModal, setLabelModal] = useState<{ title: string; sessions: PomodoroSession[] } | null>(null);
+  const [labelModal, setLabelModal] = useState<{ title: string; sessionDates: string[] } | null>(null);
+
+  // Derive live sessions from current sessions prop (stays in sync after edit/delete)
+  const barModalSessions = useMemo(() => {
+    if (!barModal) return [];
+    const dateSet = new Set(barModal.sessionDates);
+    return sessions
+      .filter(s => dateSet.has(s.date))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [barModal, sessions]);
+
+  const labelModalSessions = useMemo(() => {
+    if (!labelModal) return [];
+    const dateSet = new Set(labelModal.sessionDates);
+    return sessions
+      .filter(s => dateSet.has(s.date))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [labelModal, sessions]);
 
   // Resizable bar chart height
   const [barHeight, setBarHeight] = useState(80);
@@ -722,7 +740,7 @@ export function StatsChart({
                 const dayDate = weekDataRaw[i].date;
                 const daySessions = filteredSessions.filter((s) => new Date(s.date).toDateString() === dayDate.toDateString());
                 const title = `${dayDate.getMonth() + 1}/${dayDate.getDate()}（${weekDataRaw[i].day}）`;
-                const handleClick = () => setBarModal({ title, sessions: daySessions });
+                const handleClick = () => setBarModal({ title, sessionDates: daySessions.map(s => s.date) });
                 return isAllMode && weekStackedData ? (
                   <StackedBar key={i} total={data.count} maxCount={weekMaxCount} segments={(data as typeof weekStackedData[0]).segments} totalSeconds={data.totalSeconds} maxSeconds={weekMaxSecs} useTime={displayMode === 'time'} barHeight={barHeight} onClick={handleClick} />
                 ) : (
@@ -746,7 +764,7 @@ export function StatsChart({
                 const dayDate = monthDataRaw[i].date;
                 const daySessions = filteredSessions.filter((s) => new Date(s.date).toDateString() === dayDate.toDateString());
                 const title = `${dayDate.getMonth() + 1}/${dayDate.getDate()}`;
-                const handleClick = () => setBarModal({ title, sessions: daySessions });
+                const handleClick = () => setBarModal({ title, sessionDates: daySessions.map(s => s.date) });
                 return isAllMode && monthStackedData ? (
                   <StackedBar key={i} total={data.count} maxCount={monthMaxCount} segments={(data as typeof monthStackedData[0]).segments} totalSeconds={data.totalSeconds} maxSeconds={monthMaxSecs} useTime={displayMode === 'time'} barHeight={barHeight} onClick={handleClick} />
                 ) : (
@@ -774,7 +792,7 @@ export function StatsChart({
                   return d.getFullYear() === targetYear && d.getMonth() === i;
                 });
                 const title = `${targetYear} ${t.months[i]}`;
-                const handleClick = () => setBarModal({ title, sessions: monthSessions, groupByDay: true });
+                const handleClick = () => setBarModal({ title, sessionDates: monthSessions.map(s => s.date), groupByDay: true });
                 return isAllMode && yearStackedData ? (
                   <StackedBar key={i} total={data.count} maxCount={yearMaxCount} segments={(data as typeof yearStackedData[0]).segments} totalSeconds={data.totalSeconds} maxSeconds={yearMaxSecs} useTime={displayMode === 'time'} barHeight={barHeight} onClick={handleClick} />
                 ) : (
@@ -810,7 +828,7 @@ export function StatsChart({
                   ? (maxLabelSeconds > 0 ? totalSeconds / maxLabelSeconds : 0)
                   : (maxLabelCount > 0 ? count / maxLabelCount : 0);
                 const labelSessions = periodSessions.filter((s) => s.label === label.id);
-                const handleLabelClick = () => setLabelModal({ title: label.name, sessions: labelSessions });
+                const handleLabelClick = () => setLabelModal({ title: label.name, sessionDates: labelSessions.map(s => s.date) });
                 return (
                   <button
                     key={label.id}
@@ -836,7 +854,7 @@ export function StatsChart({
                 return (
                   <button
                     className="w-full text-left hover:bg-gray-50 dark:hover:bg-neutral-700/50 rounded-lg px-1 py-0.5 -mx-1 transition-colors cursor-pointer"
-                    onClick={() => setLabelModal({ title: t.noLabel, sessions: unlabeledPeriodSessions })}
+                    onClick={() => setLabelModal({ title: t.noLabel, sessionDates: unlabeledPeriodSessions.map(s => s.date) })}
                   >
                     <div className="flex items-center gap-1.5 mb-1">
                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-neutral-600" />
@@ -862,7 +880,7 @@ export function StatsChart({
       {barModal && (
         <BarDetailModal
           title={barModal.title}
-          modalSessions={barModal.sessions}
+          modalSessions={barModalSessions}
           labels={labels}
           onClose={() => setBarModal(null)}
           onUpdateSession={onUpdateSession}
@@ -875,7 +893,7 @@ export function StatsChart({
       {labelModal && (
         <BarDetailModal
           title={labelModal.title}
-          modalSessions={labelModal.sessions}
+          modalSessions={labelModalSessions}
           labels={labels}
           onClose={() => setLabelModal(null)}
           onUpdateSession={onUpdateSession}

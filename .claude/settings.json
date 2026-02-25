@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(scoop:*)",
+      "Bash(npx supabase:*)",
+      "Bash(git revert:*)",
+      "WebFetch(domain:pomocare.com)"
     ]
   }
 }

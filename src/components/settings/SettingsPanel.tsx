@@ -304,7 +304,7 @@ function ColorPicker({
       {/* Custom color button */}
       <button
         onClick={() => fileRef.current?.click()}
-        title="カスタムカラー"
+        title="Custom color"
         className="w-5 h-5 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-500 flex items-center justify-center hover:border-tiffany transition-colors flex-shrink-0"
         style={!LABEL_COLORS.includes(value) ? { backgroundColor: value, borderStyle: 'solid', borderColor: '#6b7280' } : {}}
       >

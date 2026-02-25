@@ -194,11 +194,12 @@ export function SessionSummary({
   const renderRow = (s: PomodoroSession, i: number) => {
     const lbl = s.label ? labelMap[s.label] : null;
     const isMenuOpen = openMenuDate === s.date;
+    const isEditing = editingSession?.date === s.date;
 
     return (
       <div
         key={i}
-        className="relative group flex items-start gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0"
+        className={`relative group flex items-start gap-2 py-1.5 border-b border-gray-50 dark:border-neutral-700 last:border-0 rounded transition-colors ${isEditing ? 'bg-tiffany/10 ring-1 ring-tiffany/30' : ''}`}
       >
         {/* Color dot */}
         {lbl ? (
@@ -326,13 +327,13 @@ export function SessionSummary({
                     onClick={() => handleCommitLabel(editingSession.date)}
                     className="flex-1 py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
                   >
-                    適用
+                    OK
                   </button>
                   <button
                     onClick={closeMenu}
                     className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
                   >
-                    キャンセル
+                    {t.dataResetCancel}
                   </button>
                 </div>
               </div>
@@ -357,13 +358,13 @@ export function SessionSummary({
                     onClick={() => handleCommitNote(editingSession.date)}
                     className="flex-1 py-1.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
                   >
-                    適用
+                    OK
                   </button>
                   <button
                     onClick={closeMenu}
                     className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
                   >
-                    キャンセル
+                    {t.dataResetCancel}
                   </button>
                 </div>
               </div>
@@ -371,7 +372,7 @@ export function SessionSummary({
 
             {editingSession && editMode === 'delete' && (
               <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-neutral-700 flex-shrink-0">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{t.sessionDelete}しますか？</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{t.sessionDeleteConfirm}</p>
                 <div className="flex gap-1.5">
                   <button
                     onClick={() => handleDelete(editingSession.date)}
@@ -383,7 +384,7 @@ export function SessionSummary({
                     onClick={closeMenu}
                     className="flex-1 py-1.5 text-xs border border-gray-300 dark:border-neutral-500 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
                   >
-                    キャンセル
+                    {t.dataResetCancel}
                   </button>
                 </div>
               </div>

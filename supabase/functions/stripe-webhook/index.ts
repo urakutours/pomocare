@@ -109,8 +109,20 @@ serve(async (req: Request) => {
               console.warn("[stripe-webhook] Failed to cancel old subscription:", cancelErr);
             }
           }
+        } else if (plan === "standard") {
+          // Standard サブスク: checkout完了時点でtierをstandardに更新
+          // （customer.subscription.created は発火するが updated は初回時に来ない場合がある）
+          const subscriptionId = typeof session.subscription === "string"
+            ? session.subscription
+            : (session.subscription as Stripe.Subscription | null)?.id ?? null;
+          await updateUserProfile(userId, {
+            tier: "standard",
+            stripe_customer_id: session.customer as string,
+            stripe_subscription_id: subscriptionId,
+            subscription_status: "active",
+          });
+          console.log(`[stripe-webhook] User ${userId} upgraded to Standard (subscription via checkout)`);
         }
-        // Standard の場合は customer.subscription.updated で処理するため、ここでは何もしない
         break;
       }
 

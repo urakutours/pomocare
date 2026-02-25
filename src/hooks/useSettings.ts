@@ -21,6 +21,21 @@ export function useSettings(storage: StorageService) {
     });
   }, [storage]);
 
+  // ── Refetch on tab focus (cross-device sync) ──
+  useEffect(() => {
+    let lastFetch = Date.now();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastFetch > 5_000) {
+        lastFetch = Date.now();
+        storage.getSettings().then(setSettings);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [storage]);
+
   const updateSettings = useCallback(
     async (newSettings: PomodoroSettings) => {
       setSettings(newSettings);

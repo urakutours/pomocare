@@ -28,6 +28,21 @@ export function useSessions(storage: StorageService, days: Translations['days'])
     storage.getSessions().then(setSessions);
   }, [storage]);
 
+  // ── Refetch on tab focus (cross-device sync) ──
+  useEffect(() => {
+    let lastFetch = Date.now();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastFetch > 5_000) {
+        lastFetch = Date.now();
+        storage.getSessions().then(setSessions);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [storage]);
+
   const addSession = useCallback(
     async (session: PomodoroSession) => {
       const updated = [...sessionsRef.current, session];

@@ -43,29 +43,45 @@ export function useSessions(storage: StorageService, days: Translations['days'])
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [storage]);
 
+  // ── Fetch-Merge-Save helpers (cross-device safe) ──
+  // Each write operation fetches the latest server data first so that
+  // changes made on other devices are never silently overwritten.
+
   const addSession = useCallback(
     async (session: PomodoroSession) => {
-      const updated = [...sessionsRef.current, session];
-      setSessions(updated);
-      await storage.saveSessions(updated);
+      // Optimistic UI update
+      setSessions((prev) => [...prev, session]);
+      // Merge with server: keep all server sessions + add new one (dedup by date)
+      const server = await storage.getSessions();
+      const merged = [...server.filter((s) => s.date !== session.date), session];
+      setSessions(merged);
+      await storage.saveSessions(merged);
     },
     [storage],
   );
 
   const updateSession = useCallback(
     async (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => {
-      const updated = sessionsRef.current.map((s) => s.date === date ? { ...s, ...patch } : s);
-      setSessions(updated);
-      await storage.saveSessions(updated);
+      // Optimistic UI update
+      setSessions((prev) => prev.map((s) => s.date === date ? { ...s, ...patch } : s));
+      // Apply patch to latest server data
+      const server = await storage.getSessions();
+      const merged = server.map((s) => s.date === date ? { ...s, ...patch } : s);
+      setSessions(merged);
+      await storage.saveSessions(merged);
     },
     [storage],
   );
 
   const deleteSession = useCallback(
     async (date: string) => {
-      const updated = sessionsRef.current.filter((s) => s.date !== date);
-      setSessions(updated);
-      await storage.saveSessions(updated);
+      // Optimistic UI update
+      setSessions((prev) => prev.filter((s) => s.date !== date));
+      // Apply delete to latest server data
+      const server = await storage.getSessions();
+      const merged = server.filter((s) => s.date !== date);
+      setSessions(merged);
+      await storage.saveSessions(merged);
     },
     [storage],
   );
@@ -177,14 +193,15 @@ export function useSessions(storage: StorageService, days: Translations['days'])
     [sessions],
   );
 
-  // Import sessions from CSV (merges with existing, deduplicates by date)
+  // Import sessions from CSV (merges with server + imported, deduplicates by date)
   const importSessions = useCallback(
     async (imported: PomodoroSession[]) => {
-      const existingDates = new Set(sessionsRef.current.map((s) => s.date));
+      const server = await storage.getSessions();
+      const existingDates = new Set(server.map((s) => s.date));
       const newSessions = imported.filter((s) => !existingDates.has(s.date));
-      const updated = [...sessionsRef.current, ...newSessions];
-      setSessions(updated);
-      await storage.saveSessions(updated);
+      const merged = [...server, ...newSessions];
+      setSessions(merged);
+      await storage.saveSessions(merged);
     },
     [storage],
   );

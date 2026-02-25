@@ -43,6 +43,8 @@ export const it: Translations = {
   addLabel: 'Aggiungi etichetta',
   activeLabelLabel: 'Etichetta attiva',
   noLabel: 'Nessuna etichetta',
+  labelDuration: 'Durata del timer',
+  labelDurationNone: 'Nessuna (predefinito)',
   weeklyStats: 'Statistiche',
   weekly: 'Settimana',
   monthly: 'Mese',

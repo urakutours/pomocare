@@ -43,6 +43,8 @@ export const en: Translations = {
   addLabel: 'Add Label',
   activeLabelLabel: 'Active Label',
   noLabel: 'No Label',
+  labelDuration: 'Timer duration',
+  labelDurationNone: 'None (default)',
   weeklyStats: 'Statistics',
   weekly: 'Weekly',
   monthly: 'Monthly',

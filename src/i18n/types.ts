@@ -56,6 +56,8 @@ export interface Translations {
   addLabel: string;
   activeLabelLabel: string;
   noLabel: string;
+  labelDuration: string;
+  labelDurationNone: string;
 
   // Session edit menu
   sessionChangeLabel: string;

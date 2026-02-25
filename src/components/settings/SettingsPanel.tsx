@@ -3,6 +3,7 @@ import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, U
 import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
+import { LABEL_COLORS } from '@/config/colors';
 import { useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeatures } from '@/contexts/FeatureContext';
@@ -37,27 +38,6 @@ const labelClass = 'block text-sm text-gray-600 dark:text-gray-400 mb-1';
 const LONG_BREAK_OPTIONS = [0, 15, 20];
 const LONG_BREAK_INTERVAL_OPTIONS = [0, 3, 4];
 
-// ---- Refined color palette (inspired by popular palette sites) ----
-const LABEL_COLORS = [
-  // Warm pastels / blush
-  '#F4A7A0', '#F28B7D', '#E8736A', '#D45C54',
-  // Pinks / roses
-  '#F4A0C0', '#E87DA8', '#D45C8F', '#C04477',
-  // Purples / lavenders
-  '#B8A4D8', '#9B87C4', '#7C6BAF', '#6355A0',
-  // Blues / periwinkle
-  '#A4BAE8', '#7FA0D8', '#5A87C8', '#3B6DB8',
-  // Teals / cyans
-  '#7FD4CC', '#4DB8B0', '#2A9C94', '#0abab5',
-  // Greens / sage
-  '#A0D4A0', '#7DBF7D', '#5AAA5A', '#3D943D',
-  // Yellows / golds
-  '#F4D48A', '#E8BC5A', '#D4A030', '#B88820',
-  // Oranges / terracotta
-  '#F4B07A', '#E8904A', '#D4702A', '#B85A18',
-  // Neutrals / stone
-  '#C0B8B0', '#A09890', '#808070', '#606050',
-];
 
 function TimeSelector({
   label,
@@ -331,14 +311,16 @@ function AddLabelModal({
   onClose: () => void;
   addLabel: string;
 }) {
+  const { t } = useI18n();
   const [name, setName] = useState('');
   const [color, setColor] = useState(LABEL_COLORS[19]); // tiffany default
+  const [duration, setDuration] = useState<number | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleAdd = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    onAdd({ id: Date.now().toString(36), name: trimmed, color });
+    onAdd({ id: Date.now().toString(36), name: trimmed, color, duration });
     onClose();
   };
 
@@ -368,6 +350,20 @@ function AddLabelModal({
           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 mb-3"
         />
         <ColorPicker value={color} onChange={setColor} />
+        {/* Duration selector */}
+        <div className="mt-3">
+          <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t.labelDuration}</label>
+          <select
+            value={duration ?? ''}
+            onChange={(e) => setDuration(e.target.value ? Number(e.target.value) : undefined)}
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 bg-white"
+          >
+            <option value="">{t.labelDurationNone}</option>
+            {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60].map((m) => (
+              <option key={m} value={m}>{m}{t.activeTimeLabel.includes('分') ? '分' : 'min'}</option>
+            ))}
+          </select>
+        </div>
         <button
           onClick={handleAdd}
           disabled={!name.trim()}
@@ -536,7 +532,7 @@ function LabelDotMenu({
   saveLabel,
 }: {
   label: LabelDefinition;
-  onEdit: (id: string, name: string, color: string) => void;
+  onEdit: (id: string, name: string, color: string, duration?: number) => void;
   onDelete: (id: string) => void;
   renameLabel: string;
   deleteLabel: string;
@@ -580,13 +576,14 @@ function LabelDotMenu({
       {/* Edit label modal (QuickLabelModal in edit mode) */}
       {showEditModal && (
         <QuickLabelModal
-          onAdd={(edited) => { onEdit(edited.id, edited.name, edited.color); setShowEditModal(false); }}
+          onAdd={(edited) => { onEdit(edited.id, edited.name, edited.color, edited.duration); setShowEditModal(false); }}
           onClose={() => setShowEditModal(false)}
           addNewLabel=""
           labelNamePlaceholder={labelNamePlaceholder}
           addButtonText=""
           initialName={label.name}
           initialColor={label.color}
+          initialDuration={label.duration}
           editId={label.id}
           title={renameLabel}
           buttonText={saveLabel}
@@ -668,8 +665,8 @@ function LabelManager({
     onChange([...labels, label]);
   };
 
-  const handleEdit = (id: string, name: string, color: string) => {
-    onChange(labels.map((l) => l.id === id ? { ...l, name, color } : l));
+  const handleEdit = (id: string, name: string, color: string, duration?: number) => {
+    onChange(labels.map((l) => l.id === id ? { ...l, name, color, duration } : l));
   };
 
   const handleDelete = (id: string) => {
@@ -875,7 +872,12 @@ function LabelManager({
               className="w-3 h-3 rounded-full flex-shrink-0"
               style={{ backgroundColor: l.color }}
             />
-            <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate">{l.name}</span>
+            <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate">
+              {l.name}
+              {l.duration != null && (
+                <span className="ml-1.5 text-xs text-gray-400 dark:text-gray-500">{l.duration}min</span>
+              )}
+            </span>
             <LabelDotMenu
               label={l}
               onEdit={handleEdit}

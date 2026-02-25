@@ -43,6 +43,8 @@ export const de: Translations = {
   addLabel: 'Beschriftung hinzufügen',
   activeLabelLabel: 'Aktive Beschriftung',
   noLabel: 'Keine Beschriftung',
+  labelDuration: 'Timer-Dauer',
+  labelDurationNone: 'Keine (Standard)',
   weeklyStats: 'Statistiken',
   weekly: 'Woche',
   monthly: 'Monat',

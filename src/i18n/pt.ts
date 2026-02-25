@@ -43,6 +43,8 @@ export const pt: Translations = {
   addLabel: 'Adicionar rótulo',
   activeLabelLabel: 'Rótulo ativo',
   noLabel: 'Sem rótulo',
+  labelDuration: 'Duração do temporizador',
+  labelDurationNone: 'Nenhum (padrão)',
   weeklyStats: 'Estatísticas',
   weekly: 'Semana',
   monthly: 'Mês',

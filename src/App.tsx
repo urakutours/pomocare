@@ -27,6 +27,7 @@ import { EmailActionHandler } from '@/components/auth/EmailActionHandler';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
 import type { PomodoroSettings } from '@/types/settings';
 import type { StorageService } from '@/services/storage/types';
+import { LABEL_COLORS } from '@/config/colors';
 
 interface PomodoroAppProps {
   storage: StorageService;
@@ -35,13 +36,6 @@ interface PomodoroAppProps {
 }
 
 // ---- Quick label creator modal (shown from TOP screen) ----
-const QUICK_COLORS = [
-  '#F4A7A0', '#F28B7D', '#F4A0C0', '#E87DA8',
-  '#B8A4D8', '#9B87C4', '#A4BAE8', '#7FA0D8',
-  '#7FD4CC', '#4DB8B0', '#0abab5', '#2A9C94',
-  '#A0D4A0', '#5AAA5A', '#F4D48A', '#E8BC5A',
-  '#F4B07A', '#E8904A', '#C0B8B0', '#808070',
-];
 
 export function QuickLabelModal({
   onAdd,
@@ -51,6 +45,7 @@ export function QuickLabelModal({
   addButtonText,
   initialName,
   initialColor,
+  initialDuration,
   editId,
   title,
   buttonText,
@@ -64,6 +59,8 @@ export function QuickLabelModal({
   initialName?: string;
   /** 編集モード用: 初期カラー */
   initialColor?: string;
+  /** 編集モード用: 初期タイマー時間 */
+  initialDuration?: number;
   /** 編集モード用: 既存ラベルID（指定時は新規IDを生成しない） */
   editId?: string;
   /** モーダルタイトル上書き */
@@ -71,14 +68,16 @@ export function QuickLabelModal({
   /** ボタンテキスト上書き */
   buttonText?: string;
 }) {
+  const { t } = useI18n();
   const [name, setName] = useState(initialName ?? '');
-  const [color, setColor] = useState(initialColor ?? QUICK_COLORS[10]);
+  const [color, setColor] = useState(initialColor ?? LABEL_COLORS[10]);
+  const [duration, setDuration] = useState<number | undefined>(initialDuration);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleAdd = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    onAdd({ id: editId ?? Date.now().toString(36), name: trimmed, color });
+    onAdd({ id: editId ?? Date.now().toString(36), name: trimmed, color, duration });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -106,7 +105,7 @@ export function QuickLabelModal({
           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 mb-3"
         />
         <div className="flex flex-wrap gap-1.5">
-          {QUICK_COLORS.map((c) => (
+          {LABEL_COLORS.map((c) => (
             <button
               key={c}
               onClick={() => setColor(c)}
@@ -118,9 +117,9 @@ export function QuickLabelModal({
           <button
             onClick={() => colorInputRef.current?.click()}
             className="w-5 h-5 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-500 flex items-center justify-center hover:border-tiffany transition-colors flex-shrink-0"
-            style={!QUICK_COLORS.includes(color) ? { backgroundColor: color, borderStyle: 'solid' } : {}}
+            style={!LABEL_COLORS.includes(color) ? { backgroundColor: color, borderStyle: 'solid' } : {}}
           >
-            {QUICK_COLORS.includes(color) && <span className="text-gray-400 text-xs leading-none">+</span>}
+            {LABEL_COLORS.includes(color) && <span className="text-gray-400 text-xs leading-none">+</span>}
           </button>
           <input
             ref={colorInputRef}
@@ -129,6 +128,20 @@ export function QuickLabelModal({
             onChange={(e) => setColor(e.target.value)}
             className="sr-only"
           />
+        </div>
+        {/* Duration selector */}
+        <div className="mt-3">
+          <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t.labelDuration}</label>
+          <select
+            value={duration ?? ''}
+            onChange={(e) => setDuration(e.target.value ? Number(e.target.value) : undefined)}
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 bg-white"
+          >
+            <option value="">{t.labelDurationNone}</option>
+            {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60].map((m) => (
+              <option key={m} value={m}>{m}{t.activeTimeLabel.includes('分') ? '分' : 'min'}</option>
+            ))}
+          </select>
         </div>
         <button
           onClick={handleAdd}
@@ -198,7 +211,12 @@ function LabelSelect({
               className="w-3 h-3 rounded-full flex-shrink-0"
               style={{ backgroundColor: selected.color }}
             />
-            <span className="flex-1 truncate text-gray-700 dark:text-gray-200">{selected.name}</span>
+            <span className="flex-1 truncate text-gray-700 dark:text-gray-200">
+              {selected.name}
+              {selected.duration != null && (
+                <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">{selected.duration}min</span>
+              )}
+            </span>
           </>
         ) : (
           <span className="flex-1 text-gray-400 dark:text-gray-500">{placeholder}</span>
@@ -244,7 +262,12 @@ function LabelSelect({
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: l.color }}
                 />
-                <span className="flex-1 truncate text-gray-700 dark:text-gray-200">{l.name}</span>
+                <span className="flex-1 truncate text-gray-700 dark:text-gray-200">
+                  {l.name}
+                  {l.duration != null && (
+                    <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">{l.duration}min</span>
+                  )}
+                </span>
                 {value === l.id && (
                   <svg className="w-3.5 h-3.5 text-tiffany flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
@@ -310,6 +333,15 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLabel]);
 
+  // Effective work time: label's duration overrides global setting temporarily
+  const effectiveWorkTime = useMemo(() => {
+    if (activeLabel) {
+      const lbl = labels.find((l) => l.id === activeLabel);
+      if (lbl?.duration) return lbl.duration;
+    }
+    return settings.workTime;
+  }, [activeLabel, labels, settings.workTime]);
+
   const onSessionComplete = useCallback(
     (session: PomodoroSession) => {
       addSession(session);
@@ -320,7 +352,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   );
 
   const { timeLeft, isRunning, mode, toggle, reset, completeEarly } = useTimer({
-    workTime: settings.workTime,
+    workTime: effectiveWorkTime,
     breakTime: settings.breakTime,
     longBreakTime: settings.longBreakTime ?? 0,
     longBreakInterval: settings.longBreakInterval ?? 0,
@@ -377,7 +409,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   const isFocusMode = isRunning && mode === 'work';
 
   // Paused mid-session: timer was started but user pressed stop (not reset)
-  const isPaused = !isRunning && mode === 'work' && timeLeft < settings.workTime * 60;
+  const isPaused = !isRunning && mode === 'work' && timeLeft < effectiveWorkTime * 60;
 
   // Both running and paused mid-session use the same full-screen FocusMode layout
   if (isFocusMode || isPaused) {
@@ -490,7 +522,14 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
       {view === 'timer' && (
         <div className="landscape:flex landscape:items-center landscape:gap-8">
           <div className="landscape:flex-1">
-            <TimerDisplay timeLeft={timeLeft} mode={mode} />
+            <TimerDisplay
+              timeLeft={timeLeft}
+              mode={mode}
+              activePresets={settings.activePresets}
+              currentWorkTime={effectiveWorkTime}
+              onChangeWorkTime={(min) => updateSettings({ ...settings, workTime: min, activeLabel })}
+              isEditable={!isRunning && mode === 'work'}
+            />
             <TimerControls isRunning={isRunning} onToggle={toggle} onReset={reset} />
           </div>
           <div className="landscape:flex-1">

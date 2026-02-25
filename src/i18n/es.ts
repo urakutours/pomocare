@@ -43,6 +43,8 @@ export const es: Translations = {
   addLabel: 'Añadir etiqueta',
   activeLabelLabel: 'Etiqueta activa',
   noLabel: 'Sin etiqueta',
+  labelDuration: 'Duración del temporizador',
+  labelDurationNone: 'Ninguno (predeterminado)',
   weeklyStats: 'Estadísticas',
   weekly: 'Semana',
   monthly: 'Mes',

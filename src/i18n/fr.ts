@@ -43,6 +43,8 @@ export const fr: Translations = {
   addLabel: 'Ajouter une étiquette',
   activeLabelLabel: 'Étiquette active',
   noLabel: 'Sans étiquette',
+  labelDuration: 'Durée du minuteur',
+  labelDurationNone: 'Aucune (par défaut)',
   weeklyStats: 'Statistiques',
   weekly: 'Semaine',
   monthly: 'Mois',

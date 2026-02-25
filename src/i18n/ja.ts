@@ -43,6 +43,8 @@ export const ja: Translations = {
   addLabel: 'ラベルを追加',
   activeLabelLabel: '使用中のラベル',
   noLabel: 'ラベルなし',
+  labelDuration: 'タイマー時間',
+  labelDurationNone: 'なし（デフォルト）',
   weeklyStats: '統計・分析',
   weekly: '週間',
   monthly: '月間',

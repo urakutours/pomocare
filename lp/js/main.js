@@ -178,10 +178,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // App Showcase tabs — switch screenshot image
   var screenshotMap = {
-    timer: 'images/lp-focus-mode.png',
-    stats: 'images/lp-statistics.png',
-    settings: 'images/screenshot-settings.jpg',
-    labels: 'images/lp-labels.png'
+    timer: 'images/manual-focus-mode.png',
+    stats: 'images/manual-stats-weekly-3.png',
+    settings: 'images/manual-settings-1.png',
+    labels: 'images/manual-labels-list.png'
   };
 
   initTabs('showcaseTabs', {

@@ -150,7 +150,7 @@ export const en: Translations = {
   planFree: 'Free',
   planStandard: 'Standard',
   planPro: 'Pro',
-  upgradeCta: 'Learn more',
+  upgradeCta: 'Upgrade',
 
   // Payment / Checkout
   paymentSuccess: 'Payment successful!',

@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { useFeatures } from '@/contexts/FeatureContext';
 
 // ---- Configuration ----
@@ -14,12 +13,11 @@ interface AdBannerProps {
 
 export function AdBanner({ hidden }: AdBannerProps) {
   const features = useFeatures();
-  const [dismissed, setDismissed] = useState(false);
   const adRef = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
 
   useEffect(() => {
-    if (features.adFree || dismissed || hidden) return;
+    if (features.adFree || hidden) return;
     // Push ad only once per mount
     if (pushed.current) return;
     try {
@@ -31,14 +29,14 @@ export function AdBanner({ hidden }: AdBannerProps) {
     } catch {
       // AdSense script not loaded (e.g. ad blocker, localhost)
     }
-  }, [features.adFree, dismissed, hidden]);
+  }, [features.adFree, hidden]);
 
-  // Don't show for paid users or when dismissed
-  if (features.adFree || dismissed || hidden) return null;
+  // Don't show for paid users or when hidden
+  if (features.adFree || hidden) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-gray-100 dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-700">
-      <div className="relative max-w-sm mx-auto flex items-center justify-center py-2 px-4">
+    <div className="flex-shrink-0 bg-gray-100 dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-700">
+      <div className="max-w-sm mx-auto flex items-center justify-center py-2 px-4">
         <ins
           ref={adRef}
           className="adsbygoogle"
@@ -48,12 +46,6 @@ export function AdBanner({ hidden }: AdBannerProps) {
           data-ad-format="horizontal"
           data-full-width-responsive="false"
         />
-        <button
-          onClick={() => setDismissed(true)}
-          className="absolute top-1 right-1 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 z-10"
-        >
-          <X size={14} />
-        </button>
       </div>
     </div>
   );

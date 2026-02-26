@@ -494,7 +494,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
 
   if (isBreakMode) {
     return (
-      <>
+      <div className="h-full flex flex-col">
       <AppShell
         header={
           <Header
@@ -543,12 +543,12 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
         )}
       </AppShell>
       <AdBanner />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="h-full flex flex-col">
     <AppShell
       header={
         <Header
@@ -674,7 +674,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
       {showUpgrade && <UpgradePrompt onClose={() => setShowUpgrade(false)} />}
     </AppShell>
     <AdBanner />
-    </>
+    </div>
   );
 }
 

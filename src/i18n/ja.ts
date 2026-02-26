@@ -150,7 +150,7 @@ export const ja: Translations = {
   planFree: 'Free',
   planStandard: 'Standard',
   planPro: 'Pro',
-  upgradeCta: '詳しく見る',
+  upgradeCta: 'アップグレードする',
 
   // Payment / Checkout
   paymentSuccess: 'お支払いが完了しました！',

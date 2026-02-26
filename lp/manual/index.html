@@ -208,7 +208,7 @@
         </table>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-main-screen.png" alt="メイン画面" class="screenshot-img">
+        <img src="../images/manual-main-screen-light.png" alt="メイン画面" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -225,13 +225,16 @@
       <div class="content-text">
         <h3>作業時間の選択</h3>
         <p>タイマーの時間表示をタップすると、プリセットボタン（デフォルト: 15 / 25 / 35 / 45分）が表示されます。好きな時間をタップするだけで素早く切り替えできます。プリセットは設定画面のPresetsタブでカスタマイズ可能です。</p>
-        <h3>基本操作</h3>
+        <h3>開始前 / 一時停止中</h3>
         <table class="info-table">
-          <tr><th>開始</th><td>&#x25B6; ボタンをタップ。フォーカスモードに切り替わります</td></tr>
-          <tr><th>一時停止</th><td>フォーカスモード中に &#x23F8; ボタンをタップ</td></tr>
-          <tr><th>再開</th><td>一時停止中に &#x25B6; ボタンをタップ</td></tr>
-          <tr><th>リセット</th><td>一時停止中にリセットボタンをタップ（確認あり）</td></tr>
-          <tr><th>早期完了</th><td>途中で「完了」をタップ → 経過時間が記録されます</td></tr>
+          <tr><th>▶ 開始 / 再開</th><td>タイマーを開始（またはポーズから再開）してフォーカスモードに入ります</td></tr>
+          <tr><th>↻ リセット</th><td>タイマーをデフォルト時間に戻します（確認ダイアログあり）</td></tr>
+        </table>
+        <h3>ポモドーロ実行中</h3>
+        <p>フォーカスモード中は、画面がシンプルなタイマー表示に切り替わります。</p>
+        <table class="info-table">
+          <tr><th>⏸ 一時停止</th><td>タイマーを一時停止します。再度タップで再開できます</td></tr>
+          <tr><th>✓ 完了</th><td>セッションを途中で完了します。経過した時間がそのまま記録されます</td></tr>
         </table>
         <h3>サイクルの流れ</h3>
         <p>タイマーが0になると、次のモード（休憩または作業）の待機画面に切り替わります。<strong>スタートボタンを押す</strong>と休憩タイマーが始まり、休憩が終わると再び作業の待機画面が表示されます。</p>
@@ -249,7 +252,8 @@
         <p class="hint-box"><strong>ポイント:</strong> 各モードの切り替え時にスタートボタンを押すタイミングは自由です。自分のペースで次のセッションを始められます。デフォルトでは4回の作業セッション後に長い休憩が入ります。</p>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-start-pomodoro.png" alt="ポモドーロをスタート" class="screenshot-img">
+        <img src="../images/manual-timer-presets.png" alt="プリセットボタン表示" class="screenshot-img">
+        <img src="../images/manual-pomodoro-running.png" alt="ポモドーロ実行中" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -344,8 +348,8 @@
         <p class="hint-box"><strong>ポイント:</strong> ラベルにタイマー時間を設定すると、そのラベルを選択した時に自動的にタイマーがその時間に切り替わります。</p>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-labels-1.png" alt="ラベル一覧" class="screenshot-img">
-        <img src="../images/manual-labels-2.png" alt="ラベル作成" class="screenshot-img">
+        <img src="../images/manual-labels-list-cropped.png" alt="ラベル一覧" class="screenshot-img">
+        <img src="../images/manual-label-add-modal-cropped.png" alt="ラベル作成" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -402,12 +406,16 @@
         <ul>
           <li><strong>積み上げ棒グラフ</strong>: ラベルごとに色分けして表示</li>
           <li><strong>グラフ高さの変更</strong>: ドラッグで調整可能</li>
-          <li><strong>セッション詳細</strong>: 日付バーをタップでラベル変更・メモ編集・削除が可能</li>
+          <li><strong>LABEL STATS</strong>: グラフ下部にラベルごとのセット数・合計時間を表示</li>
         </ul>
+        <h3>セッション詳細</h3>
+        <p>グラフの棒をタップすると、その期間のセッション一覧がモーダルで表示されます。各セッションのラベル・開始時刻・所要時間・メモを確認でき、ラベル名をタップするとさらにそのラベルのセッション一覧にドリルダウンできます。</p>
         <p class="hint-box"><strong>メモ:</strong> メイン画面の「Today」「This Week」をタップしても、その期間のセッション詳細リストを確認できます。</p>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-statistics.png" alt="統計・グラフ画面" class="screenshot-img">
+        <img src="../images/manual-stats-weekly-1.png" alt="統計パネル（Weeklyタブ・Sets表示）" class="screenshot-img">
+        <img src="../images/manual-stats-weekly-3.png" alt="統計パネル（ラベル統計）" class="screenshot-img">
+        <img src="../images/manual-stats-graph-modal-2.png" alt="グラフタップ時のセッション詳細" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -490,8 +498,8 @@
         </table>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-settings-1.png" alt="設定画面（General）" class="screenshot-img">
-        <img src="../images/manual-settings-2.png" alt="設定画面（Presets）" class="screenshot-img">
+        <img src="../images/manual-settings-general-top.png" alt="設定画面（General上部）" class="screenshot-img">
+        <img src="../images/manual-settings-general-bottom.png" alt="設定画面（General下部）" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -758,7 +766,7 @@
         </table>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-main-screen.png" alt="Main Screen" class="screenshot-img">
+        <img src="../images/manual-main-screen-light.png" alt="Main Screen" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -775,13 +783,16 @@
       <div class="content-text">
         <h3>Choosing a Duration</h3>
         <p>Tap the timer display to reveal preset buttons (default: 15 / 25 / 35 / 45 min). Tap any button to quickly switch. Presets can be customized in the Settings Presets tab.</p>
-        <h3>Basic Controls</h3>
+        <h3>Before Start / While Paused</h3>
         <table class="info-table">
-          <tr><th>Start</th><td>Tap the play button. Switches to Focus Mode.</td></tr>
-          <tr><th>Pause</th><td>Tap the pause button while in Focus Mode.</td></tr>
-          <tr><th>Resume</th><td>Tap the play button while paused.</td></tr>
-          <tr><th>Reset</th><td>Tap the reset button while paused (confirmation dialog).</td></tr>
-          <tr><th>Complete Early</th><td>Tap "Complete" mid-session to record elapsed time.</td></tr>
+          <tr><th>▶ Start / Resume</th><td>Start the timer (or resume from pause) and enter Focus Mode</td></tr>
+          <tr><th>↻ Reset</th><td>Reset the timer to the default duration (confirmation dialog)</td></tr>
+        </table>
+        <h3>While Running</h3>
+        <p>During Focus Mode, the screen switches to a simplified timer display.</p>
+        <table class="info-table">
+          <tr><th>⏸ Pause</th><td>Pause the timer. Tap again to resume</td></tr>
+          <tr><th>✓ Complete</th><td>Complete the session early. The elapsed time is recorded as-is</td></tr>
         </table>
         <h3>How the Cycle Works</h3>
         <p>When the timer reaches zero, the screen switches to a standby screen for the next mode (break or work). Press the <strong>Start button</strong> to begin the break timer. When the break ends, the work standby screen appears again.</p>
@@ -799,7 +810,8 @@
         <p class="hint-box"><strong>Tip:</strong> You're free to start each mode whenever you're ready — the app waits for you to press Start. By default, a long break occurs after every 4 work sessions.</p>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-start-pomodoro.png" alt="Start a Pomodoro" class="screenshot-img">
+        <img src="../images/manual-timer-presets.png" alt="Preset buttons" class="screenshot-img">
+        <img src="../images/manual-pomodoro-running.png" alt="Pomodoro running" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -894,8 +906,8 @@
         <p class="hint-box"><strong>Tip:</strong> Setting a timer duration on a label will automatically switch the timer when that label is selected.</p>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-labels-1.png" alt="Labels list" class="screenshot-img">
-        <img src="../images/manual-labels-2.png" alt="Label creation" class="screenshot-img">
+        <img src="../images/manual-labels-list-cropped.png" alt="Labels list" class="screenshot-img">
+        <img src="../images/manual-label-add-modal-cropped.png" alt="Label creation" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -952,12 +964,16 @@
         <ul>
           <li><strong>Stacked bar chart</strong>: Color-coded by label</li>
           <li><strong>Resizable chart</strong>: Drag to adjust height</li>
-          <li><strong>Session details</strong>: Tap a bar to change labels, edit notes, or delete sessions</li>
+          <li><strong>LABEL STATS</strong>: Shows session count and total time per label below the chart</li>
         </ul>
+        <h3>Session Details</h3>
+        <p>Tap a bar on the chart to open a modal with the session list for that period. Each session shows its label, start time, duration, and notes. Tap a label name to drill down into that label's session list.</p>
         <p class="hint-box"><strong>Note:</strong> You can also tap "Today" or "This Week" on the main screen to view session details for that period.</p>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-statistics.png" alt="Statistics & Charts" class="screenshot-img">
+        <img src="../images/manual-stats-weekly-1.png" alt="Statistics panel (Weekly, Sets view)" class="screenshot-img">
+        <img src="../images/manual-stats-weekly-3.png" alt="Statistics panel (Label stats)" class="screenshot-img">
+        <img src="../images/manual-stats-graph-modal-2.png" alt="Session details modal" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -1040,8 +1056,8 @@
         </table>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-settings-1.png" alt="Settings (General)" class="screenshot-img">
-        <img src="../images/manual-settings-2.png" alt="Settings (Presets)" class="screenshot-img">
+        <img src="../images/manual-settings-general-top.png" alt="Settings (General top)" class="screenshot-img">
+        <img src="../images/manual-settings-general-bottom.png" alt="Settings (General bottom)" class="screenshot-img">
       </div>
     </div>
   </section>

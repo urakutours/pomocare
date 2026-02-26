@@ -3,13 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PomoCare - Focus Timer for Deep Work</title>
-  <meta name="description" content="PomoCare is a focus timer app designed for deep work sessions. Available on Web, Windows, and Android.">
-  <meta property="og:title" content="PomoCare - Focus Timer for Deep Work">
-  <meta property="og:description" content="A beautifully designed Pomodoro timer to help you stay focused and productive.">
+  <!-- SEO: Title & Description (JA default, dynamically switched by i18n.js) -->
+  <title>PomoCare - ポモドーロタイマーで集中力を高める | 無料フォーカスタイマーアプリ</title>
+  <meta name="description" content="PomoCareは無料のポモドーロタイマーアプリ。25分集中+5分休憩のリズムで生産性を最大化。ラベル管理・統計分析・クラウド同期対応。Web・Windows・Androidで使えるPWAアプリ。登録なしですぐ開始。">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="株式会社URAKU">
+  <meta name="theme-color" content="#0abab5">
+
+  <!-- SEO: Canonical & Hreflang -->
+  <link rel="canonical" href="https://pomocare.com/">
+  <link rel="alternate" hreflang="ja" href="https://pomocare.com/">
+  <link rel="alternate" hreflang="en" href="https://pomocare.com/">
+  <link rel="alternate" hreflang="x-default" href="https://pomocare.com/">
+
+  <!-- SEO: Open Graph -->
+  <meta property="og:title" content="PomoCare - ポモドーロタイマーで集中力を高める | 無料アプリ">
+  <meta property="og:description" content="25分集中+5分休憩のポモドーロ・テクニックで生産性を最大化。ラベル管理・統計分析・クラウド同期対応。Web・Windows・Androidで無料。">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://pomocare.com">
+  <meta property="og:url" content="https://pomocare.com/">
   <meta property="og:image" content="https://pomocare.com/images/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="PomoCare ポモドーロタイマーアプリのスクリーンショット">
+  <meta property="og:site_name" content="PomoCare">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- SEO: Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PomoCare - ポモドーロタイマーで集中力を高める | 無料アプリ">
+  <meta name="twitter:description" content="25分集中+5分休憩のポモドーロ・テクニックで生産性を最大化。無料で使えるフォーカスタイマーアプリ。">
+  <meta name="twitter:image" content="https://pomocare.com/images/og-image.png">
+  <meta name="twitter:image:alt" content="PomoCare ポモドーロタイマーアプリ">
+
   <!-- Google AdSense -->
   <meta name="google-adsense-account" content="ca-pub-5675101743750825">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5675101743750825" crossorigin="anonymous"></script>
@@ -88,10 +114,10 @@
           <a href="https://app.pomocare.com" class="btn btn-primary btn-lg" data-i18n="heroCtaWeb">今すぐ無料で使う</a>
           <div class="store-badges">
             <a href="#" class="store-badge" aria-label="Google Play">
-              <img src="images/googleplay.png" alt="Get it on Google Play">
+              <img src="images/googleplay.png" alt="Google PlayでPomoCare ポモドーロタイマーをダウンロード">
             </a>
             <a href="#" class="store-badge" aria-label="Microsoft Store">
-              <img src="images/microsoft.png" alt="Download from Microsoft Store">
+              <img src="images/microsoft.png" alt="Microsoft StoreでPomoCare ポモドーロタイマーをダウンロード">
             </a>
           </div>
           <div class="hero-trust">
@@ -104,7 +130,7 @@
       <div class="hero-visual">
         <div class="phone-mockup">
           <div class="phone-screen">
-            <img src="images/lp-hero.png" alt="PomoCare Dark Mode" class="phone-screen-img">
+            <img src="images/lp-hero.png" alt="PomoCare ポモドーロタイマー ダークモードのメイン画面" class="phone-screen-img">
           </div>
         </div>
       </div>
@@ -125,7 +151,7 @@
           <h3 data-i18n="feature1Title">ポモドーロタイマー</h3>
           <p data-i18n="feature1Desc">集中時間・短い休憩・長い休憩を自由に設定。自分に最適なリズムでディープワークに集中できます。</p>
           <div class="feature-card-img feature-card-img--square">
-            <img src="images/lp-pomodoro-timer.png" alt="Focus mode screenshot" loading="lazy">
+            <img src="images/lp-pomodoro-timer.png" alt="PomoCare 25分集中ポモドーロタイマーのフォーカスモード画面" loading="lazy">
           </div>
         </div>
         <!-- カード2: ラベル管理 -->
@@ -136,7 +162,7 @@
           <h3 data-i18n="feature2Title">ラベル管理</h3>
           <p data-i18n="feature2Desc">作業内容ごとにラベルを設定して分類。どのタスクにどれだけ集中したかを可視化できます。</p>
           <div class="feature-card-img feature-card-img--square">
-            <img src="images/lp-labels.png" alt="Labels screenshot" loading="lazy">
+            <img src="images/lp-labels.png" alt="PomoCare ラベル管理機能 - 作業内容ごとにセッションを分類" loading="lazy">
           </div>
         </div>
         <!-- カード3: 統計・分析 -->
@@ -147,7 +173,7 @@
           <h3 data-i18n="feature3Title">統計・分析</h3>
           <p data-i18n="feature3Desc">日別・週別・月別・年別の集中時間を美しいチャートで表示。ラベルごとの内訳もひと目でわかります。</p>
           <div class="feature-card-img">
-            <img src="images/lp-statistics.png" alt="Statistics chart screenshot" loading="lazy">
+            <img src="images/lp-statistics.png" alt="PomoCare 統計分析画面 - 週別・月別の集中時間グラフ" loading="lazy">
           </div>
         </div>
         <!-- カード4: マルチプラットフォーム -->
@@ -197,7 +223,7 @@
         <div class="showcase-visual">
           <div class="showcase-phone">
             <div class="showcase-screen">
-              <img id="showcaseImg" src="images/manual-focus-mode.png" alt="App screenshot" loading="lazy">
+              <img id="showcaseImg" src="images/manual-focus-mode.png" alt="PomoCare アプリのスクリーンショット" loading="lazy">
             </div>
           </div>
         </div>
@@ -611,10 +637,10 @@
       <a href="https://app.pomocare.com" class="btn btn-cta-main animate-on-scroll" data-i18n="ctaCta">無料で始める</a>
       <div class="cta-store-badges animate-on-scroll">
         <a href="#" class="store-badge" aria-label="Google Play">
-          <img src="images/googleplay.png" alt="Get it on Google Play">
+          <img src="images/googleplay.png" alt="Google PlayでPomoCare ポモドーロタイマーをダウンロード">
         </a>
         <a href="#" class="store-badge" aria-label="Microsoft Store">
-          <img src="images/microsoft.png" alt="Download from Microsoft Store">
+          <img src="images/microsoft.png" alt="Microsoft StoreでPomoCare ポモドーロタイマーをダウンロード">
         </a>
       </div>
       <div class="cta-platforms animate-on-scroll">
@@ -702,6 +728,160 @@
       </div>
     </div>
   </div>
+
+  <!-- SEO: JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "PomoCare",
+    "url": "https://pomocare.com",
+    "description": "ポモドーロ・テクニックに基づいたフォーカスタイマーアプリ",
+    "inLanguage": ["ja", "en"],
+    "publisher": {
+      "@type": "Organization",
+      "name": "株式会社URAKU",
+      "url": "https://pomocare.com/company/"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "PomoCare",
+    "description": "ポモドーロ・テクニックに基づいた集中タイマーアプリ。ラベル管理・統計分析・クラウド同期対応。Web・Windows・Androidで利用可能。",
+    "url": "https://pomocare.com",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web, Windows, Android",
+    "offers": [
+      {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY",
+        "name": "Free",
+        "description": "ポモドーロタイマー・基本統計・ラベル管理（2個まで）・クラウド同期（要無料登録）"
+      },
+      {
+        "@type": "Offer",
+        "price": "250",
+        "priceCurrency": "JPY",
+        "name": "Standard",
+        "description": "無制限ラベル・詳細統計・CSVエクスポート・広告非表示（月額サブスクリプション）"
+      },
+      {
+        "@type": "Offer",
+        "price": "5000",
+        "priceCurrency": "JPY",
+        "name": "Pro（買い切り）",
+        "description": "一括購入で全機能を永久に利用可能"
+      }
+    ],
+    "screenshot": "https://pomocare.com/images/lp-hero.png",
+    "featureList": [
+      "ポモドーロタイマー（25分集中+5分休憩）",
+      "ラベル管理でタスクを分類",
+      "日別・週別・月別・年別の統計分析",
+      "クラウド同期（複数デバイス対応）",
+      "オフライン対応（PWA）",
+      "ダークモード対応",
+      "7種類のアラーム音"
+    ],
+    "author": {
+      "@type": "Organization",
+      "name": "株式会社URAKU",
+      "url": "https://pomocare.com/company/"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "株式会社URAKU",
+    "alternateName": "URAKU & CO.",
+    "url": "https://pomocare.com",
+    "logo": "https://pomocare.com/images/logo_dark.svg",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "support@pomocare.com",
+      "contactType": "customer support",
+      "availableLanguage": ["Japanese", "English"]
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "ポモドーロ・テクニックとは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "「25分集中 → 5分休憩」を1セットとし、4セットごとに長めの休憩を取る、科学的に裏付けられた生産性向上メソッドです。PomoCareでは集中・休憩の時間を自由にカスタマイズでき、自分に最適なリズムを見つけられます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "登録なしで本当にすぐ使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。アプリを開いたらすぐにタイマーをスタートできます。アカウント登録なしでもタイマー、基本統計、ラベル管理などのコア機能をすべて利用可能です。無料のアカウント登録をすると、データがクラウドに安全に保存され、複数デバイスからアクセスできるようになります。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "無料版でも十分に使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "もちろんです。ポモドーロタイマー、今日・今週の統計、ラベル管理（2個まで）、ライト/ダークテーマなど、集中に必要なコア機能はすべて無料で利用できます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "データはどこに保存されますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "未ログインの場合、データはブラウザのローカルストレージに保存されます。無料アカウントを作成してログインすると、データはクラウドに安全に保存され、複数デバイスからアクセスできます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "オフラインでも使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。PWA対応のため、一度アクセスすればオフラインでもタイマーや記録機能を利用できます。オンラインに戻った際に、ログイン済みであれば自動的にクラウドへデータが同期されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "どのデバイスで使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Webブラウザ（Chrome、Safari、Firefox等）、Windows（Microsoft Store）、Android（Google Play）に対応しています。ブラウザからPWAとしてインストールすれば、ネイティブアプリのように使うこともできます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "StandardとPro（買い切り）の違いは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "どちらも使える機能は同じです。Standard（月額¥250）は月単位のサブスクリプション、Pro（¥5,000の一括払い）は一度購入すれば永久に全機能を利用できる買い切りプランです。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "有料プランはいつでも解約できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。Standardプランはいつでも解約可能で、解約後も契約期間の終了まで全機能をご利用いただけます。Pro（買い切り）は解約不要で永久にご利用いただけます。"
+        }
+      }
+    ]
+  }
+  </script>
 
   <script src="js/i18n.js"></script>
   <script src="js/theme.js"></script>

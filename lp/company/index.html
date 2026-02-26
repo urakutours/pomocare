@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>会社概要 - PomoCare</title>
-  <meta name="description" content="株式会社URAKUの会社概要。PomoCareを運営する会社情報をご紹介します。">
+  <title>会社概要 | 株式会社URAKU - PomoCare運営会社</title>
+  <meta name="description" content="PomoCareを運営する株式会社URAKUの会社概要。ポモドーロ・テクニックに基づく集中タイマーアプリの開発・運営を行っています。">
+  <link rel="canonical" href="https://pomocare.com/company/">
+  <link rel="alternate" hreflang="ja" href="https://pomocare.com/company/">
+  <link rel="alternate" hreflang="en" href="https://pomocare.com/company/">
+  <link rel="alternate" hreflang="x-default" href="https://pomocare.com/company/">
   <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -239,6 +243,16 @@
       var lang = saved || (navigator.language.startsWith('ja') ? 'ja' : 'en');
       setPageLang(lang);
     });
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "PomoCare", "item": "https://pomocare.com/" },
+      { "@type": "ListItem", "position": 2, "name": "会社概要", "item": "https://pomocare.com/company/" }
+    ]
+  }
   </script>
 </body>
 </html>

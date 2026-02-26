@@ -342,6 +342,24 @@ const translations = {
   },
 };
 
+// SEO meta data per language (dynamically switched)
+const seoMeta = {
+  ja: {
+    title: 'PomoCare - ポモドーロタイマーで集中力を高める | 無料フォーカスタイマーアプリ',
+    description: 'PomoCareは無料のポモドーロタイマーアプリ。25分集中+5分休憩のリズムで生産性を最大化。ラベル管理・統計分析・クラウド同期対応。Web・Windows・Androidで使えるPWAアプリ。登録なしですぐ開始。',
+    ogTitle: 'PomoCare - ポモドーロタイマーで集中力を高める | 無料アプリ',
+    ogDesc: '25分集中+5分休憩のポモドーロ・テクニックで生産性を最大化。ラベル管理・統計分析・クラウド同期対応。Web・Windows・Androidで無料。',
+    ogLocale: 'ja_JP',
+  },
+  en: {
+    title: 'PomoCare - Free Pomodoro Timer App for Deep Work & Productivity',
+    description: 'PomoCare is a free Pomodoro timer app for deep work. Track focus sessions with labels, view statistics, and sync across devices. Available on Web, Windows & Android. No sign-up required.',
+    ogTitle: 'PomoCare - Free Pomodoro Timer App for Deep Work & Productivity',
+    ogDesc: 'Maximize productivity with the Pomodoro Technique. Focus timer with labels, statistics, cloud sync. Free on Web, Windows & Android.',
+    ogLocale: 'en_US',
+  },
+};
+
 function setLanguage(lang) {
   const t = translations[lang];
   if (!t) return;
@@ -353,6 +371,24 @@ function setLanguage(lang) {
   });
   document.documentElement.lang = lang;
   localStorage.setItem('pomocare-lp-lang', lang);
+
+  // Update SEO meta tags dynamically
+  const meta = seoMeta[lang];
+  if (meta) {
+    document.title = meta.title;
+    const descEl = document.querySelector('meta[name="description"]');
+    if (descEl) descEl.setAttribute('content', meta.description);
+    const ogTitleEl = document.querySelector('meta[property="og:title"]');
+    if (ogTitleEl) ogTitleEl.setAttribute('content', meta.ogTitle);
+    const ogDescEl = document.querySelector('meta[property="og:description"]');
+    if (ogDescEl) ogDescEl.setAttribute('content', meta.ogDesc);
+    const ogLocaleEl = document.querySelector('meta[property="og:locale"]');
+    if (ogLocaleEl) ogLocaleEl.setAttribute('content', meta.ogLocale);
+    const twTitleEl = document.querySelector('meta[name="twitter:title"]');
+    if (twTitleEl) twTitleEl.setAttribute('content', meta.ogTitle);
+    const twDescEl = document.querySelector('meta[name="twitter:description"]');
+    if (twDescEl) twDescEl.setAttribute('content', meta.ogDesc);
+  }
 }
 
 function detectLanguage() {

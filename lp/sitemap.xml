@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+    <loc>https://pomocare.com/</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://pomocare.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pomocare.com/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pomocare.com/"/>
+    <lastmod>2026-02-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://pomocare.com/manual/</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://pomocare.com/manual/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pomocare.com/manual/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pomocare.com/manual/"/>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://pomocare.com/support/</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://pomocare.com/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pomocare.com/support/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pomocare.com/support/"/>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://pomocare.com/company/</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://pomocare.com/company/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pomocare.com/company/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pomocare.com/company/"/>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://pomocare.com/privacy/</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://pomocare.com/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pomocare.com/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pomocare.com/privacy/"/>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://pomocare.com/terms/</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://pomocare.com/terms/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pomocare.com/terms/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pomocare.com/terms/"/>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://pomocare.com/tokushoho/</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+</urlset>

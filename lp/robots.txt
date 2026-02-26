@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pomocare.com/sitemap.xml
+
+# Block crawling of non-content assets
+Disallow: /css/
+Disallow: /js/
+Disallow: /scss/
+
+# Allow images for image search
+Allow: /images/

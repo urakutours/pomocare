@@ -169,6 +169,15 @@ export interface Translations {
   labelRename: string;
   labelDelete: string;
 
+  // Custom colors
+  customColorRegister: string;
+  customColorDelete: string;
+
+  // Color picker modal
+  colorPickerTitle: string;
+  colorPickerConfirm: string;
+  colorPickerCancel: string;
+
   // Label creation
   labelNamePlaceholder: string;
 

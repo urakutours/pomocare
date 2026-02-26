@@ -20,7 +20,7 @@ import { TimerDisplay } from '@/components/timer/TimerDisplay';
 import { TimerControls } from '@/components/timer/TimerControls';
 import { FocusMode } from '@/components/timer/FocusMode';
 import { BreakMode } from '@/components/timer/BreakMode';
-import { SettingsPanel } from '@/components/settings/SettingsPanel';
+import { SettingsPanel, ColorPicker } from '@/components/settings/SettingsPanel';
 import { StatsChart } from '@/components/stats/StatsChart';
 import { SessionSummary } from '@/components/stats/SessionSummary';
 import { EmailActionHandler } from '@/components/auth/EmailActionHandler';
@@ -49,6 +49,10 @@ export function QuickLabelModal({
   editId,
   title,
   buttonText,
+  customColors,
+  onRegisterColor,
+  onChangeCustomColor,
+  onDeleteCustomColor,
 }: {
   onAdd: (label: LabelDefinition) => void;
   onClose: () => void;
@@ -67,12 +71,23 @@ export function QuickLabelModal({
   title?: string;
   /** ボタンテキスト上書き */
   buttonText?: string;
+  customColors?: string[];
+  onRegisterColor?: (color: string) => void;
+  onChangeCustomColor?: (oldColor: string, newColor: string) => void;
+  onDeleteCustomColor?: (color: string) => void;
 }) {
   const { t } = useI18n();
+  const DURATION_PRESETS = [5, 10, 15, 20, 30];
   const [name, setName] = useState(initialName ?? '');
   const [color, setColor] = useState(initialColor ?? LABEL_COLORS[10]);
   const [duration, setDuration] = useState<number | undefined>(initialDuration);
-  const colorInputRef = useRef<HTMLInputElement>(null);
+  const [isCustomDuration, setIsCustomDuration] = useState(
+    initialDuration !== undefined && !DURATION_PRESETS.includes(initialDuration),
+  );
+  const [customDurationStr, setCustomDurationStr] = useState(
+    initialDuration !== undefined ? String(initialDuration) : '',
+  );
+  const unit = t.activeTimeLabel.includes('分') ? '分' : 'min';
 
   const handleAdd = () => {
     const trimmed = name.trim();
@@ -83,6 +98,20 @@ export function QuickLabelModal({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') { e.preventDefault(); handleAdd(); }
     if (e.key === 'Escape') onClose();
+  };
+
+  const handleDurationSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === '') {
+      setIsCustomDuration(false);
+      setDuration(undefined);
+    } else if (val === '__custom__') {
+      setIsCustomDuration(true);
+      setCustomDurationStr(duration !== undefined ? String(duration) : '');
+    } else {
+      setIsCustomDuration(false);
+      setDuration(Number(val));
+    }
   };
 
   return (
@@ -104,44 +133,52 @@ export function QuickLabelModal({
           placeholder={labelNamePlaceholder}
           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 mb-3"
         />
-        <div className="flex flex-wrap gap-1.5">
-          {LABEL_COLORS.map((c) => (
-            <button
-              key={c}
-              onClick={() => setColor(c)}
-              className={`w-5 h-5 rounded-full transition-transform flex-shrink-0 ${color === c ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-300 scale-110' : 'hover:scale-105'}`}
-              style={{ backgroundColor: c }}
-            />
-          ))}
-          {/* Custom color */}
-          <button
-            onClick={() => colorInputRef.current?.click()}
-            className="w-5 h-5 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-500 flex items-center justify-center hover:border-tiffany transition-colors flex-shrink-0"
-            style={!LABEL_COLORS.includes(color) ? { backgroundColor: color, borderStyle: 'solid' } : {}}
-          >
-            {LABEL_COLORS.includes(color) && <span className="text-gray-400 text-xs leading-none">+</span>}
-          </button>
-          <input
-            ref={colorInputRef}
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="sr-only"
-          />
-        </div>
-        {/* Duration selector */}
+        <ColorPicker
+          value={color}
+          onChange={setColor}
+          customColors={customColors}
+          onRegisterColor={onRegisterColor}
+          onChangeCustomColor={onChangeCustomColor}
+          onDeleteCustomColor={onDeleteCustomColor}
+        />
+        {/* Duration selector with custom input */}
         <div className="mt-3">
           <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t.labelDuration}</label>
-          <select
-            value={duration ?? ''}
-            onChange={(e) => setDuration(e.target.value ? Number(e.target.value) : undefined)}
-            className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 bg-white"
-          >
-            <option value="">{t.labelDurationNone}</option>
-            {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60].map((m) => (
-              <option key={m} value={m}>{m}{t.activeTimeLabel.includes('分') ? '分' : 'min'}</option>
-            ))}
-          </select>
+          <div className="flex gap-2">
+            <select
+              value={isCustomDuration ? '__custom__' : (duration ?? '')}
+              onChange={handleDurationSelect}
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 bg-white"
+            >
+              <option value="">{t.labelDurationNone}</option>
+              {DURATION_PRESETS.map((m) => (
+                <option key={m} value={m}>{m}{unit}</option>
+              ))}
+              <option value="__custom__">{t.customInput}</option>
+            </select>
+            {isCustomDuration && (
+              <input
+                autoFocus
+                type="number"
+                value={customDurationStr}
+                onChange={(e) => {
+                  setCustomDurationStr(e.target.value);
+                  const parsed = parseInt(e.target.value, 10);
+                  if (!isNaN(parsed) && parsed > 0) setDuration(parsed);
+                }}
+                onBlur={() => {
+                  const parsed = parseInt(customDurationStr, 10);
+                  if (isNaN(parsed) || parsed <= 0) {
+                    setIsCustomDuration(false);
+                    setDuration(undefined);
+                  }
+                }}
+                min={1}
+                placeholder={unit}
+                className="w-20 px-3 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200"
+              />
+            )}
+          </div>
         </div>
         <button
           onClick={handleAdd}
@@ -403,6 +440,33 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
     setShowLabelCreator(false);
   };
 
+  // Custom color handlers for inline label creator
+  const customColors = settings.customColors ?? [];
+
+  const handleRegisterCustomColor = useCallback((color: string) => {
+    const updated = [...(settings.customColors ?? []), color];
+    updateSettings({ ...settings, customColors: updated });
+  }, [settings, updateSettings]);
+
+  const handleChangeCustomColor = useCallback((oldColor: string, newColor: string) => {
+    const updatedColors = (settings.customColors ?? []).map((c) => c === oldColor ? newColor : c);
+    const updatedLabels = labels.map((l) => l.color === oldColor ? { ...l, color: newColor } : l);
+    setLabels(updatedLabels);
+    updateSettings({ ...settings, customColors: updatedColors, labels: updatedLabels });
+  }, [settings, labels, updateSettings]);
+
+  const handleDeleteCustomColor = useCallback((color: string) => {
+    const updated = (settings.customColors ?? []).filter((c) => c !== color);
+    updateSettings({ ...settings, customColors: updated });
+  }, [settings, updateSettings]);
+
+  // Persist custom colors from SettingsPanel without closing
+  const handleSaveCustomColors = useCallback((newCustomColors: string[], updatedLabels?: LabelDefinition[]) => {
+    const newLabels = updatedLabels ?? labels;
+    if (updatedLabels) setLabels(newLabels);
+    updateSettings({ ...settings, customColors: newCustomColors, labels: newLabels, activeLabel });
+  }, [settings, labels, activeLabel, updateSettings]);
+
   const displayMessage = settings.customMessage || t.defaultCustomMessage;
 
   // Focus mode: running + work mode → minimal UI (no header)
@@ -450,6 +514,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
             sessions={sessions}
             labels={labels}
             onSaveLabels={handleSaveLabels}
+            onSaveCustomColors={handleSaveCustomColors}
           />
         )}
 
@@ -503,6 +568,7 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
           sessions={sessions}
           labels={labels}
           onSaveLabels={handleSaveLabels}
+          onSaveCustomColors={handleSaveCustomColors}
         />
       )}
 
@@ -590,6 +656,10 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
                 addNewLabel={t.addNewLabel}
                 labelNamePlaceholder={t.labelNamePlaceholder}
                 addButtonText={t.addLabel}
+                customColors={customColors}
+                onRegisterColor={handleRegisterCustomColor}
+                onChangeCustomColor={handleChangeCustomColor}
+                onDeleteCustomColor={handleDeleteCustomColor}
               />
             )}
 
@@ -638,6 +708,17 @@ function AppWithStorage() {
       // 既存無料ユーザーが初めてクラウド保存に切り替わった際、
       // localStorage にあるデータを Supabase へ移行する
       const local = new LocalStorageAdapter();
+      let settled = false;
+
+      // タイムアウト: マイグレーションが 8 秒以内に完了しない場合、
+      // クラウドアダプターをそのまま使用して先に進む
+      const timeoutId = setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          setStorage(cloud);
+        }
+      }, 8_000);
+
       (async () => {
         try {
           const [cloudSessions, localSessions] = await Promise.all([
@@ -657,7 +738,11 @@ function AppWithStorage() {
         } catch {
           // マイグレーション失敗時はスキップ（データは localStorage に残る）
         }
-        setStorage(cloud);
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutId);
+          setStorage(cloud);
+        }
       })();
     } else {
       setStorage(createStorageService());
@@ -740,7 +825,16 @@ function AppWithI18n({ storage }: { storage: StorageService }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!isLoaded) return null;
+  if (!isLoaded) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-neutral-900">
+        <div className="text-center">
+          <div className="w-10 h-10 mx-auto mb-3 border-4 border-tiffany border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <I18nProvider language={settings.language}>

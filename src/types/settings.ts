@@ -23,6 +23,7 @@ export interface PomodoroSettings {
   alarm: AlarmSettings;
   labels: LabelDefinition[];
   activeLabel: string | null;  // id of selected label, null = no label
+  customColors?: string[];     // user-registered custom colors (hex strings)
 }
 
 export const DEFAULT_ACTIVE_PRESETS = [15, 25, 35, 45];
@@ -41,4 +42,5 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   alarm: { sound: 'bell', repeat: 1 },
   labels: [],
   activeLabel: null,
+  customColors: [],
 };

@@ -22,6 +22,7 @@ interface SettingsPanelProps {
   sessions: PomodoroSession[];
   labels: LabelDefinition[];
   onSaveLabels?: (labels: LabelDefinition[]) => void;
+  onSaveCustomColors?: (customColors: string[], labels?: LabelDefinition[]) => void;
 }
 
 type SettingsTab = 'general' | 'labels' | 'presets';
@@ -261,61 +262,412 @@ function ThemeToggle({
   );
 }
 
-// ---- Color Picker with custom color support ----
-function ColorPicker({
+// ---- Custom Color Picker Modal (touch-friendly, replaces native <input type="color">) ----
+import { hsvToHex, hexToHsv, isValidHex, normalizeHex, hueToHex } from '@/utils/color';
+
+function CustomColorPickerModal({
+  initialColor,
+  onConfirm,
+  onCancel,
+}: {
+  initialColor: string;
+  onConfirm: (color: string) => void;
+  onCancel: () => void;
+}) {
+  const { t } = useI18n();
+  const initial = hexToHsv(initialColor);
+  const [hue, setHue] = useState(initial.h);
+  const [sat, setSat] = useState(initial.s);
+  const [val, setVal] = useState(initial.v);
+  const [hexInput, setHexInput] = useState(initialColor.toLowerCase());
+
+  const svRef = useRef<HTMLDivElement>(null);
+  const hueRef = useRef<HTMLDivElement>(null);
+  const [draggingSV, setDraggingSV] = useState(false);
+  const [draggingHue, setDraggingHue] = useState(false);
+
+  const currentHex = hsvToHex(hue, sat, val);
+
+  // Sync hex input when HSV changes (but not when user is typing)
+  const hexInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (document.activeElement !== hexInputRef.current) {
+      setHexInput(currentHex);
+    }
+  }, [currentHex]);
+
+  // ---- SV panel pointer handling ----
+  const updateSV = useCallback((clientX: number, clientY: number) => {
+    const el = svRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+    setSat(x / rect.width);
+    setVal(1 - y / rect.height);
+  }, []);
+
+  const onSVPointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    setDraggingSV(true);
+    updateSV(e.clientX, e.clientY);
+  }, [updateSV]);
+
+  const onSVPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!draggingSV) return;
+    updateSV(e.clientX, e.clientY);
+  }, [draggingSV, updateSV]);
+
+  const onSVPointerUp = useCallback(() => {
+    setDraggingSV(false);
+  }, []);
+
+  // ---- Hue slider pointer handling ----
+  const updateHue = useCallback((clientX: number) => {
+    const el = hueRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    setHue((x / rect.width) * 360);
+  }, []);
+
+  const onHuePointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    setDraggingHue(true);
+    updateHue(e.clientX);
+  }, [updateHue]);
+
+  const onHuePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!draggingHue) return;
+    updateHue(e.clientX);
+  }, [draggingHue, updateHue]);
+
+  const onHuePointerUp = useCallback(() => {
+    setDraggingHue(false);
+  }, []);
+
+  // ---- HEX input handling ----
+  const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setHexInput(v);
+    const normalized = v.startsWith('#') ? v : `#${v}`;
+    if (isValidHex(normalized)) {
+      const full = normalizeHex(normalized);
+      const hsv = hexToHsv(full);
+      setHue(hsv.h);
+      setSat(hsv.s);
+      setVal(hsv.v);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-4 w-72 mx-4 flex flex-col gap-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Title */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+            {t.colorPickerTitle}
+          </span>
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* SV panel */}
+        <div
+          ref={svRef}
+          className="relative w-full h-40 rounded-lg cursor-crosshair select-none"
+          style={{
+            background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueToHex(hue)})`,
+            touchAction: 'none',
+          }}
+          onPointerDown={onSVPointerDown}
+          onPointerMove={onSVPointerMove}
+          onPointerUp={onSVPointerUp}
+        >
+          {/* Cursor */}
+          <div
+            className="absolute w-4 h-4 rounded-full border-2 border-white shadow-md pointer-events-none"
+            style={{
+              left: `${sat * 100}%`,
+              top: `${(1 - val) * 100}%`,
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: currentHex,
+            }}
+          />
+        </div>
+
+        {/* Hue slider */}
+        <div
+          ref={hueRef}
+          className="relative w-full h-4 rounded-full cursor-pointer select-none"
+          style={{
+            background: 'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)',
+            touchAction: 'none',
+          }}
+          onPointerDown={onHuePointerDown}
+          onPointerMove={onHuePointerMove}
+          onPointerUp={onHuePointerUp}
+        >
+          {/* Hue thumb */}
+          <div
+            className="absolute w-4 h-4 rounded-full border-2 border-white shadow-md pointer-events-none top-0"
+            style={{
+              left: `${(hue / 360) * 100}%`,
+              transform: 'translateX(-50%)',
+              backgroundColor: hueToHex(hue),
+            }}
+          />
+        </div>
+
+        {/* HEX input + preview */}
+        <div className="flex items-center gap-2">
+          <div
+            className="w-8 h-8 rounded-full border border-gray-300 dark:border-neutral-600 flex-shrink-0"
+            style={{ backgroundColor: currentHex }}
+          />
+          <input
+            ref={hexInputRef}
+            type="text"
+            value={hexInput}
+            onChange={handleHexChange}
+            maxLength={7}
+            className="flex-1 px-2 py-1 text-sm font-mono border border-gray-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-tiffany"
+            placeholder="#000000"
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex gap-2">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-1.5 text-sm text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-neutral-500 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors"
+          >
+            {t.colorPickerCancel}
+          </button>
+          <button
+            onClick={() => onConfirm(currentHex)}
+            className="flex-1 py-1.5 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg transition-colors"
+          >
+            {t.colorPickerConfirm}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- Color Picker with custom color registration ----
+const MAX_CUSTOM_COLORS = 20;
+
+export function ColorPicker({
   value,
   onChange,
+  customColors,
+  onRegisterColor,
+  onChangeCustomColor,
+  onDeleteCustomColor,
 }: {
   value: string;
   onChange: (c: string) => void;
+  customColors?: string[];
+  onRegisterColor?: (color: string) => void;
+  onChangeCustomColor?: (oldColor: string, newColor: string) => void;
+  onDeleteCustomColor?: (color: string) => void;
 }) {
-  const fileRef = useRef<HTMLInputElement>(null);
+  const { t } = useI18n();
+  const [pendingColor, setPendingColor] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'add' | 'change'>('add');
+
+  const cc = customColors ?? [];
+  const isCustomSelected = cc.includes(value);
+
+  const dotClass = (c: string) =>
+    `w-5 h-5 rounded-full transition-transform flex-shrink-0 ${
+      value === c
+        ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-300 scale-110'
+        : 'hover:scale-105'
+    }`;
+
+  const handlePresetClick = (c: string) => {
+    setPendingColor(null);
+    onChange(c);
+  };
+
+  // Open custom color picker for adding new color
+  const handleOpenAddPicker = () => {
+    setPickerMode('add');
+    setPickerOpen(true);
+  };
+
+  // Open custom color picker for changing existing custom color
+  const handleOpenChangePicker = () => {
+    setPickerMode('change');
+    setPickerOpen(true);
+  };
+
+  // Handle color picker confirm
+  const handlePickerConfirm = (color: string) => {
+    setPickerOpen(false);
+    if (pickerMode === 'add') {
+      setPendingColor(color);
+    } else {
+      // change mode
+      onChangeCustomColor?.(value, color);
+      onChange(color);
+    }
+  };
+
+  const handleRegister = () => {
+    if (!pendingColor) return;
+    const normalized = pendingColor.toLowerCase();
+    // Skip if already exists in presets or custom colors
+    if (LABEL_COLORS.map(c => c.toLowerCase()).includes(normalized)) {
+      onChange(pendingColor);
+      setPendingColor(null);
+      return;
+    }
+    if (cc.map(c => c.toLowerCase()).includes(normalized)) {
+      onChange(pendingColor);
+      setPendingColor(null);
+      return;
+    }
+    onRegisterColor?.(pendingColor);
+    onChange(pendingColor);
+    setPendingColor(null);
+  };
+
+  const handleDelete = () => {
+    onDeleteCustomColor?.(value);
+    onChange(LABEL_COLORS[0]);
+  };
 
   return (
-    <div className="flex flex-wrap gap-1.5 mt-2">
-      {LABEL_COLORS.map((c) => (
-        <button
-          key={c}
-          onClick={() => onChange(c)}
-          className={`w-5 h-5 rounded-full transition-transform flex-shrink-0 ${value === c ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-300 scale-110' : 'hover:scale-105'}`}
-          style={{ backgroundColor: c }}
+    <div className="mt-2">
+      {/* Preset colors */}
+      <div className="flex flex-wrap gap-1.5">
+        {LABEL_COLORS.map((c) => (
+          <button
+            key={c}
+            onClick={() => handlePresetClick(c)}
+            className={dotClass(c)}
+            style={{ backgroundColor: c }}
+          />
+        ))}
+      </div>
+
+      {/* Custom colors section */}
+      {(cc.length > 0 || onRegisterColor) && (
+        <div className="border-t border-gray-200 dark:border-neutral-600 mt-2 pt-2">
+          {/* Registered custom color dots */}
+          {cc.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-1.5">
+              {cc.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => handlePresetClick(c)}
+                  className={dotClass(c)}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Add custom color row */}
+          {onRegisterColor && cc.length < MAX_CUSTOM_COLORS && (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handleOpenAddPicker}
+                className="w-5 h-5 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-500 flex items-center justify-center hover:border-tiffany transition-colors flex-shrink-0"
+              >
+                <Plus size={10} className="text-gray-400" />
+              </button>
+              {pendingColor && (
+                <>
+                  <div
+                    className="w-5 h-5 rounded-full ring-2 ring-offset-1 ring-tiffany flex-shrink-0"
+                    style={{ backgroundColor: pendingColor }}
+                  />
+                  <button
+                    onClick={handleRegister}
+                    className="px-2 py-0.5 text-xs text-white bg-tiffany hover:bg-tiffany-hover rounded transition-colors"
+                  >
+                    {t.customColorRegister}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Actions for selected custom color */}
+          {isCustomSelected && onChangeCustomColor && onDeleteCustomColor && (
+            <div className="flex gap-2 mt-1.5">
+              <button
+                onClick={handleOpenChangePicker}
+                className="px-2 py-0.5 text-xs text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-neutral-500 rounded hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors"
+              >
+                {t.labelChangeColor}
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-2 py-0.5 text-xs text-red-500 border border-red-300 dark:border-red-500/40 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                {t.customColorDelete}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Custom color picker modal */}
+      {pickerOpen && (
+        <CustomColorPickerModal
+          initialColor={pickerMode === 'change' ? value : (pendingColor ?? '#0abab5')}
+          onConfirm={handlePickerConfirm}
+          onCancel={() => setPickerOpen(false)}
         />
-      ))}
-      {/* Custom color button */}
-      <button
-        onClick={() => fileRef.current?.click()}
-        title="Custom color"
-        className="w-5 h-5 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-500 flex items-center justify-center hover:border-tiffany transition-colors flex-shrink-0"
-        style={!LABEL_COLORS.includes(value) ? { backgroundColor: value, borderStyle: 'solid', borderColor: '#6b7280' } : {}}
-      >
-        {LABEL_COLORS.includes(value) && <Plus size={10} className="text-gray-400" />}
-      </button>
-      <input
-        ref={fileRef}
-        type="color"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="sr-only"
-      />
+      )}
     </div>
   );
 }
 
 // ---- Add Label Modal ----
+const DURATION_PRESETS = [5, 10, 15, 20, 30];
+
 function AddLabelModal({
   onAdd,
   onClose,
   addLabel,
+  customColors,
+  onRegisterColor,
+  onChangeCustomColor,
+  onDeleteCustomColor,
 }: {
   onAdd: (label: LabelDefinition) => void;
   onClose: () => void;
   addLabel: string;
+  customColors?: string[];
+  onRegisterColor?: (color: string) => void;
+  onChangeCustomColor?: (oldColor: string, newColor: string) => void;
+  onDeleteCustomColor?: (color: string) => void;
 }) {
   const { t } = useI18n();
   const [name, setName] = useState('');
   const [color, setColor] = useState(LABEL_COLORS[19]); // tiffany default
   const [duration, setDuration] = useState<number | undefined>(undefined);
+  const [isCustomDuration, setIsCustomDuration] = useState(false);
+  const [customDurationStr, setCustomDurationStr] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const unit = t.activeTimeLabel.includes('分') ? '分' : 'min';
 
   const handleAdd = () => {
     const trimmed = name.trim();
@@ -327,6 +679,20 @@ function AddLabelModal({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') { e.preventDefault(); handleAdd(); }
     if (e.key === 'Escape') onClose();
+  };
+
+  const handleDurationSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === '') {
+      setIsCustomDuration(false);
+      setDuration(undefined);
+    } else if (val === '__custom__') {
+      setIsCustomDuration(true);
+      setCustomDurationStr(duration !== undefined ? String(duration) : '');
+    } else {
+      setIsCustomDuration(false);
+      setDuration(Number(val));
+    }
   };
 
   return (
@@ -349,20 +715,52 @@ function AddLabelModal({
           placeholder="Label name"
           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 mb-3"
         />
-        <ColorPicker value={color} onChange={setColor} />
-        {/* Duration selector */}
+        <ColorPicker
+          value={color}
+          onChange={setColor}
+          customColors={customColors}
+          onRegisterColor={onRegisterColor}
+          onChangeCustomColor={onChangeCustomColor}
+          onDeleteCustomColor={onDeleteCustomColor}
+        />
+        {/* Duration selector with custom input */}
         <div className="mt-3">
           <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t.labelDuration}</label>
-          <select
-            value={duration ?? ''}
-            onChange={(e) => setDuration(e.target.value ? Number(e.target.value) : undefined)}
-            className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 bg-white"
-          >
-            <option value="">{t.labelDurationNone}</option>
-            {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60].map((m) => (
-              <option key={m} value={m}>{m}{t.activeTimeLabel.includes('分') ? '分' : 'min'}</option>
-            ))}
-          </select>
+          <div className="flex gap-2">
+            <select
+              value={isCustomDuration ? '__custom__' : (duration ?? '')}
+              onChange={handleDurationSelect}
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 bg-white"
+            >
+              <option value="">{t.labelDurationNone}</option>
+              {DURATION_PRESETS.map((m) => (
+                <option key={m} value={m}>{m}{unit}</option>
+              ))}
+              <option value="__custom__">{t.customInput}</option>
+            </select>
+            {isCustomDuration && (
+              <input
+                autoFocus
+                type="number"
+                value={customDurationStr}
+                onChange={(e) => {
+                  setCustomDurationStr(e.target.value);
+                  const parsed = parseInt(e.target.value, 10);
+                  if (!isNaN(parsed) && parsed > 0) setDuration(parsed);
+                }}
+                onBlur={() => {
+                  const parsed = parseInt(customDurationStr, 10);
+                  if (isNaN(parsed) || parsed <= 0) {
+                    setIsCustomDuration(false);
+                    setDuration(undefined);
+                  }
+                }}
+                min={1}
+                placeholder={unit}
+                className="w-20 px-3 py-1.5 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200"
+              />
+            )}
+          </div>
         </div>
         <button
           onClick={handleAdd}
@@ -530,6 +928,10 @@ function LabelDotMenu({
   cancelLabel,
   labelNamePlaceholder,
   saveLabel,
+  customColors,
+  onRegisterColor,
+  onChangeCustomColor,
+  onDeleteCustomColor,
 }: {
   label: LabelDefinition;
   onEdit: (id: string, name: string, color: string, duration?: number) => void;
@@ -539,6 +941,10 @@ function LabelDotMenu({
   cancelLabel: string;
   labelNamePlaceholder: string;
   saveLabel: string;
+  customColors?: string[];
+  onRegisterColor?: (color: string) => void;
+  onChangeCustomColor?: (oldColor: string, newColor: string) => void;
+  onDeleteCustomColor?: (color: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -587,6 +993,10 @@ function LabelDotMenu({
           editId={label.id}
           title={renameLabel}
           buttonText={saveLabel}
+          customColors={customColors}
+          onRegisterColor={onRegisterColor}
+          onChangeCustomColor={onChangeCustomColor}
+          onDeleteCustomColor={onDeleteCustomColor}
         />
       )}
 
@@ -633,6 +1043,10 @@ function LabelManager({
   maxLabels,
   limitMessage,
   onUpgrade,
+  customColors,
+  onRegisterColor,
+  onChangeCustomColor,
+  onDeleteCustomColor,
 }: {
   labels: LabelDefinition[];
   onChange: (labels: LabelDefinition[]) => void;
@@ -646,21 +1060,36 @@ function LabelManager({
   maxLabels: number;
   limitMessage?: string;
   onUpgrade?: () => void;
+  customColors?: string[];
+  onRegisterColor?: (color: string) => void;
+  onChangeCustomColor?: (oldColor: string, newColor: string) => void;
+  onDeleteCustomColor?: (color: string) => void;
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const atLimit = labels.length >= maxLabels;
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const [overIdx, setOverIdx] = useState<number | null>(null);
 
-  // Refs (declared early so all callbacks can access them)
-  const touchStartIdx = useRef<number | null>(null);
-  const touchCurrentIdx = useRef<number | null>(null);
+  // --- Live reorder state ---
+  // ドラッグ中は liveLabels で並び順を即座に反映し、
+  // ドロップ時に onChange で外部へ確定通知する。
+  const [liveLabels, setLiveLabels] = useState<LabelDefinition[]>(labels);
+  const [dragItemId, setDragItemId] = useState<string | null>(null);
+  const isDraggingRef = useRef(false);
+  const liveLabelsRef = useRef(liveLabels);
+  liveLabelsRef.current = liveLabels;
+
+  // Sync with external labels when not dragging
+  useEffect(() => {
+    if (!isDraggingRef.current) setLiveLabels(labels);
+  }, [labels]);
+
+  // Refs
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // FLIP animation refs
   const prevRectsRef = useRef<Map<string, DOMRect> | null>(null);
   const isAnimatingRef = useRef(false);
 
+  // CRUD handlers (operate on original labels)
   const handleAdd = (label: LabelDefinition) => {
     onChange([...labels, label]);
   };
@@ -676,78 +1105,75 @@ function LabelManager({
   // ── FLIP: capture current bounding rects keyed by label id ──
   const capturePositions = useCallback((): Map<string, DOMRect> => {
     const rects = new Map<string, DOMRect>();
-    labels.forEach((l, i) => {
+    liveLabelsRef.current.forEach((l, i) => {
       const el = rowRefs.current[i];
       if (el) rects.set(l.id, el.getBoundingClientRect());
     });
     return rects;
-  }, [labels]);
-
-  const handleDragStart = useCallback((idx: number) => {
-    setDragIdx(idx);
   }, []);
 
-  const handleDragOver = useCallback((e: React.DragEvent, idx: number) => {
-    e.preventDefault();
-    setOverIdx(idx);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent, dropIdx: number) => {
-    e.preventDefault();
-    if (dragIdx === null || dragIdx === dropIdx) {
-      setDragIdx(null);
-      setOverIdx(null);
-      return;
-    }
-    // FLIP: capture positions before React re-renders
+  // ── Reorder helper: move item from currentIdx to targetIdx ──
+  const reorderLive = useCallback((currentIdx: number, targetIdx: number) => {
     prevRectsRef.current = capturePositions();
-    const reordered = [...labels];
-    const [moved] = reordered.splice(dragIdx, 1);
-    reordered.splice(dropIdx, 0, moved);
-    onChange(reordered);
-    setDragIdx(null);
-    setOverIdx(null);
-  }, [dragIdx, labels, onChange, capturePositions]);
+    const reordered = [...liveLabelsRef.current];
+    const [moved] = reordered.splice(currentIdx, 1);
+    reordered.splice(targetIdx, 0, moved);
+    liveLabelsRef.current = reordered;
+    setLiveLabels(reordered);
+  }, [capturePositions]);
+
+  // --- Mouse drag handlers ---
+  const handleDragStart = useCallback((idx: number) => {
+    isDraggingRef.current = true;
+    setDragItemId(liveLabelsRef.current[idx]?.id ?? null);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, targetIdx: number) => {
+    e.preventDefault();
+    if (!dragItemId) return;
+    const currentIdx = liveLabelsRef.current.findIndex(l => l.id === dragItemId);
+    if (currentIdx === -1 || currentIdx === targetIdx) return;
+    reorderLive(currentIdx, targetIdx);
+  }, [dragItemId, reorderLive]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
 
   const handleDragEnd = useCallback(() => {
-    setDragIdx(null);
-    setOverIdx(null);
-  }, []);
+    if (isDraggingRef.current) {
+      onChange(liveLabelsRef.current);
+    }
+    isDraggingRef.current = false;
+    setDragItemId(null);
+  }, [onChange]);
 
   // --- Touch-based reorder ---
   const handleTouchStart = useCallback((idx: number) => {
-    touchStartIdx.current = idx;
-    setDragIdx(idx);
+    isDraggingRef.current = true;
+    setDragItemId(liveLabelsRef.current[idx]?.id ?? null);
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!dragItemId) return;
     const touch = e.touches[0];
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     if (!el) return;
     const rowEl = el.closest('[data-label-idx]') as HTMLElement | null;
-    if (rowEl) {
-      const idx = Number(rowEl.dataset.labelIdx);
-      touchCurrentIdx.current = idx;
-      setOverIdx(idx);
-    }
-  }, []);
+    if (!rowEl) return;
+    const targetIdx = Number(rowEl.dataset.labelIdx);
+    const currentIdx = liveLabelsRef.current.findIndex(l => l.id === dragItemId);
+    if (currentIdx === -1 || currentIdx === targetIdx) return;
+    reorderLive(currentIdx, targetIdx);
+  }, [dragItemId, reorderLive]);
 
   const handleTouchEnd = useCallback(() => {
-    const from = touchStartIdx.current;
-    const to = touchCurrentIdx.current;
-    if (from !== null && to !== null && from !== to) {
-      // FLIP: capture positions before React re-renders
-      prevRectsRef.current = capturePositions();
-      const reordered = [...labels];
-      const [moved] = reordered.splice(from, 1);
-      reordered.splice(to, 0, moved);
-      onChange(reordered);
+    if (isDraggingRef.current) {
+      onChange(liveLabelsRef.current);
     }
-    touchStartIdx.current = null;
-    touchCurrentIdx.current = null;
-    setDragIdx(null);
-    setOverIdx(null);
-  }, [labels, onChange, capturePositions]);
+    isDraggingRef.current = false;
+    setDragItemId(null);
+  }, [onChange]);
 
   // ── FLIP animation: runs after React re-renders with new label order ──
   useLayoutEffect(() => {
@@ -757,7 +1183,7 @@ function LabelManager({
 
     // If already animating, snap previous animation to end instantly
     if (isAnimatingRef.current) {
-      labels.forEach((_, i) => {
+      liveLabels.forEach((_, i) => {
         const el = rowRefs.current[i];
         if (el) { el.style.transition = ''; el.style.transform = ''; }
       });
@@ -766,7 +1192,7 @@ function LabelManager({
     isAnimatingRef.current = true;
     const animatingEls: HTMLDivElement[] = [];
 
-    labels.forEach((l, i) => {
+    liveLabels.forEach((l, i) => {
       const el = rowRefs.current[i];
       if (!el) return;
       const prevRect = prevRects.get(l.id);
@@ -788,7 +1214,7 @@ function LabelManager({
     void document.body.offsetHeight;
 
     // Play: animate to final position
-    const duration = 250;
+    const duration = 200;
     let done = 0;
     const onEnd = (e: TransitionEvent) => {
       const el = e.currentTarget as HTMLDivElement;
@@ -815,7 +1241,7 @@ function LabelManager({
     }, duration + 100);
 
     return () => clearTimeout(timer);
-  }, [labels]);
+  }, [liveLabels]);
 
   return (
     <div>
@@ -845,10 +1271,10 @@ function LabelManager({
 
       {/* Label list */}
       <div className="space-y-1">
-        {labels.length === 0 && (
+        {liveLabels.length === 0 && (
           <p className="text-sm text-gray-400 dark:text-gray-500 py-2">{noLabelsText}</p>
         )}
-        {labels.map((l, i) => (
+        {liveLabels.map((l, i) => (
           <div
             key={l.id}
             data-label-idx={i}
@@ -856,14 +1282,14 @@ function LabelManager({
             draggable
             onDragStart={() => handleDragStart(i)}
             onDragOver={(e) => handleDragOver(e, i)}
-            onDrop={(e) => handleDrop(e, i)}
+            onDrop={handleDrop}
             onDragEnd={handleDragEnd}
             onTouchStart={() => handleTouchStart(i)}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             className={`flex items-center gap-2 py-2 px-1 border-b border-gray-100 dark:border-neutral-700 transition-colors select-none ${
-              dragIdx === i ? 'opacity-40' : ''
-            } ${overIdx === i && dragIdx !== i ? 'bg-tiffany/10' : ''}`}
+              dragItemId === l.id ? 'opacity-40' : ''
+            }`}
           >
             <span className="cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-500 flex-shrink-0 touch-none">
               <GripVertical size={14} />
@@ -887,6 +1313,10 @@ function LabelManager({
               cancelLabel={cancelLabel}
               labelNamePlaceholder={labelNamePlaceholder}
               saveLabel={saveLabel}
+              customColors={customColors}
+              onRegisterColor={onRegisterColor}
+              onChangeCustomColor={onChangeCustomColor}
+              onDeleteCustomColor={onDeleteCustomColor}
             />
           </div>
         ))}
@@ -897,6 +1327,10 @@ function LabelManager({
           onAdd={handleAdd}
           onClose={() => setShowAddModal(false)}
           addLabel={addLabel}
+          customColors={customColors}
+          onRegisterColor={onRegisterColor}
+          onChangeCustomColor={onChangeCustomColor}
+          onDeleteCustomColor={onDeleteCustomColor}
         />
       )}
     </div>
@@ -1017,7 +1451,7 @@ function readFileWithEncoding(file: File): Promise<string> {
   });
 }
 
-export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, sessions, labels: externalLabels, onSaveLabels }: SettingsPanelProps) {
+export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, sessions, labels: externalLabels, onSaveLabels, onSaveCustomColors }: SettingsPanelProps) {
   const { t } = useI18n();
   const { user, deleteAccount } = useAuth();
   const features = useFeatures();
@@ -1038,6 +1472,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
   const [alarmSound, setAlarmSound] = useState<AlarmSound>(settings.alarm?.sound ?? 'bell');
   const [alarmRepeat, setAlarmRepeat] = useState(settings.alarm?.repeat ?? 1);
   const [labels, setLabels] = useState<LabelDefinition[]>(settings.labels ?? []);
+  const [customColors, setCustomColors] = useState<string[]>(settings.customColors ?? []);
   const [tab, setTab] = useState<SettingsTab>('general');
 
   // Data reset confirmation modal
@@ -1056,6 +1491,30 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
     if (onSaveLabels) {
       onSaveLabels(newLabels);
     }
+  };
+
+  // Custom color handlers — persist immediately without closing settings
+  const persistCustomColors = (updated: string[], updatedLabels?: LabelDefinition[]) => {
+    setCustomColors(updated);
+    const newLabels = updatedLabels ?? labels;
+    if (updatedLabels) setLabels(newLabels);
+    if (onSaveCustomColors) {
+      onSaveCustomColors(updated, updatedLabels);
+    }
+  };
+
+  const handleRegisterCustomColor = (color: string) => {
+    persistCustomColors([...customColors, color]);
+  };
+
+  const handleChangeCustomColor = (oldColor: string, newColor: string) => {
+    const updatedColors = customColors.map((c) => c === oldColor ? newColor : c);
+    const updatedLabels = labels.map((l) => l.color === oldColor ? { ...l, color: newColor } : l);
+    persistCustomColors(updatedColors, updatedLabels);
+  };
+
+  const handleDeleteCustomColor = (color: string) => {
+    persistCustomColors(customColors.filter((c) => c !== color));
   };
 
   const handleImportFile = async (file: File) => {
@@ -1161,6 +1620,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
       alarm: { sound: alarmSound, repeat: alarmRepeat },
       labels,
       activeLabel: settings.activeLabel,
+      customColors,
     });
   };
 
@@ -1361,6 +1821,10 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               maxLabels={features.maxLabels}
               limitMessage={!features.unlimitedLabels ? t.freeLabelLimit : undefined}
               onUpgrade={() => setShowUpgrade(true)}
+              customColors={customColors}
+              onRegisterColor={handleRegisterCustomColor}
+              onChangeCustomColor={handleChangeCustomColor}
+              onDeleteCustomColor={handleDeleteCustomColor}
             />
           </div>
         )}

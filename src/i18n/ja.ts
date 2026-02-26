@@ -152,6 +152,16 @@ export const ja: Translations = {
   planPro: 'Pro',
   upgradeCta: 'アップグレードする',
 
+  // Standard → Pro upgrade
+  upgradeToProTitle: 'Proにアップグレード',
+  upgradeToProDescription: '買い切りプランでずっと使えます。月額の支払いが不要になります。',
+  proDiscountInfo: 'Standard {months}ヶ月分（{amount}）を割引',
+  proDiscountedPrice: '割引後: {price}',
+
+  // Subscription management
+  cancelSubscription: 'プランを解約',
+  cancelSubscriptionDesc: 'Stripeの管理ページで解約手続きを行います',
+
   // Payment / Checkout
   paymentSuccess: 'お支払いが完了しました！',
   paymentSuccessStandard: 'Standardプランへようこそ！すべての機能が解放されました。',

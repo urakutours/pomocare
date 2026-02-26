@@ -94,3 +94,33 @@ export async function createCheckoutSession(
   console.log('[Stripe] 5. Checkout URL received:', data.url ? 'yes' : 'no');
   return data;
 }
+
+/**
+ * Supabase Edge Function を呼び出して Stripe Customer Portal セッションを作成し、
+ * ポータルの URL を返す（サブスクリプション管理・解約用）。
+ */
+export async function createPortalSession(): Promise<{ url: string }> {
+  console.log('[Stripe] Portal: Starting...');
+
+  const accessToken = await getFreshAccessToken();
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/create-portal-session`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
+      'apikey': supabaseAnonKey,
+    },
+  });
+
+  if (!res.ok) {
+    let errMsg = 'Portal session failed';
+    try {
+      const errData = await res.json();
+      if (errData.error) errMsg = errData.error;
+    } catch { /* ignore */ }
+    throw new Error(errMsg);
+  }
+
+  return await res.json() as { url: string };
+}

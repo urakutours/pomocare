@@ -152,6 +152,16 @@ export const pt: Translations = {
   planPro: 'Pro',
   upgradeCta: 'Atualizar',
 
+  // Standard → Pro upgrade
+  upgradeToProTitle: 'Atualizar para Pro',
+  upgradeToProDescription: 'Compra única para acesso vitalício. Sem mais pagamentos mensais.',
+  proDiscountInfo: '{months} meses de Standard ({amount}) descontados',
+  proDiscountedPrice: 'Após desconto: {price}',
+
+  // Subscription management
+  cancelSubscription: 'Cancelar plano',
+  cancelSubscriptionDesc: 'Gerencie sua assinatura no Stripe',
+
   // Payment / Checkout
   paymentSuccess: 'Pagamento concluído!',
   paymentSuccessStandard: 'Bem-vindo ao plano Standard! Todos os recursos estão desbloqueados.',

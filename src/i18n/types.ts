@@ -199,6 +199,16 @@ export interface Translations {
   planPro: string;
   upgradeCta: string;
 
+  // Standard → Pro upgrade
+  upgradeToProTitle: string;
+  upgradeToProDescription: string;
+  proDiscountInfo: string;
+  proDiscountedPrice: string;
+
+  // Subscription management
+  cancelSubscription: string;
+  cancelSubscriptionDesc: string;
+
   // Payment / Checkout
   paymentSuccess: string;
   paymentSuccessStandard: string;

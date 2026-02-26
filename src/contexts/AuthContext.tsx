@@ -33,10 +33,15 @@ const AuthContext = createContext<AuthContextValue>({
   refreshTier: async () => {},
 });
 
-async function fetchUserTier(userId: string): Promise<UserTier> {
+interface UserProfileData {
+  tier: UserTier;
+  subscriptionStartDate: string | null;
+}
+
+async function fetchUserProfile(userId: string): Promise<UserProfileData> {
   const { data, error } = await supabase
     .from('user_profiles')
-    .select('tier')
+    .select('tier, subscription_start_date')
     .eq('user_id', userId)
     .single();
 
@@ -45,14 +50,17 @@ async function fetchUserTier(userId: string): Promise<UserTier> {
     if (error.code === 'PGRST116') {
       console.log('[Auth] No profile row found, creating free tier for', userId);
       await supabase.from('user_profiles').insert({ user_id: userId, tier: 'free' });
-      return 'free';
+      return { tier: 'free', subscriptionStartDate: null };
     }
     // Any other error (RLS, network, etc.) — log and return free without overwriting
-    console.error('[Auth] fetchUserTier failed:', error.code, error.message);
-    return 'free';
+    console.error('[Auth] fetchUserProfile failed:', error.code, error.message);
+    return { tier: 'free', subscriptionStartDate: null };
   }
 
-  return (data.tier as UserTier) ?? 'free';
+  return {
+    tier: (data.tier as UserTier) ?? 'free',
+    subscriptionStartDate: data.subscription_start_date ?? null,
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -78,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Build user — preserve existing tier if same user (avoids flash to 'free' on TOKEN_REFRESHED)
         setUser(prev => {
           const preservedTier = (prev && prev.id === sbUser.id) ? prev.tier : 'free';
+          const preservedSubStart = (prev && prev.id === sbUser.id) ? prev.subscriptionStartDate : null;
           return {
             id: sbUser.id,
             email: sbUser.email ?? null,
@@ -90,15 +99,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               sbUser.user_metadata?.picture ??
               null,
             tier: preservedTier,
+            subscriptionStartDate: preservedSubStart,
             isAnonymous: false,
             emailVerified: sbUser.email_confirmed_at != null,
           };
         });
         setIsLoading(false);
 
-        // Fetch actual tier asynchronously and always apply it
-        const tier = await fetchUserTier(sbUser.id);
-        setUser(prev => prev && prev.id === sbUser.id ? { ...prev, tier } : prev);
+        // Fetch actual profile asynchronously and always apply it
+        const profile = await fetchUserProfile(sbUser.id);
+        setUser(prev => prev && prev.id === sbUser.id
+          ? { ...prev, tier: profile.tier, subscriptionStartDate: profile.subscriptionStartDate }
+          : prev
+        );
       },
     );
     return () => subscription.unsubscribe();
@@ -142,9 +155,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.warn('[Auth] refreshTier: no authenticated user');
       return;
     }
-    const tier = await fetchUserTier(sbUser.id);
-    console.log('[Auth] refreshTier result:', tier);
-    setUser(prev => prev ? { ...prev, tier } : prev);
+    const profile = await fetchUserProfile(sbUser.id);
+    console.log('[Auth] refreshTier result:', profile.tier);
+    setUser(prev => prev
+      ? { ...prev, tier: profile.tier, subscriptionStartDate: profile.subscriptionStartDate }
+      : prev
+    );
   }, []);
 
   return (

@@ -43,6 +43,51 @@ function getPriceId(plan: "standard" | "pro"): string {
   return id;
 }
 
+// ---------- Discount helpers (Standard → Pro) ----------
+const MAX_DISCOUNT_MONTHS = 6;
+
+// 月額単価（通貨ごと）
+const MONTHLY_AMOUNT: Record<Currency, number> = {
+  jpy: 250,
+  usd: 249,  // $2.49 → Stripe: 249 cents
+  eur: 249,  // €2.49 → Stripe: 249 cents
+};
+
+/**
+ * Standard → Pro アップグレード時に割引クーポンを自動生成する。
+ * subscription_start_date から経過月数を算出し、MAX_DISCOUNT_MONTHS を上限に割引。
+ */
+async function createUpgradeDiscount(
+  subscriptionStartDate: string | null,
+  currency: Currency,
+): Promise<string | null> {
+  if (!subscriptionStartDate) return null;
+
+  const start = new Date(subscriptionStartDate);
+  const now = new Date();
+  const diffMs = now.getTime() - start.getTime();
+  const months = Math.floor(diffMs / (30.44 * 24 * 60 * 60 * 1000));
+  const discountMonths = Math.min(Math.max(months, 0), MAX_DISCOUNT_MONTHS);
+
+  if (discountMonths === 0) return null;
+
+  const monthlyAmount = MONTHLY_AMOUNT[currency];
+  const discountAmount = discountMonths * monthlyAmount;
+
+  console.log(`[create-checkout-session] Discount: ${discountMonths} months × ${monthlyAmount} ${currency} = ${discountAmount}`);
+
+  // Stripe coupon を once で作成（1回限りのクーポン）
+  const coupon = await stripe.coupons.create({
+    amount_off: discountAmount,
+    currency,
+    duration: "once",
+    name: `Standard ${discountMonths}mo upgrade discount`,
+    max_redemptions: 1,
+  });
+
+  return coupon.id;
+}
+
 // ---------- Main handler ----------
 serve(async (req: Request) => {
   const origin = req.headers.get("Origin") ?? "";
@@ -101,7 +146,7 @@ serve(async (req: Request) => {
 
     const { data: profile } = await supabaseAdmin
       .from("user_profiles")
-      .select("tier, stripe_customer_id, stripe_subscription_id")
+      .select("tier, stripe_customer_id, stripe_subscription_id, subscription_start_date")
       .eq("user_id", user.id)
       .single();
 
@@ -136,6 +181,15 @@ serve(async (req: Request) => {
     const currency = getCurrency(language);
     const priceId = getPriceId(plan);
 
+    // ---- Standard → Pro 割引クーポン生成 ----
+    let couponId: string | null = null;
+    if (plan === "pro" && profile?.tier === "standard") {
+      couponId = await createUpgradeDiscount(
+        profile.subscription_start_date ?? null,
+        currency,
+      );
+    }
+
     // ---- Stripe Checkout Session作成 ----
     const isSubscription = plan === "standard";
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -150,6 +204,10 @@ serve(async (req: Request) => {
         supabase_user_id: user.id,
         plan,
       },
+      // Standard → Pro 割引クーポン適用
+      ...(couponId
+        ? { discounts: [{ coupon: couponId }] }
+        : {}),
       // StandardからProへのアップグレード時: 既存サブスクを後でキャンセルできるようメタデータに記録
       ...(plan === "pro" && profile?.stripe_subscription_id
         ? {

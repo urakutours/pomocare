@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { BarChart3, Settings, LogOut, Crown } from 'lucide-react';
+import { BarChart3, Settings, LogOut, Crown, CreditCard } from 'lucide-react';
 import logoSvg from '/icons/logo.svg';
 import logoDarkSvg from '/icons/logo_dark.svg';
 import { useAuth } from '@/contexts/AuthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import { LoginModal } from '@/components/auth/LoginModal';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
+import { createPortalSession } from '@/services/stripe/StripeService';
 
 interface HeaderProps {
   onLogoClick: () => void;
@@ -19,13 +20,26 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const tierLabel = user?.tier === 'pro' ? t.planPro : user?.tier === 'standard' ? t.planStandard : t.planFree;
-  const isPaid = user?.tier === 'standard' || user?.tier === 'pro';
+  const isFree = !user?.tier || user.tier === 'free';
+  const isStandard = user?.tier === 'standard';
 
   const handleSignOut = async () => {
     setShowUserMenu(false);
     await signOut();
+  };
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const { url } = await createPortalSession();
+      window.location.href = url;
+    } catch (err) {
+      console.error('[Header] Portal error:', err);
+      setPortalLoading(false);
+    }
   };
 
   return (
@@ -76,11 +90,13 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                       {user.email && user.displayName && (
                         <p className="text-xs text-gray-400 dark:text-gray-400 truncate">{user.email}</p>
                       )}
-                      <span className={`inline-block mt-1 px-1.5 py-0.5 text-[10px] font-semibold rounded ${isPaid ? 'bg-tiffany/15 text-tiffany' : 'bg-gray-100 dark:bg-neutral-600 text-gray-500 dark:text-gray-400'}`}>
+                      <span className={`inline-block mt-1 px-1.5 py-0.5 text-[10px] font-semibold rounded ${!isFree ? 'bg-tiffany/15 text-tiffany' : 'bg-gray-100 dark:bg-neutral-600 text-gray-500 dark:text-gray-400'}`}>
                         {tierLabel}
                       </span>
                     </div>
-                    {!isPaid && (
+
+                    {/* Free → show upgrade button */}
+                    {isFree && (
                       <button
                         onClick={() => { setShowUserMenu(false); setShowUpgrade(true); }}
                         className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-tiffany hover:bg-tiffany/5 transition-colors"
@@ -89,6 +105,30 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                         {t.upgradeCta}
                       </button>
                     )}
+
+                    {/* Standard → show Pro upgrade + Cancel */}
+                    {isStandard && (
+                      <>
+                        <button
+                          onClick={() => { setShowUserMenu(false); setShowUpgrade(true); }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-tiffany hover:bg-tiffany/5 transition-colors"
+                        >
+                          <Crown size={14} />
+                          {t.upgradeToProTitle}
+                        </button>
+                        <button
+                          onClick={() => { setShowUserMenu(false); handleManageSubscription(); }}
+                          disabled={portalLoading}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors disabled:opacity-50"
+                        >
+                          <CreditCard size={14} />
+                          {t.cancelSubscription}
+                        </button>
+                      </>
+                    )}
+
+                    {/* Pro → no upgrade needed */}
+
                     <button
                       onClick={handleSignOut}
                       className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
@@ -112,7 +152,13 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
       </div>
 
       {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
-      {showUpgrade && <UpgradePrompt onClose={() => setShowUpgrade(false)} />}
+      {showUpgrade && (
+        <UpgradePrompt
+          onClose={() => setShowUpgrade(false)}
+          currentTier={user?.tier ?? 'free'}
+          subscriptionStartDate={user?.subscriptionStartDate ?? null}
+        />
+      )}
     </>
   );
 }

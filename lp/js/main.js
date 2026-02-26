@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var screenshotMap = {
     timer: 'images/manual-focus-mode.png',
     stats: 'images/manual-stats-weekly-3.png',
-    settings: 'images/manual-settings-1.png',
+    settings: 'images/manual-settings-general-top.png',
     labels: 'images/manual-labels-list.png'
   };
 

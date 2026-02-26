@@ -120,6 +120,7 @@ serve(async (req: Request) => {
             stripe_customer_id: session.customer as string,
             stripe_subscription_id: subscriptionId,
             subscription_status: "active",
+            subscription_start_date: new Date().toISOString(),
           });
           console.log(`[stripe-webhook] User ${userId} upgraded to Standard (subscription via checkout)`);
         }

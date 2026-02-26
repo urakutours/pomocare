@@ -25,7 +25,7 @@ export function useSessions(storage: StorageService, days: Translations['days'])
 
   useEffect(() => {
     setSessions([]); // ストレージ切替時に旧データを即クリア
-    storage.getSessions().then(setSessions);
+    storage.getSessions().then(setSessions).catch(() => setSessions([]));
   }, [storage]);
 
   // ── Refetch on tab focus (cross-device sync) ──
@@ -41,6 +41,32 @@ export function useSessions(storage: StorageService, days: Translations['days'])
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [storage]);
+
+  // ── Remote change subscription (Supabase Broadcast) ──
+  useEffect(() => {
+    if (!storage.onRemoteChange) return;
+
+    const unsubscribe = storage.onRemoteChange((table) => {
+      if (table === 'sessions') {
+        storage.getSessions().then(setSessions);
+      }
+    });
+
+    return unsubscribe;
+  }, [storage]);
+
+  // ── Interval polling (fallback sync every 60s, only for cloud storage) ──
+  useEffect(() => {
+    if (!storage.onRemoteChange) return; // skip for localStorage
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        storage.getSessions().then(setSessions);
+      }
+    }, 60_000);
+
+    return () => clearInterval(interval);
   }, [storage]);
 
   // ── Fetch-Merge-Save helpers (cross-device safe) ──

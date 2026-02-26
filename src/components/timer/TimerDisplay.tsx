@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { formatTime } from '@/utils/time';
 import type { TimerMode } from '@/types/timer';
 import { useI18n } from '@/contexts/I18nContext';
@@ -52,33 +51,40 @@ export function TimerDisplay({
         onClick={() => { if (canEdit) setOpen((v) => !v); }}
       >
         {formatTime(timeLeft)}
-        {canEdit && (
-          <ChevronDown
-            size={20}
-            className={`text-gray-400 dark:text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`}
-          />
-        )}
       </div>
 
       {/* Preset dropdown */}
-      {open && canEdit && (
-        <div className="mt-2 inline-flex flex-wrap gap-2 justify-center">
-          {activePresets!.map((min) => (
-            <button
-              key={min}
-              onClick={() => {
-                onChangeWorkTime!(min);
-                setOpen(false);
-              }}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                min === currentWorkTime
-                  ? 'bg-tiffany text-white'
-                  : 'bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-tiffany/20'
-              }`}
-            >
-              {min}{t.activeTimeLabel.includes('分') ? '分' : 'min'}
-            </button>
-          ))}
+      {canEdit && (
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            maxHeight: open ? `${(activePresets!.length * 48) + 16}px` : '0px',
+            opacity: open ? 1 : 0,
+          }}
+        >
+          <div className="mt-2 inline-flex flex-wrap gap-2 justify-center">
+            {activePresets!.map((min, i) => (
+              <button
+                key={min}
+                onClick={() => {
+                  onChangeWorkTime!(min);
+                  setOpen(false);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  min === currentWorkTime
+                    ? 'bg-tiffany text-white'
+                    : 'bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-tiffany/20'
+                }`}
+                style={{
+                  transitionDelay: open ? `${i * 50}ms` : '0ms',
+                  transform: open ? 'translateY(0) scale(1)' : 'translateY(-8px) scale(0.9)',
+                  opacity: open ? 1 : 0,
+                }}
+              >
+                {min}{t.activeTimeLabel.includes('分') ? '分' : 'min'}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

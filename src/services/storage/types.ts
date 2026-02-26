@@ -7,4 +7,6 @@ export interface StorageService {
   getSettings(): Promise<PomodoroSettings>;
   saveSettings(settings: PomodoroSettings): Promise<void>;
   clearAll(): Promise<void>;
+  /** Subscribe to remote data changes (cross-device sync). Returns cleanup function. */
+  onRemoteChange?(callback: (table: 'sessions' | 'settings') => void): () => void;
 }

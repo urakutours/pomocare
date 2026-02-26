@@ -165,7 +165,7 @@ export const ja: Translations = {
   // Free trial
   freeTrialBadge: '60日間無料',
   freeTrialNote: '無料トライアル後、自動的に月額プランに移行します',
-  freeTrialMenuHint: 'Standardプラン2ヶ月無料',
+  freeTrialMenuHint: 'Standardプラン60日間無料',
 
   // Payment / Checkout
   paymentSuccess: 'お支払いが完了しました！',

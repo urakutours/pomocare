@@ -162,6 +162,10 @@ export const es: Translations = {
   cancelSubscription: 'Cancelar plan',
   cancelSubscriptionDesc: 'Gestiona tu suscripción en Stripe',
 
+  // Free trial
+  freeTrialBadge: '60 días gratis',
+  freeTrialNote: 'Tras la prueba gratuita, se cobrará automáticamente el plan mensual',
+
   // Payment / Checkout
   paymentSuccess: '¡Pago completado!',
   paymentSuccessStandard: '¡Bienvenido al plan Standard! Todas las funciones están desbloqueadas.',

@@ -209,6 +209,10 @@ export interface Translations {
   cancelSubscription: string;
   cancelSubscriptionDesc: string;
 
+  // Free trial
+  freeTrialBadge: string;
+  freeTrialNote: string;
+
   // Payment / Checkout
   paymentSuccess: string;
   paymentSuccessStandard: string;

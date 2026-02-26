@@ -165,16 +165,24 @@ export function UpgradePrompt({ onClose, onRequestLogin, currentTier, subscripti
         <div className="space-y-2">
           {/* Standard プラン: サブスクリプション（Free時のみ表示） */}
           {!isStandard && (
-            <button
-              onClick={() => handleCheckout('standard')}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-tiffany text-white font-semibold hover:bg-tiffany-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loadingPlan === 'standard' ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : null}
-              {t.upgradeStandard} — {t.upgradeStandardPrice}
-            </button>
+            <div>
+              <button
+                onClick={() => handleCheckout('standard')}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-tiffany text-white font-semibold hover:bg-tiffany-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {loadingPlan === 'standard' ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : null}
+                <span>{t.upgradeStandard} — {t.upgradeStandardPrice}</span>
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-white/25 rounded">
+                  {t.freeTrialBadge}
+                </span>
+              </button>
+              <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-1 text-center">
+                {t.freeTrialNote}
+              </p>
+            </div>
           )}
 
           {/* Pro プラン: 買い切り */}

@@ -192,6 +192,9 @@ serve(async (req: Request) => {
 
     // ---- Stripe Checkout Session作成 ----
     const isSubscription = plan === "standard";
+    // 新規Standard契約（free→standard）のみ60日間の無料トライアルを付与
+    const isNewSubscription = isSubscription && (!profile?.tier || profile.tier === "free");
+
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
@@ -204,6 +207,10 @@ serve(async (req: Request) => {
         supabase_user_id: user.id,
         plan,
       },
+      // 60日間無料トライアル（新規Standard契約のみ）
+      ...(isNewSubscription
+        ? { subscription_data: { trial_period_days: 60 } }
+        : {}),
       // Standard → Pro 割引クーポン適用
       ...(couponId
         ? { discounts: [{ coupon: couponId }] }

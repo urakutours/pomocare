@@ -162,6 +162,10 @@ export const ja: Translations = {
   cancelSubscription: 'プランを解約',
   cancelSubscriptionDesc: 'Stripeの管理ページで解約手続きを行います',
 
+  // Free trial
+  freeTrialBadge: '60日間無料',
+  freeTrialNote: '無料トライアル後、自動的に月額プランに移行します',
+
   // Payment / Checkout
   paymentSuccess: 'お支払いが完了しました！',
   paymentSuccessStandard: 'Standardプランへようこそ！すべての機能が解放されました。',

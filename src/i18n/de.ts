@@ -162,6 +162,10 @@ export const de: Translations = {
   cancelSubscription: 'Abo kündigen',
   cancelSubscriptionDesc: 'Verwalte dein Abo auf Stripe',
 
+  // Free trial
+  freeTrialBadge: '60 Tage kostenlos',
+  freeTrialNote: 'Nach der Testphase wird automatisch das Monatsabo berechnet',
+
   // Payment / Checkout
   paymentSuccess: 'Zahlung erfolgreich!',
   paymentSuccessStandard: 'Willkommen im Standard-Plan! Alle Funktionen sind jetzt freigeschaltet.',

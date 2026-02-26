@@ -169,7 +169,7 @@
         <li>アカウント登録で<strong>複数デバイスからデータ同期</strong></li>
       </ul>
     </div>
-    <p>PomoCare はログインしなくてもすべての基本機能を利用できます。データはブラウザに保存され、アカウントを作成するとクラウドに同期されます。</p>
+    <p>PomoCare はログインしなくてもタイマーや記録などの基本機能を利用できます。データはブラウザに保存され、アカウントを作成するとクラウドに同期されます。一部の機能（CSVエクスポート、月間・年間統計など）はStandard / Pro プランで利用可能です。</p>
   </section>
   </div>
 
@@ -182,12 +182,29 @@
     </div>
     <div class="content-row reverse">
       <div class="content-text">
-        <p>アプリは大きく3つの画面で構成されています。</p>
+        <p>メイン画面には以下の要素が配置されています。</p>
+        <h3>ヘッダー</h3>
         <table class="info-table">
-          <tr><th>ロゴ</th><td>タイマー画面（ホーム）に戻る</td></tr>
-          <tr><th>統計</th><td>統計・グラフ画面を開く</td></tr>
-          <tr><th>設定</th><td>設定画面を開く</td></tr>
-          <tr><th>ユーザー</th><td>ログイン / ユーザーメニューを表示</td></tr>
+          <tr><th>ロゴ</th><td>タップするとタイマー画面（ホーム）に戻る</td></tr>
+          <tr><th>統計アイコン</th><td>統計パネルを開く</td></tr>
+          <tr><th>設定アイコン</th><td>設定パネルを開く</td></tr>
+          <tr><th>ユーザーアイコン</th><td>ログイン画面、またはユーザーメニュー（メール・プラン・ログアウト）を表示</td></tr>
+        </table>
+        <h3>タイマーエリア</h3>
+        <table class="info-table">
+          <tr><th>タイマー表示</th><td>残り時間を大きく表示。<strong>タップするとプリセット選択</strong>（15/25/35/45分など）が開く</td></tr>
+          <tr><th>再生ボタン</th><td>タイマーを開始してフォーカスモードに入る</td></tr>
+          <tr><th>リセットボタン</th><td>タイマーをデフォルト時間にリセット</td></tr>
+        </table>
+        <h3>セッションサマリー</h3>
+        <table class="info-table">
+          <tr><th>Today</th><td>本日のセッション数（タップで詳細表示）</td></tr>
+          <tr><th>This Week</th><td>今週のセッション数とアクティブ日数（X/7）（タップで詳細表示）</td></tr>
+        </table>
+        <h3>その他</h3>
+        <table class="info-table">
+          <tr><th>ラベル選択</th><td>ドロップダウンでラベルを選択、またはラベルを新規作成</td></tr>
+          <tr><th>カスタムメッセージ</th><td>設定で登録したメッセージが画面下部に常時表示される</td></tr>
         </table>
       </div>
       <div class="content-illust">
@@ -206,6 +223,8 @@
     </div>
     <div class="content-row">
       <div class="content-text">
+        <h3>作業時間の選択</h3>
+        <p>タイマーの時間表示をタップすると、プリセットボタン（デフォルト: 15 / 25 / 35 / 45分）が表示されます。好きな時間をタップするだけで素早く切り替えできます。プリセットは設定画面のPresetsタブでカスタマイズ可能です。</p>
         <h3>基本操作</h3>
         <table class="info-table">
           <tr><th>開始</th><td>&#x25B6; ボタンをタップ。フォーカスモードに切り替わります</td></tr>
@@ -223,9 +242,11 @@
           <span class="cycle-item cycle-work">作業</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-sbreak">短い休憩</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-work">作業</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-sbreak">短い休憩</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-work">作業</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-lbreak">長い休憩</span>
         </div>
-        <p class="hint-box"><strong>ポイント:</strong> 各モードの切り替え時にスタートボタンを押すタイミングは自由です。自分のペースで次のセッションを始められます。</p>
+        <p class="hint-box"><strong>ポイント:</strong> 各モードの切り替え時にスタートボタンを押すタイミングは自由です。自分のペースで次のセッションを始められます。デフォルトでは4回の作業セッション後に長い休憩が入ります。</p>
       </div>
       <div class="content-illust">
         <img src="../images/manual-start-pomodoro.png" alt="ポモドーロをスタート" class="screenshot-img">
@@ -304,16 +325,23 @@
         <ol class="manual-steps">
           <li>タイマー画面の<strong>ラベル選択ドロップダウン</strong>からラベルを選ぶ</li>
           <li>タイマーを開始すると、選択中のラベルがセッションに自動的に記録される</li>
-          <li>ラベルなしでもセッションの記録は可能</li>
+          <li>「Select label」を選ぶとラベルなしで記録可能</li>
         </ol>
-        <h3>ラベルの管理</h3>
+        <h3>ラベルの作成</h3>
+        <p>タイマー画面のドロップダウンから「+ New label」を選ぶか、設定パネルの<strong>Labelsタブ</strong>から「+ Add Label」をタップします。</p>
         <table class="info-table">
-          <tr><th>新規作成</th><td>タイマー画面から直接、または設定画面から</td></tr>
-          <tr><th>色を変更</th><td>56色パレットまたはカスタムカラーから選択</td></tr>
-          <tr><th>名前を変更</th><td>ラベル名をタップして直接編集</td></tr>
-          <tr><th>並び替え</th><td>ドラッグ&ドロップ（タッチ対応）</td></tr>
-          <tr><th>削除</th><td>確認ダイアログ付き</td></tr>
+          <tr><th>ラベル名</th><td>自由なテキストを入力</td></tr>
+          <tr><th>色の選択</th><td>36色のカラーパレットから選択。カスタムカラーの登録も可能</td></tr>
+          <tr><th>タイマー時間</th><td>ラベル専用の作業時間を設定可能（5〜60分の5分刻み、カスタム入力、またはデフォルト）</td></tr>
         </table>
+        <h3>ラベルの管理</h3>
+        <p>設定パネルの<strong>Labelsタブ</strong>で管理します。各ラベルの右側にある <strong>&#x22EE;（三点メニュー）</strong>から編集・削除が可能です。</p>
+        <table class="info-table">
+          <tr><th>編集</th><td>三点メニュー →「Edit」で名前・色・タイマー時間を変更</td></tr>
+          <tr><th>並び替え</th><td>左側のドラッグハンドルでドラッグ&ドロップ（タッチ対応）</td></tr>
+          <tr><th>削除</th><td>三点メニュー →「Delete」（確認ダイアログ付き）</td></tr>
+        </table>
+        <p class="hint-box"><strong>ポイント:</strong> ラベルにタイマー時間を設定すると、そのラベルを選択した時に自動的にタイマーがその時間に切り替わります。</p>
       </div>
       <div class="content-illust">
         <img src="../images/manual-labels-1.png" alt="ラベル一覧" class="screenshot-img">
@@ -332,11 +360,11 @@
     </div>
     <div class="content-row">
       <div class="content-text">
-        <p>作業内容の詳細をメモとして記録できます。</p>
+        <p>作業内容の詳細をメモとして記録できます（Standard / Pro プラン機能）。</p>
         <ol class="manual-steps">
           <li>タイマー画面でラベルを選択すると、<strong>メモ入力欄</strong>が表示されます</li>
           <li>テキストを入力してからタイマーを開始すると、セッションと一緒に保存されます</li>
-          <li>後から編集する場合は、統計画面の<strong>セッション詳細モーダル</strong>からメモ欄を直接編集</li>
+          <li>後から編集する場合は、統計画面の<strong>セッション詳細</strong>からメモ欄を直接編集</li>
         </ol>
       </div>
       <div class="content-illust">
@@ -355,26 +383,28 @@
     </div>
     <div class="content-row reverse">
       <div class="content-text">
-        <p>ヘッダーの<strong>統計ボタン</strong>をタップすると、作業の記録をグラフで確認できます。</p>
-        <h3>セッションサマリー</h3>
+        <p>ヘッダーの<strong>統計アイコン</strong>をタップすると、統計パネルが開きます。</p>
+        <h3>表示期間タブ</h3>
         <table class="info-table">
-          <tr><th>今日</th><td>本日のセッション数と合計作業時間</td></tr>
-          <tr><th>今週</th><td>セッション数、アクティブ日数（X/7）、合計時間</td></tr>
+          <tr><th>Weekly</th><td>週間グラフ（曜日別の棒グラフ）</td></tr>
+          <tr><th>Monthly</th><td>月間グラフ（日別の棒グラフ）※ Standard / Pro プラン</td></tr>
+          <tr><th>Yearly</th><td>年間グラフ（月別の棒グラフ）※ Standard / Pro プラン</td></tr>
         </table>
-        <h3>表示期間</h3>
+        <h3>表示の切り替え</h3>
         <table class="info-table">
-          <tr><th>週間</th><td>過去7日間の日別グラフ</td></tr>
-          <tr><th>月間</th><td>当月の日別グラフ</td></tr>
-          <tr><th>年間</th><td>12ヶ月の月別グラフ</td></tr>
+          <tr><th>Sets</th><td>セッション数で表示</td></tr>
+          <tr><th>Time</th><td>合計作業時間で表示</td></tr>
         </table>
-        <p>&#x25C0; &#x25B6; ボタンで前後の期間に移動できます。セッション数と合計時間の表示を切り替えられます。</p>
+        <p>「← Previous Week」「Next Week →」ボタンで前後の期間に移動できます。</p>
+        <h3>ラベルフィルター</h3>
+        <p>左上のドロップダウンで「All」または特定のラベルを選択し、表示をフィルタリングできます。</p>
         <h3>その他の機能</h3>
         <ul>
           <li><strong>積み上げ棒グラフ</strong>: ラベルごとに色分けして表示</li>
-          <li><strong>ラベルフィルター</strong>: 特定ラベルだけを表示</li>
-          <li><strong>グラフ高さの変更</strong>: ドラッグで調整（40px〜300px）</li>
+          <li><strong>グラフ高さの変更</strong>: ドラッグで調整可能</li>
           <li><strong>セッション詳細</strong>: 日付バーをタップでラベル変更・メモ編集・削除が可能</li>
         </ul>
+        <p class="hint-box"><strong>メモ:</strong> メイン画面の「Today」「This Week」をタップしても、その期間のセッション詳細リストを確認できます。</p>
       </div>
       <div class="content-illust">
         <img src="../images/manual-statistics.png" alt="統計・グラフ画面" class="screenshot-img">
@@ -390,10 +420,11 @@
       <span class="section-num">9</span>
       <h2>セッションデータの管理（CSV）</h2>
     </div>
+    <p>CSV のインポート・エクスポートは、設定パネルの<strong>Generalタブ</strong>下部にあります。</p>
     <h3>エクスポート（書き出し）</h3>
-    <p>設定画面 →「<strong>CSVエクスポート</strong>」をタップすると、全セッションデータがCSVファイルとしてダウンロードされます。</p>
+    <p>「<strong>Export CSV</strong>」をタップすると、全セッションデータがCSVファイルとしてダウンロードされます（Standard / Pro プラン機能）。</p>
     <h3>インポート（読み込み）</h3>
-    <p>設定画面 →「<strong>CSVインポート</strong>」で、CSVファイルを読み込めます。</p>
+    <p>「<strong>Import CSV</strong>」をタップして、CSVファイルを読み込めます。</p>
     <ul>
       <li>ファイルをドラッグ&ドロップ、またはファイル選択で読み込み</li>
       <li>Shift-JIS / UTF-8 のエンコーディングを自動判別</li>
@@ -412,13 +443,17 @@
     </div>
     <div class="content-row reverse">
       <div class="content-text">
-        <h3>タイマー時間</h3>
+        <p>設定パネルは <strong>General</strong>、<strong>Labels</strong>、<strong>Presets</strong> の3つのタブで構成されています。</p>
+
+        <h3>General タブ</h3>
+        <h4>タイマー時間</h4>
         <table class="info-table">
-          <tr><th>作業時間</th><td>プリセット選択またはカスタム入力（デフォルト: 25分）</td></tr>
-          <tr><th>短い休憩</th><td>プリセット選択またはカスタム入力（デフォルト: 5分）</td></tr>
-          <tr><th>長い休憩</th><td>ON/OFF切替、間隔と時間を設定（デフォルト: 4回ごと/20分）</td></tr>
+          <tr><th>Pomodoro</th><td>作業時間（デフォルト: 25分）。プリセットまたはカスタム入力</td></tr>
+          <tr><th>Short Break</th><td>短い休憩（デフォルト: 5分）。プリセットまたはカスタム入力</td></tr>
+          <tr><th>Long Break</th><td>長い休憩（デフォルト: 20分）。0に設定するとOFF</td></tr>
+          <tr><th>Long Break interval</th><td>長い休憩の間隔（デフォルト: 4セッションごと）。0でOFF</td></tr>
         </table>
-        <h3>アラーム</h3>
+        <h4>アラーム</h4>
         <table class="info-table">
           <tr><th>Bell</th><td>ハンドベル風の澄んだ音</td></tr>
           <tr><th>Digital</th><td>目覚まし時計風のデジタル音</td></tr>
@@ -427,21 +462,36 @@
           <tr><th>Classic</th><td>クラシックなアラーム音</td></tr>
           <tr><th>Gentle</th><td>穏やかな通知音</td></tr>
           <tr><th>Soft</th><td>柔らかいソフトな音</td></tr>
-          <tr><th>なし</th><td>サイレント（音なし）</td></tr>
+          <tr><th>None</th><td>サイレント（音なし）</td></tr>
         </table>
-        <p>リピート回数（1〜5回）とプレビュー再生が設定できます。</p>
-        <h3>外観・その他</h3>
-        <ul>
-          <li><strong>テーマ</strong>: ライト / ダークモードの切替</li>
-          <li><strong>言語</strong>: 7言語から選択</li>
-          <li><strong>カスタムメッセージ</strong>: 休憩中に表示するメッセージを設定</li>
-          <li><strong>データリセット</strong>: 全データ消去（確認付き）</li>
-          <li><strong>アカウント削除</strong>: ログイン中のアカウントを削除（確認付き）</li>
-        </ul>
+        <p>Alarm Repeat Count（1〜5回）と &#x25B6; プレビュー再生が設定できます。</p>
+        <h4>外観・その他</h4>
+        <table class="info-table">
+          <tr><th>Theme</th><td><strong>Light</strong>（白背景）/ <strong>Gray</strong>（グレー背景）/ <strong>Dark</strong>（暗い背景）の3種から選択</td></tr>
+          <tr><th>Custom Message</th><td>メイン画面と休憩画面に表示されるメッセージを設定</td></tr>
+          <tr><th>Language</th><td>7言語（日本語 / English / Espa&ntilde;ol / Portugu&ecirc;s / Deutsch / Fran&ccedil;ais / Italiano）</td></tr>
+        </table>
+        <h4>データ管理</h4>
+        <table class="info-table">
+          <tr><th>Import CSV</th><td>CSVファイルからセッションデータを読み込み</td></tr>
+          <tr><th>Export CSV</th><td>全セッションデータをCSV出力（Standard / Pro プラン）</td></tr>
+          <tr><th>Reset All Data</th><td>全データ消去（確認付き・元に戻せません）</td></tr>
+          <tr><th>Delete Account</th><td>ログイン中に表示。アカウントを完全に削除</td></tr>
+        </table>
+
+        <h3>Labels タブ</h3>
+        <p>ラベルの作成・編集・並び替え・削除を行います。詳しくは <a href="#s6-ja">セクション6</a> を参照してください。</p>
+
+        <h3>Presets タブ</h3>
+        <p>タイマー画面でタップして選べるプリセット時間をカスタマイズします。</p>
+        <table class="info-table">
+          <tr><th>Active Presets</th><td>作業時間のプリセット（デフォルト: 15 / 25 / 35 / 45分）。追加・削除が可能</td></tr>
+          <tr><th>Rest Presets</th><td>休憩時間のプリセット（デフォルト: OFF / 3 / 5 / 10分）。追加・削除が可能</td></tr>
+        </table>
       </div>
       <div class="content-illust">
-        <img src="../images/manual-settings-1.png" alt="設定画面（一般）" class="screenshot-img">
-        <img src="../images/manual-settings-2.png" alt="設定画面（その他）" class="screenshot-img">
+        <img src="../images/manual-settings-1.png" alt="設定画面（General）" class="screenshot-img">
+        <img src="../images/manual-settings-2.png" alt="設定画面（Presets）" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -464,16 +514,25 @@
     </table>
     <h3>アカウント作成の流れ</h3>
     <ol class="manual-steps">
+      <li>ヘッダーの<strong>ユーザーアイコン</strong>をタップしてログイン画面を開く</li>
       <li>メールアドレスとパスワードを入力して<strong>サインアップ</strong></li>
       <li>確認メールが届くので、メール内のリンクをクリック</li>
       <li>メール認証完了。すべての機能が利用可能に</li>
     </ol>
+    <h3>ユーザーメニュー</h3>
+    <p>ログイン後、ヘッダーのユーザーアイコンをタップするとメニューが表示されます。</p>
+    <table class="info-table">
+      <tr><th>メールアドレス</th><td>登録済みのメールアドレスが表示</td></tr>
+      <tr><th>プランバッジ</th><td>現在のプラン（Free / Standard / Pro）が表示</td></tr>
+      <tr><th>Learn more</th><td>プランの詳細ページへ移動</td></tr>
+      <tr><th>Logout</th><td>ログアウト</td></tr>
+    </table>
     <h3>データの保存先</h3>
     <table class="info-table">
       <tr><th>未ログイン</th><td>ブラウザのローカルストレージ（そのブラウザでのみ利用可能。キャッシュクリアでデータ消失の可能性あり）</td></tr>
-      <tr><th>ログイン済み（無料アカウント含む）</th><td>クラウドに同期 → 複数デバイスで安全に利用可能</td></tr>
+      <tr><th>ログイン済み</th><td>クラウドに自動同期 → 複数デバイスで安全に利用可能</td></tr>
     </table>
-    <p class="hint-box"><strong>重要:</strong> 未ログインの場合、ブラウザのキャッシュクリアやデータ消去でセッション履歴が失われる可能性があります。大切なデータを守るために、無料アカウントの作成をおすすめします。</p>
+    <p class="hint-box"><strong>重要:</strong> 未ログインの場合、ブラウザのキャッシュクリアやデータ消去でセッション履歴が失われる可能性があります。大切なデータを守るために、アカウントの作成をおすすめします。</p>
     <p>未ログインの状態で記録したデータは、初回ログイン時に自動的にクラウドへ移行されます。</p>
   </section>
   </div>
@@ -660,7 +719,7 @@
         <li>Create an account to <strong>sync data across devices</strong></li>
       </ul>
     </div>
-    <p>PomoCare provides full access to all core features without logging in. Data is saved to your browser, and creating an account syncs it to the cloud.</p>
+    <p>PomoCare provides access to core features like the timer and session recording without logging in. Data is saved to your browser, and creating an account syncs it to the cloud. Some features (CSV export, monthly/yearly statistics, etc.) require a Standard or Pro plan.</p>
   </section>
   </div>
 
@@ -673,12 +732,29 @@
     </div>
     <div class="content-row reverse">
       <div class="content-text">
-        <p>The app is organized into three main screens.</p>
+        <p>The main screen contains the following elements.</p>
+        <h3>Header</h3>
         <table class="info-table">
-          <tr><th>Logo</th><td>Returns to the Timer screen (Home)</td></tr>
-          <tr><th>Stats</th><td>Opens the Statistics and Charts screen</td></tr>
-          <tr><th>Settings</th><td>Opens the Settings screen</td></tr>
-          <tr><th>User</th><td>Login or User menu (Logout, etc.)</td></tr>
+          <tr><th>Logo</th><td>Tap to return to the Timer screen (Home)</td></tr>
+          <tr><th>Stats icon</th><td>Opens the Statistics panel</td></tr>
+          <tr><th>Settings icon</th><td>Opens the Settings panel</td></tr>
+          <tr><th>User icon</th><td>Opens the Login screen, or User menu (email, plan, logout)</td></tr>
+        </table>
+        <h3>Timer Area</h3>
+        <table class="info-table">
+          <tr><th>Timer display</th><td>Shows remaining time. <strong>Tap to reveal preset buttons</strong> (15/25/35/45 min, etc.)</td></tr>
+          <tr><th>Play button</th><td>Starts the timer and enters Focus Mode</td></tr>
+          <tr><th>Reset button</th><td>Resets the timer to the default duration</td></tr>
+        </table>
+        <h3>Session Summary</h3>
+        <table class="info-table">
+          <tr><th>Today</th><td>Number of sessions today (tap for details)</td></tr>
+          <tr><th>This Week</th><td>Sessions this week and active days (X/7) (tap for details)</td></tr>
+        </table>
+        <h3>Other</h3>
+        <table class="info-table">
+          <tr><th>Label selector</th><td>Dropdown to select a label or create a new one</td></tr>
+          <tr><th>Custom message</th><td>Your custom message is always displayed at the bottom of the screen</td></tr>
         </table>
       </div>
       <div class="content-illust">
@@ -697,6 +773,8 @@
     </div>
     <div class="content-row">
       <div class="content-text">
+        <h3>Choosing a Duration</h3>
+        <p>Tap the timer display to reveal preset buttons (default: 15 / 25 / 35 / 45 min). Tap any button to quickly switch. Presets can be customized in the Settings Presets tab.</p>
         <h3>Basic Controls</h3>
         <table class="info-table">
           <tr><th>Start</th><td>Tap the play button. Switches to Focus Mode.</td></tr>
@@ -714,9 +792,11 @@
           <span class="cycle-item cycle-work">Work</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-sbreak">Short Break</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-work">Work</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-sbreak">Short Break</span><span class="cycle-arrow">→</span>
+          <span class="cycle-item cycle-work">Work</span><span class="cycle-arrow">→</span>
           <span class="cycle-item cycle-lbreak">Long Break</span>
         </div>
-        <p class="hint-box"><strong>Tip:</strong> You're free to start each mode whenever you're ready — the app waits for you to press Start.</p>
+        <p class="hint-box"><strong>Tip:</strong> You're free to start each mode whenever you're ready — the app waits for you to press Start. By default, a long break occurs after every 4 work sessions.</p>
       </div>
       <div class="content-illust">
         <img src="../images/manual-start-pomodoro.png" alt="Start a Pomodoro" class="screenshot-img">
@@ -795,16 +875,23 @@
         <ol class="manual-steps">
           <li>Select a label from the <strong>dropdown</strong> on the Timer screen</li>
           <li>Start the timer — the selected label is automatically recorded with the session</li>
-          <li>Sessions can also be recorded without a label</li>
+          <li>Choose "Select label" to record without a label</li>
         </ol>
-        <h3>Managing Labels</h3>
+        <h3>Creating Labels</h3>
+        <p>Tap "+ New label" from the Timer screen dropdown, or go to Settings &gt; <strong>Labels tab</strong> &gt; "+ Add Label".</p>
         <table class="info-table">
-          <tr><th>Create</th><td>Directly from the Timer screen or from Settings</td></tr>
-          <tr><th>Change Color</th><td>Choose from 56-color palette or custom color</td></tr>
-          <tr><th>Rename</th><td>Tap the label name to edit directly</td></tr>
-          <tr><th>Reorder</th><td>Drag and drop (touch-friendly)</td></tr>
-          <tr><th>Delete</th><td>With confirmation dialog</td></tr>
+          <tr><th>Label name</th><td>Enter any text</td></tr>
+          <tr><th>Color</th><td>Choose from a 36-color palette, or register a custom color</td></tr>
+          <tr><th>Timer duration</th><td>Set a label-specific work time (5–60 min in 5-min steps, custom, or default)</td></tr>
         </table>
+        <h3>Managing Labels</h3>
+        <p>Manage labels in the Settings <strong>Labels tab</strong>. Tap the <strong>&#x22EE; (three-dot menu)</strong> on the right of each label to edit or delete.</p>
+        <table class="info-table">
+          <tr><th>Edit</th><td>Three-dot menu → "Edit" to change name, color, or timer duration</td></tr>
+          <tr><th>Reorder</th><td>Drag the handle on the left side (touch-friendly)</td></tr>
+          <tr><th>Delete</th><td>Three-dot menu → "Delete" (with confirmation)</td></tr>
+        </table>
+        <p class="hint-box"><strong>Tip:</strong> Setting a timer duration on a label will automatically switch the timer when that label is selected.</p>
       </div>
       <div class="content-illust">
         <img src="../images/manual-labels-1.png" alt="Labels list" class="screenshot-img">
@@ -823,11 +910,11 @@
     </div>
     <div class="content-row">
       <div class="content-text">
-        <p>You can record detailed notes about your work for each session.</p>
+        <p>You can record detailed notes about your work for each session (Standard / Pro plan feature).</p>
         <ol class="manual-steps">
           <li>Select a label on the Timer screen to reveal the <strong>notes field</strong></li>
           <li>Enter your notes before starting the timer — they're saved with the session</li>
-          <li>To edit later, open the <strong>session detail modal</strong> from the Statistics screen</li>
+          <li>To edit later, open the <strong>session details</strong> from the Statistics screen</li>
         </ol>
       </div>
       <div class="content-illust">
@@ -846,26 +933,28 @@
     </div>
     <div class="content-row reverse">
       <div class="content-text">
-        <p>Tap the <strong>Stats button</strong> in the header to view your work history as charts.</p>
-        <h3>Session Summary</h3>
+        <p>Tap the <strong>Stats icon</strong> in the header to open the Statistics panel.</p>
+        <h3>View Period Tabs</h3>
         <table class="info-table">
-          <tr><th>Today</th><td>Number of sessions and total work time</td></tr>
-          <tr><th>This Week</th><td>Sessions, active days (X/7), and total time</td></tr>
+          <tr><th>Weekly</th><td>Weekly bar chart (by day of week)</td></tr>
+          <tr><th>Monthly</th><td>Monthly bar chart (by day) — Standard / Pro plan</td></tr>
+          <tr><th>Yearly</th><td>Yearly bar chart (by month) — Standard / Pro plan</td></tr>
         </table>
-        <h3>View Periods</h3>
+        <h3>Display Toggle</h3>
         <table class="info-table">
-          <tr><th>Weekly</th><td>Daily chart for the past 7 days</td></tr>
-          <tr><th>Monthly</th><td>Daily chart for the current month</td></tr>
-          <tr><th>Yearly</th><td>Monthly chart for 12 months</td></tr>
+          <tr><th>Sets</th><td>Shows session count</td></tr>
+          <tr><th>Time</th><td>Shows total work time</td></tr>
         </table>
-        <p>Use &#x25C0; &#x25B6; buttons to navigate. Toggle between session count and total time.</p>
+        <p>Use "← Previous Week" and "Next Week →" buttons to navigate between periods.</p>
+        <h3>Label Filter</h3>
+        <p>Use the dropdown at the top left to filter by "All" or a specific label.</p>
         <h3>Additional Features</h3>
         <ul>
           <li><strong>Stacked bar chart</strong>: Color-coded by label</li>
-          <li><strong>Label filter</strong>: Show specific labels only</li>
-          <li><strong>Resizable chart</strong>: Drag to adjust height (40–300px)</li>
+          <li><strong>Resizable chart</strong>: Drag to adjust height</li>
           <li><strong>Session details</strong>: Tap a bar to change labels, edit notes, or delete sessions</li>
         </ul>
+        <p class="hint-box"><strong>Note:</strong> You can also tap "Today" or "This Week" on the main screen to view session details for that period.</p>
       </div>
       <div class="content-illust">
         <img src="../images/manual-statistics.png" alt="Statistics & Charts" class="screenshot-img">
@@ -881,10 +970,11 @@
       <span class="section-num">9</span>
       <h2>CSV Data Management</h2>
     </div>
+    <p>CSV import and export are located at the bottom of the Settings <strong>General tab</strong>.</p>
     <h3>Export</h3>
-    <p>Go to Settings → "<strong>CSV Export</strong>" to download all session data as a CSV file.</p>
+    <p>Tap "<strong>Export CSV</strong>" to download all session data as a CSV file (Standard / Pro plan feature).</p>
     <h3>Import</h3>
-    <p>Go to Settings → "<strong>CSV Import</strong>" to load a CSV file.</p>
+    <p>Tap "<strong>Import CSV</strong>" to load a CSV file.</p>
     <ul>
       <li>Drag and drop or use the file picker</li>
       <li>Automatic encoding detection (Shift-JIS / UTF-8)</li>
@@ -903,13 +993,17 @@
     </div>
     <div class="content-row reverse">
       <div class="content-text">
-        <h3>Timer Duration</h3>
+        <p>The Settings panel has three tabs: <strong>General</strong>, <strong>Labels</strong>, and <strong>Presets</strong>.</p>
+
+        <h3>General Tab</h3>
+        <h4>Timer Duration</h4>
         <table class="info-table">
-          <tr><th>Work</th><td>Preset or custom input (default: 25 min)</td></tr>
-          <tr><th>Short Break</th><td>Preset or custom input (default: 5 min)</td></tr>
-          <tr><th>Long Break</th><td>ON/OFF, interval and duration (default: every 4 / 20 min)</td></tr>
+          <tr><th>Pomodoro</th><td>Work time (default: 25 min). Preset or custom input</td></tr>
+          <tr><th>Short Break</th><td>Short break (default: 5 min). Preset or custom input</td></tr>
+          <tr><th>Long Break</th><td>Long break (default: 20 min). Set to 0 to disable</td></tr>
+          <tr><th>Long Break interval</th><td>Sessions before long break (default: 4). Set to 0 to disable</td></tr>
         </table>
-        <h3>Alarm Sounds</h3>
+        <h4>Alarm Sounds</h4>
         <table class="info-table">
           <tr><th>Bell</th><td>Clear hand bell tone</td></tr>
           <tr><th>Digital</th><td>Alarm clock style digital sound</td></tr>
@@ -920,19 +1014,34 @@
           <tr><th>Soft</th><td>Soft, gentle tone</td></tr>
           <tr><th>None</th><td>Silent (no sound)</td></tr>
         </table>
-        <p>Repeat count (1–5 times) and preview playback available.</p>
-        <h3>Appearance & More</h3>
-        <ul>
-          <li><strong>Theme</strong>: Switch between Light and Dark mode</li>
-          <li><strong>Language</strong>: Choose from 7 languages</li>
-          <li><strong>Custom message</strong>: Set a message to display during breaks</li>
-          <li><strong>Reset data</strong>: Clear all data (with confirmation)</li>
-          <li><strong>Delete account</strong>: Remove logged-in account (with confirmation)</li>
-        </ul>
+        <p>Alarm Repeat Count (1–5 times) and &#x25B6; preview playback available.</p>
+        <h4>Appearance & More</h4>
+        <table class="info-table">
+          <tr><th>Theme</th><td><strong>Light</strong> (white) / <strong>Gray</strong> (gray) / <strong>Dark</strong> (dark) — 3 options</td></tr>
+          <tr><th>Custom Message</th><td>Set a message displayed on the main screen and during breaks</td></tr>
+          <tr><th>Language</th><td>7 languages (Japanese / English / Spanish / Portuguese / German / French / Italian)</td></tr>
+        </table>
+        <h4>Data Management</h4>
+        <table class="info-table">
+          <tr><th>Import CSV</th><td>Load session data from a CSV file</td></tr>
+          <tr><th>Export CSV</th><td>Export all session data as CSV (Standard / Pro plan)</td></tr>
+          <tr><th>Reset All Data</th><td>Clear all data (with confirmation — cannot be undone)</td></tr>
+          <tr><th>Delete Account</th><td>Shown when logged in. Permanently deletes your account</td></tr>
+        </table>
+
+        <h3>Labels Tab</h3>
+        <p>Create, edit, reorder, and delete labels. See <a href="#s6-en">Section 6</a> for details.</p>
+
+        <h3>Presets Tab</h3>
+        <p>Customize the quick-select preset buttons shown when you tap the timer display.</p>
+        <table class="info-table">
+          <tr><th>Active Presets</th><td>Work time presets (default: 15 / 25 / 35 / 45 min). Add or remove freely</td></tr>
+          <tr><th>Rest Presets</th><td>Break time presets (default: OFF / 3 / 5 / 10 min). Add or remove freely</td></tr>
+        </table>
       </div>
       <div class="content-illust">
         <img src="../images/manual-settings-1.png" alt="Settings (General)" class="screenshot-img">
-        <img src="../images/manual-settings-2.png" alt="Settings (More)" class="screenshot-img">
+        <img src="../images/manual-settings-2.png" alt="Settings (Presets)" class="screenshot-img">
       </div>
     </div>
   </section>
@@ -955,16 +1064,25 @@
     </table>
     <h3>Creating an Account</h3>
     <ol class="manual-steps">
+      <li>Tap the <strong>User icon</strong> in the header to open the login screen</li>
       <li>Enter your email and password, then <strong>Sign Up</strong></li>
       <li>Check your email and click the confirmation link</li>
       <li>Verification complete — all features unlocked</li>
     </ol>
+    <h3>User Menu</h3>
+    <p>After logging in, tap the User icon in the header to open the menu.</p>
+    <table class="info-table">
+      <tr><th>Email</th><td>Your registered email address</td></tr>
+      <tr><th>Plan badge</th><td>Shows your current plan (Free / Standard / Pro)</td></tr>
+      <tr><th>Learn more</th><td>Opens the plan details page</td></tr>
+      <tr><th>Logout</th><td>Sign out of your account</td></tr>
+    </table>
     <h3>Data Storage</h3>
     <table class="info-table">
       <tr><th>Not logged in</th><td>Browser local storage (available on that browser only; may be lost if cache is cleared)</td></tr>
-      <tr><th>Logged in (including free accounts)</th><td>Cloud sync — safely available on multiple devices</td></tr>
+      <tr><th>Logged in</th><td>Cloud sync — safely available on multiple devices</td></tr>
     </table>
-    <p class="hint-box"><strong>Important:</strong> When not logged in, clearing your browser cache or data may permanently delete your session history. We recommend creating a free account to keep your data safe.</p>
+    <p class="hint-box"><strong>Important:</strong> When not logged in, clearing your browser cache or data may permanently delete your session history. We recommend creating an account to keep your data safe.</p>
     <p>Data recorded while not logged in is automatically migrated to the cloud on your first login.</p>
   </section>
   </div>

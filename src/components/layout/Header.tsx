@@ -99,10 +99,13 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                     {isFree && (
                       <button
                         onClick={() => { setShowUserMenu(false); setShowUpgrade(true); }}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-tiffany hover:bg-tiffany/5 transition-colors"
+                        className="w-full flex items-start gap-2 px-3 py-2.5 text-sm text-left text-tiffany hover:bg-tiffany/5 transition-colors"
                       >
-                        <Crown size={14} />
-                        {t.upgradeCta}
+                        <Crown size={14} className="mt-0.5 flex-shrink-0" />
+                        <span>
+                          {t.upgradeCta}
+                          <span className="block text-[10px] text-tiffany/70 font-normal">{t.freeTrialMenuHint}</span>
+                        </span>
                       </button>
                     )}
 

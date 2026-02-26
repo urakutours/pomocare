@@ -165,6 +165,7 @@ export const it: Translations = {
   // Free trial
   freeTrialBadge: '60 giorni gratis',
   freeTrialNote: 'Dopo il periodo di prova, verrà addebitato automaticamente il piano mensile',
+  freeTrialMenuHint: 'Piano Standard — 2 mesi gratis',
 
   // Payment / Checkout
   paymentSuccess: 'Pagamento riuscito!',

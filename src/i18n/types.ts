@@ -212,6 +212,7 @@ export interface Translations {
   // Free trial
   freeTrialBadge: string;
   freeTrialNote: string;
+  freeTrialMenuHint: string;
 
   // Payment / Checkout
   paymentSuccess: string;

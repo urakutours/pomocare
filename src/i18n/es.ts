@@ -6,10 +6,10 @@ export const es: Translations = {
   restMode: 'Descanso corto',
   longBreakMode: 'Descanso largo',
   settings: 'Configuración',
-  activeTimeLabel: 'Pomodoro (min)',
-  restTimeLabel: 'Descanso corto (min)',
-  longBreakTimeLabel: 'Descanso largo (min)',
-  longBreakIntervalLabel: 'Intervalo de descanso largo (sesiones)',
+  activeTimeLabel: 'Pomodoro',
+  restTimeLabel: 'Descanso corto',
+  longBreakTimeLabel: 'Descanso largo',
+  longBreakIntervalLabel: 'Intervalo de descanso largo',
   customMessageLabel: 'Mensaje personalizado',
   languageLabel: 'Idioma',
   applySettings: 'Aplicar configuración',
@@ -140,8 +140,11 @@ export const es: Translations = {
   colorPickerTitle: 'Elegir color',
   colorPickerConfirm: 'OK',
   colorPickerCancel: 'Cancelar',
-  labelNamePlaceholder: 'Nombre de etiqueta',
-  statsSets: 'Sets',
+  // Units
+  minuteUnit: 'min',
+  sessionUnit: 'sesiones',
+  labelNamePlaceholder: 'Nombre de la etiqueta',
+  statsSets: 'Sesiones',
   statsTime: 'Tiempo',
 
   // Upgrade / Tier

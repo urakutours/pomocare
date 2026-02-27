@@ -48,6 +48,7 @@ function TimeSelector({
   isRest,
   restOffLabel,
   customLabel,
+  unit,
 }: {
   label: string;
   value: number;
@@ -56,13 +57,14 @@ function TimeSelector({
   isRest?: boolean;
   restOffLabel: string;
   customLabel: string;
+  unit?: string;
 }) {
   const [isCustom, setIsCustom] = useState(!presets.includes(value));
   const [customValue, setCustomValue] = useState(String(value));
 
   const formatOption = (v: number) => {
     if (isRest && v === 0) return restOffLabel;
-    return `${v}`;
+    return unit ? `${v}${unit}` : `${v}`;
   };
 
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -667,7 +669,7 @@ function AddLabelModal({
   const [isCustomDuration, setIsCustomDuration] = useState(false);
   const [customDurationStr, setCustomDurationStr] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const unit = t.activeTimeLabel.includes('分') ? '分' : 'min';
+  const unit = t.minuteUnit;
 
   const handleAdd = () => {
     const trimmed = name.trim();
@@ -712,7 +714,7 @@ function AddLabelModal({
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Label name"
+          placeholder={t.labelNamePlaceholder}
           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 mb-3"
         />
         <ColorPicker
@@ -767,7 +769,7 @@ function AddLabelModal({
           disabled={!name.trim()}
           className="mt-4 w-full py-2 text-sm text-white bg-tiffany hover:bg-tiffany-hover rounded-lg disabled:opacity-40 transition-colors"
         >
-          + {addLabel}
+          {t.addPreset}
         </button>
       </div>
     </div>
@@ -1065,6 +1067,7 @@ function LabelManager({
   onChangeCustomColor?: (oldColor: string, newColor: string) => void;
   onDeleteCustomColor?: (color: string) => void;
 }) {
+  const { t } = useI18n();
   const [showAddModal, setShowAddModal] = useState(false);
   const atLimit = labels.length >= maxLabels;
 
@@ -1301,7 +1304,7 @@ function LabelManager({
             <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate">
               {l.name}
               {l.duration != null && (
-                <span className="ml-1.5 text-xs text-gray-400 dark:text-gray-500">{l.duration}min</span>
+                <span className="ml-1.5 text-xs text-gray-400 dark:text-gray-500">{l.duration}{t.minuteUnit}</span>
               )}
             </span>
             <LabelDotMenu
@@ -1721,6 +1724,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               onChange={setWorkTime}
               restOffLabel={t.restOffLabel}
               customLabel={t.customInput}
+              unit={t.minuteUnit}
             />
             <TimeSelector
               label={t.restTimeLabel}
@@ -1730,6 +1734,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               isRest
               restOffLabel={t.restOffLabel}
               customLabel={t.customInput}
+              unit={t.minuteUnit}
             />
             <TimeSelector
               label={t.longBreakTimeLabel}
@@ -1739,6 +1744,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               isRest
               restOffLabel={t.restOffLabel}
               customLabel={t.customInput}
+              unit={t.minuteUnit}
             />
             {longBreakTime > 0 && (
               <TimeSelector
@@ -1749,6 +1755,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
                 isRest
                 restOffLabel={t.restOffLabel}
                 customLabel={t.customInput}
+                unit={t.sessionUnit}
               />
             )}
             <AlarmSettingsPanel
@@ -1819,10 +1826,10 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
                 {t.csvImportDescription}
               </p>
               <button
-                onClick={() => { setImportStatus(null); setShowImportModal(true); }}
+                onClick={features.exportData ? () => { setImportStatus(null); setShowImportModal(true); } : () => setShowUpgrade(true)}
                 className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
               >
-                <Upload size={14} />
+                {features.exportData ? <Upload size={14} /> : <Lock size={14} />}
                 {t.csvImportButton}
               </button>
               {importStatus && (

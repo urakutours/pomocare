@@ -81,7 +81,7 @@ export function TimerDisplay({
                   opacity: open ? 1 : 0,
                 }}
               >
-                {min}{t.activeTimeLabel.includes('分') ? '分' : 'min'}
+                {min}{t.minuteUnit}
               </button>
             ))}
           </div>

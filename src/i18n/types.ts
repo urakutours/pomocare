@@ -187,6 +187,10 @@ export interface Translations {
   // Label creation
   labelNamePlaceholder: string;
 
+  // Units for selectors
+  minuteUnit: string;
+  sessionUnit: string;
+
   // Stats display mode
   statsSets: string;
   statsTime: string;

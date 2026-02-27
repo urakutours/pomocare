@@ -87,7 +87,7 @@ export function QuickLabelModal({
   const [customDurationStr, setCustomDurationStr] = useState(
     initialDuration !== undefined ? String(initialDuration) : '',
   );
-  const unit = t.activeTimeLabel.includes('分') ? '分' : 'min';
+  const unit = t.minuteUnit;
 
   const handleAdd = () => {
     const trimmed = name.trim();

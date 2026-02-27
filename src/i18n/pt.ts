@@ -74,7 +74,7 @@ export const pt: Translations = {
   installApp: 'Instalar como app',
   days: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
   months: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-  defaultCustomMessage: 'Levante-se, olhe para longe e faça um alongamento leve.',
+  defaultCustomMessage: 'Escreva sua própria mensagem aqui',
   sessionChangeLabel: 'Alterar etiqueta',
   sessionEditNote: 'Editar nota',
   sessionDelete: 'Excluir',

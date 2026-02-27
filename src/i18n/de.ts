@@ -74,7 +74,7 @@ export const de: Translations = {
   installApp: 'Als App installieren',
   days: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
   months: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-  defaultCustomMessage: 'Steh auf, schau in die Ferne und mach eine leichte Dehnübung.',
+  defaultCustomMessage: 'Geben Sie hier Ihre eigene Nachricht ein',
   sessionChangeLabel: 'Bezeichnung ändern',
   sessionEditNote: 'Notiz bearbeiten',
   sessionDelete: 'Löschen',

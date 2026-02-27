@@ -167,6 +167,15 @@ export const pt: Translations = {
   // Subscription management
   cancelSubscription: 'Cancelar plano',
   cancelSubscriptionDesc: 'Gerencie sua assinatura no Stripe',
+  managePayment: 'Gerenciar pagamento',
+  cancelSubscriptionTitle: 'Cancelar assinatura',
+  cancelSubscriptionWarning: 'Se cancelar, perderá imediatamente o acesso a todas as funções pagas. Esta ação não pode ser desfeita.',
+  cancelSubscriptionTrialInfo: 'Teste gratuito até {date}',
+  cancelSubscriptionDaysLeft: '{days} dias restantes',
+  cancelSubscriptionConfirm: 'Cancelar assinatura',
+  cancelSubscriptionKeep: 'Manter plano',
+  cancelSubscriptionSuccess: 'Assinatura cancelada',
+  cancelSubscriptionError: 'Falha ao cancelar. Tente novamente.',
 
   // Free trial
   freeTrialBadge: '60 dias grátis',

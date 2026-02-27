@@ -167,6 +167,15 @@ export const fr: Translations = {
   // Subscription management
   cancelSubscription: 'Résilier l\'abonnement',
   cancelSubscriptionDesc: 'Gérez votre abonnement sur Stripe',
+  managePayment: 'Gérer le paiement',
+  cancelSubscriptionTitle: 'Résilier l\'abonnement',
+  cancelSubscriptionWarning: 'Si vous résiliez, vous perdrez immédiatement l\'accès à toutes les fonctionnalités payantes. Cette action est irréversible.',
+  cancelSubscriptionTrialInfo: 'Essai gratuit jusqu\'au {date}',
+  cancelSubscriptionDaysLeft: '{days} jours restants',
+  cancelSubscriptionConfirm: 'Résilier',
+  cancelSubscriptionKeep: 'Garder le plan',
+  cancelSubscriptionSuccess: 'Abonnement résilié',
+  cancelSubscriptionError: 'Échec de la résiliation. Veuillez réessayer.',
 
   // Free trial
   freeTrialBadge: '60 jours gratuits',

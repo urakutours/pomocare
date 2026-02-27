@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { BarChart3, Settings, LogOut, Crown, CreditCard } from 'lucide-react';
+import { BarChart3, Settings, LogOut, Crown, CreditCard, XCircle } from 'lucide-react';
 import logoSvg from '/icons/logo.svg';
 import logoDarkSvg from '/icons/logo_dark.svg';
 import { useAuth } from '@/contexts/AuthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import { LoginModal } from '@/components/auth/LoginModal';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
+import { CancelSubscriptionModal } from '@/components/shared/CancelSubscriptionModal';
 import { createPortalSession } from '@/services/stripe/StripeService';
 
 interface HeaderProps {
@@ -15,11 +16,12 @@ interface HeaderProps {
 }
 
 export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderProps) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshTier } = useAuth();
   const { t, language } = useI18n();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
 
   const tierLabel = user?.tier === 'pro' ? t.planPro : user?.tier === 'standard' ? t.planStandard : t.planFree;
@@ -109,7 +111,7 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                       </button>
                     )}
 
-                    {/* Standard → show Pro upgrade + Cancel */}
+                    {/* Standard → show Pro upgrade + Payment management + Cancel */}
                     {isStandard && (
                       <>
                         <button
@@ -125,6 +127,13 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                           className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors disabled:opacity-50"
                         >
                           <CreditCard size={14} />
+                          {t.managePayment}
+                        </button>
+                        <button
+                          onClick={() => { setShowUserMenu(false); setShowCancelModal(true); }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                          <XCircle size={14} />
                           {t.cancelSubscription}
                         </button>
                       </>
@@ -160,6 +169,12 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
           onClose={() => setShowUpgrade(false)}
           currentTier={user?.tier ?? 'free'}
           subscriptionStartDate={user?.subscriptionStartDate ?? null}
+        />
+      )}
+      {showCancelModal && (
+        <CancelSubscriptionModal
+          onClose={() => setShowCancelModal(false)}
+          onCancelled={async () => { await refreshTier(); }}
         />
       )}
     </>

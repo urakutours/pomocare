@@ -214,6 +214,15 @@ export interface Translations {
   // Subscription management
   cancelSubscription: string;
   cancelSubscriptionDesc: string;
+  managePayment: string;
+  cancelSubscriptionTitle: string;
+  cancelSubscriptionWarning: string;
+  cancelSubscriptionTrialInfo: string;
+  cancelSubscriptionDaysLeft: string;
+  cancelSubscriptionConfirm: string;
+  cancelSubscriptionKeep: string;
+  cancelSubscriptionSuccess: string;
+  cancelSubscriptionError: string;
 
   // Free trial
   freeTrialBadge: string;

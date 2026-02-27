@@ -10,11 +10,19 @@ export interface User {
   photoURL: string | null;
   tier: UserTier;
   subscriptionStartDate: string | null;
+  subscriptionStatus: string | null;
+  subscriptionCurrentPeriodEnd: string | null;
   isAnonymous: boolean;
   emailVerified: boolean;
 }
 
-function toUser(sbUser: SupabaseUser, tier: UserTier = 'free', subscriptionStartDate: string | null = null): User {
+function toUser(
+  sbUser: SupabaseUser,
+  tier: UserTier = 'free',
+  subscriptionStartDate: string | null = null,
+  subscriptionStatus: string | null = null,
+  subscriptionCurrentPeriodEnd: string | null = null,
+): User {
   return {
     id: sbUser.id,
     email: sbUser.email ?? null,
@@ -28,6 +36,8 @@ function toUser(sbUser: SupabaseUser, tier: UserTier = 'free', subscriptionStart
       null,
     tier,
     subscriptionStartDate,
+    subscriptionStatus,
+    subscriptionCurrentPeriodEnd,
     isAnonymous: false,
     emailVerified: sbUser.email_confirmed_at != null,
   };

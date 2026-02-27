@@ -6,6 +6,7 @@ const ALLOWED_ORIGINS = [
   "https://app.pomocare.com",
   "http://localhost:5173",
   "http://localhost:4173",
+  "http://localhost:5174",
 ];
 
 function corsHeaders(origin: string) {
@@ -28,7 +29,6 @@ Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin") ?? "";
   const headers = corsHeaders(origin);
 
-  // CORSプリフライト
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers });
   }
@@ -69,46 +69,58 @@ Deno.serve(async (req: Request) => {
 
     const { data: profile } = await supabaseAdmin
       .from("user_profiles")
-      .select("stripe_customer_id")
+      .select("tier, stripe_subscription_id, subscription_status")
       .eq("user_id", user.id)
       .single();
 
-    if (!profile?.stripe_customer_id) {
+    // ---- ガードチェック ----
+    if (!profile?.stripe_subscription_id) {
       return new Response(
-        JSON.stringify({ error: "No Stripe customer found. Please contact support." }),
+        JSON.stringify({ error: "No active subscription found." }),
         { status: 400, headers: { ...headers, "Content-Type": "application/json" } }
       );
     }
 
-    // ---- リクエストボディから言語を取得 ----
-    let language = "en";
-    try {
-      const body = await req.json() as { language?: string };
-      if (body.language) language = body.language;
-    } catch {
-      // ボディなし or JSON以外の場合はデフォルト(en)
+    if (profile.tier === "pro") {
+      return new Response(
+        JSON.stringify({ error: "Pro plan cannot be cancelled (one-time purchase)." }),
+        { status: 400, headers: { ...headers, "Content-Type": "application/json" } }
+      );
     }
 
-    // ---- Stripe Customer Portal Session作成 ----
-    // STRIPE_PORTAL_CONFIG_ID が設定されている場合、キャンセル機能無効化済みの
-    // カスタムPortal Configurationを使用する（解約はアプリ内モーダルで処理）
-    const portalConfigId = Deno.env.get("STRIPE_PORTAL_CONFIG_ID");
+    if (profile.subscription_status === "canceled") {
+      return new Response(
+        JSON.stringify({ error: "Subscription is already cancelled." }),
+        { status: 400, headers: { ...headers, "Content-Type": "application/json" } }
+      );
+    }
 
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: profile.stripe_customer_id,
-      return_url: "https://app.pomocare.com/",
-      locale: language as Stripe.BillingPortal.SessionCreateParams.Locale,
-      ...(portalConfigId ? { configuration: portalConfigId } : {}),
-    });
+    // ---- Stripe サブスクリプション即時キャンセル ----
+    console.log(`[cancel-subscription] Cancelling subscription ${profile.stripe_subscription_id} for user ${user.id}`);
+    await stripe.subscriptions.cancel(profile.stripe_subscription_id);
+
+    // ---- DB即時更新（webhook遅延のバックアップ、冪等） ----
+    await supabaseAdmin
+      .from("user_profiles")
+      .update({
+        tier: "free",
+        stripe_subscription_id: null,
+        subscription_status: "canceled",
+        subscription_current_period_end: null,
+        tier_updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", user.id);
+
+    console.log(`[cancel-subscription] Successfully cancelled for user ${user.id}`);
 
     return new Response(
-      JSON.stringify({ url: portalSession.url }),
+      JSON.stringify({ success: true }),
       { status: 200, headers: { ...headers, "Content-Type": "application/json" } }
     );
 
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal Server Error";
-    console.error("[create-portal-session] Error:", message);
+    console.error("[cancel-subscription] Error:", message);
     return new Response(
       JSON.stringify({ error: message }),
       { status: 500, headers: { ...headers, "Content-Type": "application/json" } }

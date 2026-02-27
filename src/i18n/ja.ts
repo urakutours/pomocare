@@ -167,6 +167,15 @@ export const ja: Translations = {
   // Subscription management
   cancelSubscription: 'プランを解約',
   cancelSubscriptionDesc: 'Stripeの管理ページで解約手続きを行います',
+  managePayment: 'お支払い方法の管理',
+  cancelSubscriptionTitle: 'プランの解約',
+  cancelSubscriptionWarning: '解約すると有料機能がすぐに利用できなくなります。この操作は取り消せません。',
+  cancelSubscriptionTrialInfo: '{date}まで無料トライアル中',
+  cancelSubscriptionDaysLeft: '残り{days}日',
+  cancelSubscriptionConfirm: '解約する',
+  cancelSubscriptionKeep: 'プランを維持',
+  cancelSubscriptionSuccess: 'プランが解約されました',
+  cancelSubscriptionError: '解約に失敗しました。もう一度お試しください。',
 
   // Free trial
   freeTrialBadge: '60日間無料',

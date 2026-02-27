@@ -167,6 +167,15 @@ export const de: Translations = {
   // Subscription management
   cancelSubscription: 'Abo kündigen',
   cancelSubscriptionDesc: 'Verwalte dein Abo auf Stripe',
+  managePayment: 'Zahlung verwalten',
+  cancelSubscriptionTitle: 'Abo kündigen',
+  cancelSubscriptionWarning: 'Bei Kündigung verlierst du sofort den Zugang zu allen kostenpflichtigen Funktionen. Diese Aktion kann nicht rückgängig gemacht werden.',
+  cancelSubscriptionTrialInfo: 'Kostenlose Testphase bis {date}',
+  cancelSubscriptionDaysLeft: 'Noch {days} Tage',
+  cancelSubscriptionConfirm: 'Abo kündigen',
+  cancelSubscriptionKeep: 'Plan behalten',
+  cancelSubscriptionSuccess: 'Abo gekündigt',
+  cancelSubscriptionError: 'Kündigung fehlgeschlagen. Bitte versuche es erneut.',
 
   // Free trial
   freeTrialBadge: '60 Tage kostenlos',

@@ -36,30 +36,32 @@ const AuthContext = createContext<AuthContextValue>({
 interface UserProfileData {
   tier: UserTier;
   subscriptionStartDate: string | null;
+  subscriptionStatus: string | null;
+  subscriptionCurrentPeriodEnd: string | null;
 }
 
 async function fetchUserProfile(userId: string): Promise<UserProfileData> {
   const { data, error } = await supabase
     .from('user_profiles')
-    .select('tier, subscription_start_date')
+    .select('tier, subscription_start_date, subscription_status, subscription_current_period_end')
     .eq('user_id', userId)
     .single();
 
   if (error) {
-    // PGRST116 = "Row not found" — the only case where we should create a new row
     if (error.code === 'PGRST116') {
       console.log('[Auth] No profile row found, creating free tier for', userId);
       await supabase.from('user_profiles').insert({ user_id: userId, tier: 'free' });
-      return { tier: 'free', subscriptionStartDate: null };
+      return { tier: 'free', subscriptionStartDate: null, subscriptionStatus: null, subscriptionCurrentPeriodEnd: null };
     }
-    // Any other error (RLS, network, etc.) — log and return free without overwriting
     console.error('[Auth] fetchUserProfile failed:', error.code, error.message);
-    return { tier: 'free', subscriptionStartDate: null };
+    return { tier: 'free', subscriptionStartDate: null, subscriptionStatus: null, subscriptionCurrentPeriodEnd: null };
   }
 
   return {
     tier: (data.tier as UserTier) ?? 'free',
     subscriptionStartDate: data.subscription_start_date ?? null,
+    subscriptionStatus: data.subscription_status ?? null,
+    subscriptionCurrentPeriodEnd: data.subscription_current_period_end ?? null,
   };
 }
 
@@ -85,8 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Build user — preserve existing tier if same user (avoids flash to 'free' on TOKEN_REFRESHED)
         setUser(prev => {
-          const preservedTier = (prev && prev.id === sbUser.id) ? prev.tier : 'free';
-          const preservedSubStart = (prev && prev.id === sbUser.id) ? prev.subscriptionStartDate : null;
+          const isSame = prev && prev.id === sbUser.id;
           return {
             id: sbUser.id,
             email: sbUser.email ?? null,
@@ -98,8 +99,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               sbUser.user_metadata?.avatar_url ??
               sbUser.user_metadata?.picture ??
               null,
-            tier: preservedTier,
-            subscriptionStartDate: preservedSubStart,
+            tier: isSame ? prev.tier : 'free',
+            subscriptionStartDate: isSame ? prev.subscriptionStartDate : null,
+            subscriptionStatus: isSame ? prev.subscriptionStatus : null,
+            subscriptionCurrentPeriodEnd: isSame ? prev.subscriptionCurrentPeriodEnd : null,
             isAnonymous: false,
             emailVerified: sbUser.email_confirmed_at != null,
           };
@@ -109,7 +112,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Fetch actual profile asynchronously and always apply it
         const profile = await fetchUserProfile(sbUser.id);
         setUser(prev => prev && prev.id === sbUser.id
-          ? { ...prev, tier: profile.tier, subscriptionStartDate: profile.subscriptionStartDate }
+          ? {
+              ...prev,
+              tier: profile.tier,
+              subscriptionStartDate: profile.subscriptionStartDate,
+              subscriptionStatus: profile.subscriptionStatus,
+              subscriptionCurrentPeriodEnd: profile.subscriptionCurrentPeriodEnd,
+            }
           : prev
         );
       },
@@ -158,7 +167,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const profile = await fetchUserProfile(sbUser.id);
     console.log('[Auth] refreshTier result:', profile.tier);
     setUser(prev => prev
-      ? { ...prev, tier: profile.tier, subscriptionStartDate: profile.subscriptionStartDate }
+      ? {
+          ...prev,
+          tier: profile.tier,
+          subscriptionStartDate: profile.subscriptionStartDate,
+          subscriptionStatus: profile.subscriptionStatus,
+          subscriptionCurrentPeriodEnd: profile.subscriptionCurrentPeriodEnd,
+        }
       : prev
     );
   }, []);

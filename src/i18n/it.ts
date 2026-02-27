@@ -167,6 +167,15 @@ export const it: Translations = {
   // Subscription management
   cancelSubscription: 'Annulla piano',
   cancelSubscriptionDesc: 'Gestisci il tuo abbonamento su Stripe',
+  managePayment: 'Gestisci pagamento',
+  cancelSubscriptionTitle: 'Annulla abbonamento',
+  cancelSubscriptionWarning: 'Se annulli, perderai immediatamente l\'accesso a tutte le funzioni a pagamento. Questa azione non può essere annullata.',
+  cancelSubscriptionTrialInfo: 'Prova gratuita fino al {date}',
+  cancelSubscriptionDaysLeft: '{days} giorni rimanenti',
+  cancelSubscriptionConfirm: 'Annulla abbonamento',
+  cancelSubscriptionKeep: 'Mantieni il piano',
+  cancelSubscriptionSuccess: 'Abbonamento annullato',
+  cancelSubscriptionError: 'Annullamento fallito. Riprova.',
 
   // Free trial
   freeTrialBadge: '60 giorni gratis',

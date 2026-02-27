@@ -125,3 +125,33 @@ export async function createPortalSession(language: string): Promise<{ url: stri
 
   return await res.json() as { url: string };
 }
+
+/**
+ * Supabase Edge Function を呼び出してサブスクリプションを即時キャンセルする。
+ * トライアル中でもアクティブでも即時キャンセルされ、Free プランに戻る。
+ */
+export async function cancelSubscription(): Promise<{ success: boolean }> {
+  console.log('[Stripe] Cancel: Starting...');
+
+  const accessToken = await getFreshAccessToken();
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/cancel-subscription`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
+      'apikey': supabaseAnonKey,
+    },
+  });
+
+  if (!res.ok) {
+    let errMsg = 'Cancellation failed';
+    try {
+      const errData = await res.json();
+      if (errData.error) errMsg = errData.error;
+    } catch { /* ignore */ }
+    throw new Error(errMsg);
+  }
+
+  return await res.json() as { success: boolean };
+}

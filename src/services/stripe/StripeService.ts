@@ -99,7 +99,7 @@ export async function createCheckoutSession(
  * Supabase Edge Function を呼び出して Stripe Customer Portal セッションを作成し、
  * ポータルの URL を返す（サブスクリプション管理・解約用）。
  */
-export async function createPortalSession(): Promise<{ url: string }> {
+export async function createPortalSession(language: string): Promise<{ url: string }> {
   console.log('[Stripe] Portal: Starting...');
 
   const accessToken = await getFreshAccessToken();
@@ -111,6 +111,7 @@ export async function createPortalSession(): Promise<{ url: string }> {
       'Authorization': `Bearer ${accessToken}`,
       'apikey': supabaseAnonKey,
     },
+    body: JSON.stringify({ language }),
   });
 
   if (!res.ok) {

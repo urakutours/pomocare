@@ -1,5 +1,4 @@
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@16.0.0?target=deno";
+import Stripe from "https://esm.sh/stripe@17.7.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2?target=deno";
 
 // ---------- CORS ----------
@@ -89,7 +88,7 @@ async function createUpgradeDiscount(
 }
 
 // ---------- Main handler ----------
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin") ?? "";
   const headers = corsHeaders(origin);
 
@@ -178,7 +177,36 @@ serve(async (req: Request) => {
 
     // ---- 通貨・Price ID決定 ----
     // 多通貨Priceを使用: price_id は1つ、currency で通貨を指定
-    const currency = getCurrency(language);
+    // ※ Stripe は1顧客に複数通貨を混在できないため、既存通貨がある場合はそちらを優先
+    let currency = getCurrency(language);
+    try {
+      const existingSubs = await stripe.subscriptions.list({
+        customer: customerId,
+        limit: 1,
+      });
+      if (existingSubs.data.length > 0 && existingSubs.data[0].currency) {
+        const existingCurrency = existingSubs.data[0].currency as Currency;
+        if (existingCurrency !== currency) {
+          console.log(`[create-checkout-session] Currency override: ${currency} → ${existingCurrency} (existing customer currency)`);
+          currency = existingCurrency;
+        }
+      } else {
+        // サブスクがない場合、過去のinvoiceから通貨を確認
+        const invoices = await stripe.invoices.list({
+          customer: customerId,
+          limit: 1,
+        });
+        if (invoices.data.length > 0 && invoices.data[0].currency) {
+          const existingCurrency = invoices.data[0].currency as Currency;
+          if (existingCurrency !== currency) {
+            console.log(`[create-checkout-session] Currency override: ${currency} → ${existingCurrency} (existing invoice currency)`);
+            currency = existingCurrency;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[create-checkout-session] Currency check failed, using language-based:", e);
+    }
     const priceId = getPriceId(plan);
 
     // ---- Standard → Pro 割引クーポン生成 ----
@@ -201,6 +229,8 @@ serve(async (req: Request) => {
       mode: isSubscription ? "subscription" : "payment",
       // 多通貨Priceに設定された通貨のうち、言語に対応する通貨を指定
       currency,
+      // Checkout UIの表示言語をアプリの言語設定に合わせる
+      locale: language as Stripe.Checkout.SessionCreateParams.Locale,
       success_url: `https://app.pomocare.com/?payment=success&plan=${plan}`,
       cancel_url: "https://app.pomocare.com/?payment=cancelled",
       metadata: {

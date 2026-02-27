@@ -6,7 +6,7 @@ const ADSENSE_CLIENT = 'ca-pub-5675101743750825';
 // Replace with your ad slot ID after creating an ad unit in AdSense dashboard
 const ADSENSE_SLOT = '0000000000';
 
-/** Height of the ad banner area (py-2 + 50px ad + border) */
+/** @deprecated Use flex layout instead of hardcoded height */
 export const AD_BANNER_HEIGHT = 67;
 
 interface AdBannerProps {
@@ -38,7 +38,7 @@ export function AdBanner({ hidden }: AdBannerProps) {
   if (features.adFree || hidden) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-gray-100 dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-700">
+    <div className="flex-shrink-0 bg-gray-100 dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-700">
       <div className="max-w-sm mx-auto flex items-center justify-center py-2 px-4">
         <ins
           ref={adRef}

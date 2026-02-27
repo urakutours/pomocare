@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderProps) {
   const { user, signOut } = useAuth();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -34,7 +34,7 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
   const handleManageSubscription = async () => {
     setPortalLoading(true);
     try {
-      const { url } = await createPortalSession();
+      const { url } = await createPortalSession(language);
       window.location.href = url;
     } catch (err) {
       console.error('[Header] Portal error:', err);

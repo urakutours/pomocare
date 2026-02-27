@@ -1,4 +1,4 @@
-import type { AlarmSound } from '@/types/settings';
+import type { AlarmSound, VibrationMode } from '@/types/settings';
 import { classicWavB64, gentleWavB64, softWavB64 } from '@/assets/alarmWavData';
 
 /**
@@ -16,10 +16,20 @@ function createAudioContext(): AudioContext | null {
 }
 
 /**
+ * マスター GainNode を作成し、volume (0-100) に応じたゲインを設定
+ */
+function createMasterGain(ctx: AudioContext, volume: number): GainNode {
+  const master = ctx.createGain();
+  master.gain.value = Math.max(0, Math.min(1, volume / 100));
+  master.connect(ctx.destination);
+  return master;
+}
+
+/**
  * Bell: ハンドベル音 - 打撃音 + 金属的倍音 + 急速アタック・長い余韻
  * ハンドベルらしい「コーン」という澄んだ金属打撃音
  */
-function playBell(ctx: AudioContext, startTime: number): number {
+function playBell(ctx: AudioContext, dest: AudioNode, startTime: number): number {
   const duration = 3.2;
 
   // ハンドベルの基本音 (E5 = 659Hz 付近)
@@ -37,7 +47,7 @@ function playBell(ctx: AudioContext, startTime: number): number {
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     osc.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    gainNode.connect(dest);
 
     osc.type = 'sine';
     const f = freq * Math.pow(2, detune / 1200); // cent detune
@@ -62,7 +72,7 @@ function playBell(ctx: AudioContext, startTime: number): number {
   const clickFilter = ctx.createBiquadFilter();
   clickOsc.connect(clickFilter);
   clickFilter.connect(clickGain);
-  clickGain.connect(ctx.destination);
+  clickGain.connect(dest);
   clickFilter.type = 'bandpass';
   clickFilter.frequency.setValueAtTime(4000, startTime);
   clickFilter.Q.setValueAtTime(0.5, startTime);
@@ -80,7 +90,7 @@ function playBell(ctx: AudioContext, startTime: number): number {
 /**
  * Digital: 目覚まし時計風 - 「ピピピ、ピピピ、ピピピ」の3連パターン
  */
-function playDigital(ctx: AudioContext, startTime: number): number {
+function playDigital(ctx: AudioContext, dest: AudioNode, startTime: number): number {
   // 3回の「ピピピ」を繰り返す
   const beepFreq = 880;    // ピ の周波数
   const beepOn   = 0.07;   // 1ビープのON時間
@@ -106,7 +116,7 @@ function playDigital(ctx: AudioContext, startTime: number): number {
 
       osc.connect(filter);
       filter.connect(gainNode);
-      gainNode.connect(ctx.destination);
+      gainNode.connect(dest);
 
       osc.type = 'square';
       // 最初のビープを少し高く (デジタル感)
@@ -129,7 +139,7 @@ function playDigital(ctx: AudioContext, startTime: number): number {
  * Kitchen Timer: ポモドーロ型キッチンタイマーの「チーン」音
  * ゼンマイが解ける最後の「チン！」をイメージした金属的な高音
  */
-function playKitchen(ctx: AudioContext, startTime: number): number {
+function playKitchen(ctx: AudioContext, dest: AudioNode, startTime: number): number {
   const duration = 3.0;
 
   // メインの「チン！」: 高い金属音
@@ -144,7 +154,7 @@ function playKitchen(ctx: AudioContext, startTime: number): number {
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     osc.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    gainNode.connect(dest);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, startTime);
     osc.frequency.exponentialRampToValueAtTime(freq * 0.97, startTime + decay);
@@ -161,7 +171,7 @@ function playKitchen(ctx: AudioContext, startTime: number): number {
     const osc2 = ctx.createOscillator();
     const g2 = ctx.createGain();
     osc2.connect(g2);
-    g2.connect(ctx.destination);
+    g2.connect(dest);
     osc2.type = 'square';
     osc2.frequency.setValueAtTime(800 - i * 80, t);
     g2.gain.setValueAtTime(0, t);
@@ -177,7 +187,7 @@ function playKitchen(ctx: AudioContext, startTime: number): number {
 /**
  * Chime: 3音アルペジオ
  */
-function playChime(ctx: AudioContext, startTime: number): number {
+function playChime(ctx: AudioContext, dest: AudioNode, startTime: number): number {
   const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
   const noteDuration = 0.5;
   const noteGap = 0.12;
@@ -187,7 +197,7 @@ function playChime(ctx: AudioContext, startTime: number): number {
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     osc.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    gainNode.connect(dest);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, t);
     gainNode.gain.setValueAtTime(0, t);
@@ -227,6 +237,7 @@ const WAV_B64_MAP: Partial<Record<AlarmSound, string>> = {
  */
 async function playWavAlarm(
   ctx: AudioContext,
+  dest: AudioNode,
   sound: AlarmSound,
   startTime: number,
 ): Promise<number> {
@@ -242,28 +253,55 @@ async function playWavAlarm(
 
   const source = ctx.createBufferSource();
   source.buffer = buffer;
-  source.connect(ctx.destination);
+  source.connect(dest);
   source.start(startTime);
   return buffer.duration;
 }
 
-function playSingleAlarm(ctx: AudioContext, sound: AlarmSound, startTime: number): number {
-  if (sound === 'bell') return playBell(ctx, startTime);
-  if (sound === 'digital') return playDigital(ctx, startTime);
-  if (sound === 'chime') return playChime(ctx, startTime);
-  if (sound === 'kitchen') return playKitchen(ctx, startTime);
+function playSingleAlarm(ctx: AudioContext, dest: AudioNode, sound: AlarmSound, startTime: number): number {
+  if (sound === 'bell') return playBell(ctx, dest, startTime);
+  if (sound === 'digital') return playDigital(ctx, dest, startTime);
+  if (sound === 'chime') return playChime(ctx, dest, startTime);
+  if (sound === 'kitchen') return playKitchen(ctx, dest, startTime);
   return 0;
 }
 
 /** WAVベースサウンドかどうか */
 const WAV_SOUNDS: AlarmSound[] = ['classic', 'gentle', 'soft'];
 
-export function playAlarm(sound: AlarmSound, repeat: number): void {
-  if (sound === 'none') return;
+/**
+ * バイブレーションパターンを生成（振動ms, 休止ms, ...）
+ * repeat 回分の短いバースト振動を鳴らす
+ */
+function vibrate(repeat: number): void {
+  if (!navigator.vibrate) return;
+  const pattern: number[] = [];
+  for (let i = 0; i < repeat; i++) {
+    if (i > 0) pattern.push(400); // 休止
+    pattern.push(300, 100, 300);  // 振動, 短い休止, 振動
+  }
+  navigator.vibrate(pattern);
+}
+
+export function playAlarm(
+  sound: AlarmSound,
+  repeat: number,
+  volume: number = 80,
+  vibrationMode: VibrationMode = 'silent',
+): void {
+  const isSilent = sound === 'none' || volume === 0;
+
+  // バイブレーション判定
+  if (vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent)) {
+    vibrate(repeat);
+  }
+
+  if (isSilent) return;
 
   const ctx = createAudioContext();
   if (!ctx) return;
 
+  const master = createMasterGain(ctx, volume);
   const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
 
   if (WAV_SOUNDS.includes(sound)) {
@@ -272,7 +310,7 @@ export function playAlarm(sound: AlarmSound, repeat: number): void {
       const gap = 0.4;
       let cursor = ctx.currentTime;
       for (let i = 0; i < repeat; i++) {
-        const d = await playWavAlarm(ctx, sound, cursor);
+        const d = await playWavAlarm(ctx, master, sound, cursor);
         cursor += d + gap;
       }
       setTimeout(() => ctx.close(), (cursor - ctx.currentTime + 1) * 1000);
@@ -284,7 +322,7 @@ export function playAlarm(sound: AlarmSound, repeat: number): void {
       const gap = 0.4;
 
       for (let i = 0; i < repeat; i++) {
-        const d = playSingleAlarm(ctx, sound, cursor);
+        const d = playSingleAlarm(ctx, master, sound, cursor);
         cursor += d + gap;
       }
 
@@ -294,6 +332,11 @@ export function playAlarm(sound: AlarmSound, repeat: number): void {
 }
 
 /** プレビュー: 指定の繰り返し回数で再生 */
-export function previewAlarm(sound: AlarmSound, repeat: number): void {
-  playAlarm(sound, repeat);
+export function previewAlarm(
+  sound: AlarmSound,
+  repeat: number,
+  volume: number = 80,
+  vibrationMode: VibrationMode = 'silent',
+): void {
+  playAlarm(sound, repeat, volume, vibrationMode);
 }

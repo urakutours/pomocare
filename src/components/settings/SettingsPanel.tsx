@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Download, Lock } from 'lucide-react';
-import type { PomodoroSettings, ThemeMode, AlarmSound } from '@/types/settings';
+import type { PomodoroSettings, ThemeMode, AlarmSound, VibrationMode } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
 import { LABEL_COLORS } from '@/config/colors';
@@ -1341,10 +1341,20 @@ function LabelManager({
 function AlarmSettingsPanel({
   sound,
   repeat,
+  volume,
+  vibration,
   onSoundChange,
   onRepeatChange,
+  onVolumeChange,
+  onVibrationChange,
   alarmLabel,
   repeatLabel,
+  volumeLabel,
+  vibrationLabel,
+  vibrationOffLabel,
+  vibrationSilentLabel,
+  vibrationAlwaysLabel,
+  vibrationNote,
   bellLabel,
   digitalLabel,
   chimeLabel,
@@ -1356,10 +1366,20 @@ function AlarmSettingsPanel({
 }: {
   sound: AlarmSound;
   repeat: number;
+  volume: number;
+  vibration: VibrationMode;
   onSoundChange: (s: AlarmSound) => void;
   onRepeatChange: (n: number) => void;
+  onVolumeChange: (v: number) => void;
+  onVibrationChange: (v: VibrationMode) => void;
   alarmLabel: string;
   repeatLabel: string;
+  volumeLabel: string;
+  vibrationLabel: string;
+  vibrationOffLabel: string;
+  vibrationSilentLabel: string;
+  vibrationAlwaysLabel: string;
+  vibrationNote: string;
   bellLabel: string;
   digitalLabel: string;
   chimeLabel: string;
@@ -1398,7 +1418,7 @@ function AlarmSettingsPanel({
           </select>
           {sound !== 'none' && (
             <button
-              onClick={() => previewAlarm(sound, repeat)}
+              onClick={() => previewAlarm(sound, repeat, volume, vibration)}
               className="p-2 rounded-lg border border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-600 text-gray-600 dark:text-gray-400"
               title="Preview"
             >
@@ -1407,6 +1427,24 @@ function AlarmSettingsPanel({
           )}
         </div>
       </div>
+
+      {sound !== 'none' && (
+        <div>
+          <label className={labelClass}>{volumeLabel}</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={volume}
+              onChange={(e) => onVolumeChange(Number(e.target.value))}
+              className="flex-1 h-2 rounded-lg appearance-none cursor-pointer accent-tiffany bg-gray-200 dark:bg-neutral-600"
+            />
+            <span className="w-10 text-right text-sm text-gray-600 dark:text-gray-400">{volume}%</span>
+          </div>
+        </div>
+      )}
 
       {sound !== 'none' && (
         <div>
@@ -1428,6 +1466,30 @@ function AlarmSettingsPanel({
           </div>
         </div>
       )}
+
+      <div>
+        <label className={labelClass}>{vibrationLabel}</label>
+        <div className="flex gap-1.5">
+          {([
+            { value: 'off' as VibrationMode, label: vibrationOffLabel },
+            { value: 'silent' as VibrationMode, label: vibrationSilentLabel },
+            { value: 'always' as VibrationMode, label: vibrationAlwaysLabel },
+          ]).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => onVibrationChange(opt.value)}
+              className={`px-3 h-9 rounded-lg border text-sm font-medium transition-colors ${
+                vibration === opt.value
+                  ? 'border-tiffany bg-tiffany text-white'
+                  : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{vibrationNote}</p>
+      </div>
     </div>
   );
 }
@@ -1471,6 +1533,8 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
   );
   const [alarmSound, setAlarmSound] = useState<AlarmSound>(settings.alarm?.sound ?? 'bell');
   const [alarmRepeat, setAlarmRepeat] = useState(settings.alarm?.repeat ?? 1);
+  const [alarmVolume, setAlarmVolume] = useState(settings.alarm?.volume ?? 80);
+  const [alarmVibration, setAlarmVibration] = useState<VibrationMode>(settings.alarm?.vibration ?? 'silent');
   const [labels, setLabels] = useState<LabelDefinition[]>(settings.labels ?? []);
   const [customColors, setCustomColors] = useState<string[]>(settings.customColors ?? []);
   const [tab, setTab] = useState<SettingsTab>('general');
@@ -1617,7 +1681,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
       activePresets,
       restPresets,
       theme,
-      alarm: { sound: alarmSound, repeat: alarmRepeat },
+      alarm: { sound: alarmSound, repeat: alarmRepeat, volume: alarmVolume, vibration: alarmVibration },
       labels,
       activeLabel: settings.activeLabel,
       customColors,
@@ -1630,7 +1694,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
     }`;
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div className="flex-1 min-h-0 flex flex-col relative">
       {/* Close button - fixed */}
       <button onClick={onClose} className="absolute top-0 right-0 z-10">
         <X size={18} className="text-gray-500 dark:text-gray-400" />
@@ -1690,10 +1754,20 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
             <AlarmSettingsPanel
               sound={alarmSound}
               repeat={alarmRepeat}
+              volume={alarmVolume}
+              vibration={alarmVibration}
               onSoundChange={setAlarmSound}
               onRepeatChange={setAlarmRepeat}
+              onVolumeChange={setAlarmVolume}
+              onVibrationChange={setAlarmVibration}
               alarmLabel={t.alarmLabel}
               repeatLabel={t.alarmRepeatLabel}
+              volumeLabel={t.alarmVolumeLabel}
+              vibrationLabel={t.alarmVibrationLabel}
+              vibrationOffLabel={t.alarmVibrationOff}
+              vibrationSilentLabel={t.alarmVibrationSilent}
+              vibrationAlwaysLabel={t.alarmVibrationAlways}
+              vibrationNote={t.alarmVibrationNote}
               bellLabel={t.alarmSoundBell}
               digitalLabel={t.alarmSoundDigital}
               chimeLabel={t.alarmSoundChime}

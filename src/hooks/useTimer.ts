@@ -52,7 +52,7 @@ export function useTimer({
       setIsRunning(false);
 
       // Play alarm
-      playAlarm(alarm.sound, alarm.repeat);
+      playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent');
 
       if (mode === 'work') {
         const session: PomodoroSession = {

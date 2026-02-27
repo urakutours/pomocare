@@ -1,5 +1,4 @@
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@16.0.0?target=deno";
+import Stripe from "https://esm.sh/stripe@17.7.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2?target=deno";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
@@ -38,7 +37,7 @@ async function updateUserProfile(
 }
 
 // ---------- Main handler ----------
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }

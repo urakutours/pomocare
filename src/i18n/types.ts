@@ -44,6 +44,12 @@ export interface Translations {
   alarmSoundSoft: string;
   alarmSoundNone: string;
   alarmRepeatLabel: string;
+  alarmVolumeLabel: string;
+  alarmVibrationLabel: string;
+  alarmVibrationOff: string;
+  alarmVibrationSilent: string;
+  alarmVibrationAlways: string;
+  alarmVibrationNote: string;
 
   // Labels
   labelsLabel: string;

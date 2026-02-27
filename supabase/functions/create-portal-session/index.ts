@@ -1,5 +1,4 @@
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@16.0.0?target=deno";
+import Stripe from "https://esm.sh/stripe@17.7.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2?target=deno";
 
 // ---------- CORS ----------
@@ -25,7 +24,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
 });
 
 // ---------- Main handler ----------
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin") ?? "";
   const headers = corsHeaders(origin);
 
@@ -81,10 +80,21 @@ serve(async (req: Request) => {
       );
     }
 
+    // ---- リクエストボディから言語を取得 ----
+    let language = "en";
+    try {
+      const body = await req.json() as { language?: string };
+      if (body.language) language = body.language;
+    } catch {
+      // ボディなし or JSON以外の場合はデフォルト(en)
+    }
+
     // ---- Stripe Customer Portal Session作成 ----
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
       return_url: "https://app.pomocare.com/",
+      // Portal UIの表示言語をアプリの言語設定に合わせる
+      locale: language as Stripe.BillingPortal.SessionCreateParams.Locale,
     });
 
     return new Response(

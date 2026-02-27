@@ -5,9 +5,13 @@ export type ThemeMode = 'light' | 'gray' | 'dark';
 
 export type AlarmSound = 'bell' | 'digital' | 'chime' | 'kitchen' | 'classic' | 'gentle' | 'soft' | 'none';
 
+export type VibrationMode = 'off' | 'silent' | 'always';
+
 export interface AlarmSettings {
   sound: AlarmSound;
   repeat: number; // 1-5
+  volume: number; // 0-100
+  vibration: VibrationMode;
 }
 
 export interface PomodoroSettings {
@@ -39,7 +43,7 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   activePresets: DEFAULT_ACTIVE_PRESETS,
   restPresets: DEFAULT_REST_PRESETS,
   theme: 'light',
-  alarm: { sound: 'bell', repeat: 1 },
+  alarm: { sound: 'bell', repeat: 1, volume: 80, vibration: 'silent' },
   labels: [],
   activeLabel: null,
   customColors: [],

@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "deploy": "gh-pages -d dist",
     "lp:dev": "sass --watch lp/scss/main.scss:lp/css/style.css --source-map",
-    "lp:build": "sass lp/scss/main.scss:lp/css/style.css --style=compressed --no-source-map"
+    "lp:build": "sass lp/scss/main.scss:lp/css/style.css --style=compressed --no-source-map",
+    "generate-icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",
@@ -29,9 +30,11 @@
     "eslint-plugin-react-refresh": "^0.4.18",
     "gh-pages": "^6.3.0",
     "globals": "^15.14.0",
+    "playwright": "^1.58.2",
     "postcss": "^8.5.1",
     "sass": "^1.97.3",
     "serve": "^14.2.5",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",

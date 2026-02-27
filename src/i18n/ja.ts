@@ -76,7 +76,7 @@ export const ja: Translations = {
   installApp: 'アプリとしてインストール',
   days: ['月', '火', '水', '木', '金', '土', '日'],
   months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-  defaultCustomMessage: 'ここに自分へのメッセージを入れてください',
+  defaultCustomMessage: '自分へのメッセージを入れてください',
   sessionChangeLabel: 'ラベルの変更',
   sessionEditNote: 'メモの修正',
   sessionDelete: '削除',

@@ -6,6 +6,8 @@ export const fr: Translations = {
   restMode: 'Pause courte',
   longBreakMode: 'Longue pause',
   settings: 'Paramètres',
+  settingsSessionGroup: 'Paramètres de session',
+  settingsLongBreakGroup: 'Paramètres de pause longue',
   activeTimeLabel: 'Pomodoro',
   restTimeLabel: 'Pause courte',
   longBreakTimeLabel: 'Longue pause',

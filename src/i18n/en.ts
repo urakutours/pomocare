@@ -6,6 +6,8 @@ export const en: Translations = {
   restMode: 'Short Break',
   longBreakMode: 'Long Break',
   settings: 'Settings',
+  settingsSessionGroup: 'Session Settings',
+  settingsLongBreakGroup: 'Long Break Settings',
   activeTimeLabel: 'Pomodoro',
   restTimeLabel: 'Short Break',
   longBreakTimeLabel: 'Long Break',

@@ -15,6 +15,8 @@ export interface Translations {
 
   // Settings
   settings: string;
+  settingsSessionGroup: string;
+  settingsLongBreakGroup: string;
   activeTimeLabel: string;
   restTimeLabel: string;
   longBreakTimeLabel: string;

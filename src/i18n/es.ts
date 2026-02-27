@@ -6,6 +6,8 @@ export const es: Translations = {
   restMode: 'Descanso corto',
   longBreakMode: 'Descanso largo',
   settings: 'Configuración',
+  settingsSessionGroup: 'Configuración de sesión',
+  settingsLongBreakGroup: 'Configuración de descanso largo',
   activeTimeLabel: 'Pomodoro',
   restTimeLabel: 'Descanso corto',
   longBreakTimeLabel: 'Descanso largo',

@@ -91,11 +91,11 @@ export function CancelSubscriptionModal({ onClose, onCancelled }: CancelSubscrip
 
             {/* トライアル情報ボックス */}
             {isTrialing && trialEndDate && (
-              <div className="mb-3 px-3 py-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-lg">
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+              <div className="mb-3 px-3 py-4 rounded-lg text-center" style={{ background: '#40c3b29e', lineHeight: 1.7 }}>
+                <p className="font-medium text-white" style={{ fontSize: '1rem' }}>
                   {t.cancelSubscriptionTrialInfo.replace('{date}', formattedDate)}
                 </p>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                <p className="font-bold text-white" style={{ fontSize: '1.2rem' }}>
                   {t.cancelSubscriptionDaysLeft.replace('{days}', String(daysRemaining))}
                 </p>
               </div>

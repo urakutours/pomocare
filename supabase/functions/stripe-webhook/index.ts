@@ -114,14 +114,30 @@ Deno.serve(async (req: Request) => {
           const subscriptionId = typeof session.subscription === "string"
             ? session.subscription
             : (session.subscription as Stripe.Subscription | null)?.id ?? null;
+
+          // Subscription オブジェクトを取得して正確な status / period_end を反映
+          let subStatus: string = "active";
+          let periodEnd: string | null = null;
+          if (subscriptionId) {
+            try {
+              const sub = await stripe.subscriptions.retrieve(subscriptionId);
+              subStatus = sub.status; // "trialing" or "active"
+              periodEnd = new Date(sub.current_period_end * 1000).toISOString();
+              console.log(`[stripe-webhook] Subscription ${subscriptionId}: status=${subStatus}, period_end=${periodEnd}`);
+            } catch (subErr) {
+              console.warn("[stripe-webhook] Failed to retrieve subscription, using defaults:", subErr);
+            }
+          }
+
           await updateUserProfile(userId, {
             tier: "standard",
             stripe_customer_id: session.customer as string,
             stripe_subscription_id: subscriptionId,
-            subscription_status: "active",
+            subscription_status: subStatus,
+            subscription_current_period_end: periodEnd,
             subscription_start_date: new Date().toISOString(),
           });
-          console.log(`[stripe-webhook] User ${userId} upgraded to Standard (subscription via checkout)`);
+          console.log(`[stripe-webhook] User ${userId} upgraded to Standard (subscription via checkout, status=${subStatus})`);
         }
         break;
       }

@@ -1717,61 +1717,49 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
         {/* General tab */}
         {tab === 'general' && (
           <div className="space-y-4 p-1">
-            {/* Session group */}
-            <div>
-              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">{t.settingsSessionGroup}</p>
-              <div className="grid grid-cols-2 gap-3 px-1">
-                <TimeSelector
-                  label={t.activeTimeLabel}
-                  value={workTime}
-                  presets={activePresets}
-                  onChange={setWorkTime}
-                  restOffLabel={t.restOffLabel}
-                  customLabel={t.customInput}
-                  unit={t.minuteUnit}
-                />
-                <TimeSelector
-                  label={t.restTimeLabel}
-                  value={breakTime}
-                  presets={restPresets}
-                  onChange={setBreakTime}
-                  isRest
-                  restOffLabel={t.restOffLabel}
-                  customLabel={t.customInput}
-                  unit={t.minuteUnit}
-                />
-              </div>
-            </div>
-            {/* Long break group */}
-            <div className="pt-2 border-t border-gray-200 dark:border-neutral-700">
-              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">{t.settingsLongBreakGroup}</p>
-              <div className="grid grid-cols-2 gap-3 px-1">
-                <TimeSelector
-                  label={t.longBreakTimeLabel}
-                  value={longBreakTime}
-                  presets={LONG_BREAK_OPTIONS}
-                  onChange={setLongBreakTime}
-                  isRest
-                  restOffLabel={t.restOffLabel}
-                  customLabel={t.customInput}
-                  unit={t.minuteUnit}
-                />
-                {longBreakTime > 0 && (
-                  <TimeSelector
-                    label={t.longBreakIntervalLabel}
-                    value={longBreakInterval}
-                    presets={LONG_BREAK_INTERVAL_OPTIONS}
-                    onChange={setLongBreakInterval}
-                    isRest
-                    restOffLabel={t.restOffLabel}
-                    customLabel={t.customInput}
-                    unit={t.sessionUnit}
-                  />
-                )}
-              </div>
-            </div>
+            <TimeSelector
+              label={t.activeTimeLabel}
+              value={workTime}
+              presets={activePresets}
+              onChange={setWorkTime}
+              restOffLabel={t.restOffLabel}
+              customLabel={t.customInput}
+              unit={t.minuteUnit}
+            />
+            <TimeSelector
+              label={t.restTimeLabel}
+              value={breakTime}
+              presets={restPresets}
+              onChange={setBreakTime}
+              isRest
+              restOffLabel={t.restOffLabel}
+              customLabel={t.customInput}
+              unit={t.minuteUnit}
+            />
+            <TimeSelector
+              label={t.longBreakTimeLabel}
+              value={longBreakTime}
+              presets={LONG_BREAK_OPTIONS}
+              onChange={setLongBreakTime}
+              isRest
+              restOffLabel={t.restOffLabel}
+              customLabel={t.customInput}
+              unit={t.minuteUnit}
+            />
+            {longBreakTime > 0 && (
+              <TimeSelector
+                label={t.longBreakIntervalLabel}
+                value={longBreakInterval}
+                presets={LONG_BREAK_INTERVAL_OPTIONS}
+                onChange={setLongBreakInterval}
+                isRest
+                restOffLabel={t.restOffLabel}
+                customLabel={t.customInput}
+                unit={t.sessionUnit}
+              />
+            )}
             {/* Alarm separator */}
-            <div className="pt-2 border-t border-gray-200 dark:border-neutral-700" />
+            <div className="border-t border-gray-200 dark:border-neutral-700" />
             <AlarmSettingsPanel
               sound={alarmSound}
               repeat={alarmRepeat}

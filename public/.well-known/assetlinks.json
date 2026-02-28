@@ -1,12 +1,11 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.pomocare.app",
-      "sha256_cert_fingerprints": [
-        "TODO_REPLACE_WITH_SHA256_FINGERPRINT_FROM_BUBBLEWRAP"
-      ]
-    }
-  }
-]
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.pomocare.app.twa",
+        "sha256_cert_fingerprints": [
+          "80:6C:D4:A4:CC:1A:28:5D:40:D3:CD:A6:2E:69:44:89:5F:1A:75:42:2F:22:CB:AF:76:A5:E7:11:7C:3A:76:88",
+          "2C:2C:FD:13:DA:93:75:AC:9B:98:7E:B7:C6:7A:25:91:8C:77:58:89:97:1C:E5:F0:88:B5:BC:18:86:03:41:DA"
+        ]
+      }
+    }]

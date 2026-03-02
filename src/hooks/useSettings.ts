@@ -8,9 +8,13 @@ export function useSettings(storage: StorageService) {
   const [isLoaded, setIsLoaded] = useState(false);
   // Track the last-saved settings to detect local vs remote changes
   const lastSavedRef = useRef<string>('');
+  // Guard: true only after settings have been successfully loaded from the server.
+  // Prevents accidental write-back of DEFAULT_SETTINGS when the load fails/times out.
+  const serverLoadedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
+    serverLoadedRef.current = false; // Reset on storage change
 
     const load = async () => {
       try {
@@ -34,9 +38,11 @@ export function useSettings(storage: StorageService) {
         localStorage.setItem(migrationKey, '1');
 
         lastSavedRef.current = JSON.stringify(migrated);
+        serverLoadedRef.current = true;
         setSettings(migrated);
       } catch {
-        // Network error or timeout — use defaults so the app is usable
+        // Network error or timeout — show defaults for UI but do NOT mark as
+        // server-loaded so that no write-back can overwrite real remote data.
         if (cancelled) return;
         setSettings(DEFAULT_SETTINGS);
       }
@@ -56,6 +62,7 @@ export function useSettings(storage: StorageService) {
         lastFetch = Date.now();
         storage.getSettings().then((s) => {
           lastSavedRef.current = JSON.stringify(s);
+          serverLoadedRef.current = true;
           setSettings(s);
         });
       }
@@ -73,6 +80,7 @@ export function useSettings(storage: StorageService) {
       if (table === 'settings') {
         storage.getSettings().then((s) => {
           lastSavedRef.current = JSON.stringify(s);
+          serverLoadedRef.current = true;
           setSettings(s);
         });
       }
@@ -89,6 +97,7 @@ export function useSettings(storage: StorageService) {
       if (document.visibilityState === 'visible') {
         storage.getSettings().then((s) => {
           lastSavedRef.current = JSON.stringify(s);
+          serverLoadedRef.current = true;
           setSettings(s);
         });
       }
@@ -100,6 +109,11 @@ export function useSettings(storage: StorageService) {
   // ── Fetch-merge-save: fetch latest from server before saving ──
   const updateSettings = useCallback(
     async (newSettings: PomodoroSettings) => {
+      // Block saves when settings haven't been loaded from server yet.
+      // This prevents DEFAULT_SETTINGS from being written back to Supabase
+      // when the initial load timed out or failed.
+      if (!serverLoadedRef.current) return;
+
       // Optimistic UI update
       setSettings(newSettings);
 
@@ -120,5 +134,25 @@ export function useSettings(storage: StorageService) {
     [storage],
   );
 
-  return { settings, updateSettings, isLoaded };
+  // ── Partial update: only merge specified fields (avoids stale-closure bugs) ──
+  const patchSettings = useCallback(
+    async (patch: Partial<PomodoroSettings>) => {
+      if (!serverLoadedRef.current) return;
+
+      setSettings((prev) => ({ ...prev, ...patch }));
+
+      try {
+        const server = await storage.getSettings();
+        const merged = { ...server, ...patch };
+        lastSavedRef.current = JSON.stringify(merged);
+        setSettings(merged);
+        await storage.saveSettings(merged);
+      } catch {
+        // Silently ignore — next sync will reconcile
+      }
+    },
+    [storage],
+  );
+
+  return { settings, updateSettings, patchSettings, isLoaded };
 }

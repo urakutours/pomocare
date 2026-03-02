@@ -33,6 +33,7 @@ interface PomodoroAppProps {
   storage: StorageService;
   settings: PomodoroSettings;
   updateSettings: (settings: PomodoroSettings) => void;
+  patchSettings: (patch: Partial<PomodoroSettings>) => void;
 }
 
 // ---- Quick label creator modal (shown from TOP screen) ----
@@ -330,7 +331,7 @@ function LabelSelect({
   );
 }
 
-function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
+function PomodoroApp({ storage, settings, updateSettings, patchSettings }: PomodoroAppProps) {
   const { t } = useI18n();
   const features = useFeatures();
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -365,10 +366,9 @@ function PomodoroApp({ storage, settings, updateSettings }: PomodoroAppProps) {
   useEffect(() => {
     if (prevActiveLabelRef.current !== activeLabel) {
       prevActiveLabelRef.current = activeLabel;
-      updateSettings({ ...settings, activeLabel });
+      patchSettings({ activeLabel });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLabel]);
+  }, [activeLabel, patchSettings]);
 
   // Effective work time: label's duration overrides global setting temporarily
   const effectiveWorkTime = useMemo(() => {
@@ -780,7 +780,7 @@ function AppWithStorage() {
 }
 
 function AppWithI18n({ storage }: { storage: StorageService }) {
-  const { settings, updateSettings, isLoaded } = useSettings(storage);
+  const { settings, updateSettings, patchSettings, isLoaded } = useSettings(storage);
   const { refreshTier } = useAuth();
   const [paymentSuccessPlan, setPaymentSuccessPlan] = useState<CheckoutPlan | null>(null);
 
@@ -843,6 +843,7 @@ function AppWithI18n({ storage }: { storage: StorageService }) {
         storage={storage}
         settings={settings}
         updateSettings={updateSettings}
+        patchSettings={patchSettings}
       />
       {paymentSuccessPlan && (
         <PaymentSuccessToast

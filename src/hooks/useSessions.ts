@@ -24,7 +24,9 @@ export function useSessions(storage: StorageService, days: Translations['days'])
   sessionsRef.current = sessions;
 
   useEffect(() => {
-    setSessions([]); // ストレージ切替時に旧データを即クリア
+    // Keep previous sessions visible until the new storage responds.
+    // Clearing to [] first could cause a brief window where empty state
+    // is read by other effects and accidentally persisted.
     storage.getSessions().then(setSessions).catch(() => setSessions([]));
   }, [storage]);
 

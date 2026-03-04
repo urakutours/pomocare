@@ -17,15 +17,33 @@
     <!-- Google AdSense -->
     <meta name="google-adsense-account" content="ca-pub-5675101743750825">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5675101743750825" crossorigin="anonymous"></script>
-    <script type="module" crossorigin src="/assets/index-ByOOMskR.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-D7rgCXgh.css">
+    <script type="module" crossorigin src="/assets/index-BlBpY3h7.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-IU04sr_a.css">
   <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
   <body>
+    <script>
+      // Apply cached theme instantly to prevent flash of wrong theme
+      try {
+        var c = localStorage.getItem('pomocare-settings-cache');
+        if (c) {
+          var t = JSON.parse(c).theme;
+          if (t === 'gray' || t === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', t);
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute('content', t === 'gray' ? '#333333' : '#13171b');
+          }
+        }
+      } catch(e) {}
+    </script>
     <div id="root">
-      <div style="display:flex;align-items:center;justify-content:center;height:100vh;height:100dvh">
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;height:100dvh;background:var(--bg,#fff)">
         <div style="width:32px;height:32px;border:3px solid #0abab5;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></div>
       </div>
-      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+      <style>
+        @keyframes spin{to{transform:rotate(360deg)}}
+        html.dark #root>div{--bg:#171717}
+      </style>
     </div>
   </body>
 </html>

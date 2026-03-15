@@ -32,6 +32,10 @@ export function useTimer({
   // Count of completed work sessions (used to trigger long break)
   const completedSessionsRef = useRef(0);
 
+  // Wall-clock tracking: when the timer was started/resumed and how much time was left at that point
+  const startTimestampRef = useRef<number | null>(null);
+  const startTimeLeftRef = useRef<number>(workTime * 60);
+
   // Sync timeLeft only when workTime setting changes while not running
   const prevWorkTimeRef = useRef(workTime);
   useEffect(() => {
@@ -41,15 +45,37 @@ export function useTimer({
     prevWorkTimeRef.current = workTime;
   }, [workTime, isRunning, mode]);
 
+  // Recalculate timeLeft from wall-clock when the page becomes visible again
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState === 'visible' &&
+        startTimestampRef.current !== null
+      ) {
+        const elapsed = Math.floor((Date.now() - startTimestampRef.current) / 1000);
+        const remaining = Math.max(0, startTimeLeftRef.current - elapsed);
+        setTimeLeft(remaining);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
 
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((time) => time - 1);
+        // Use wall-clock elapsed time instead of decrementing by 1
+        if (startTimestampRef.current !== null) {
+          const elapsed = Math.floor((Date.now() - startTimestampRef.current) / 1000);
+          const remaining = Math.max(0, startTimeLeftRef.current - elapsed);
+          setTimeLeft(remaining);
+        }
       }, 1000);
     } else if (timeLeft === 0 && isRunning) {
       setIsRunning(false);
+      startTimestampRef.current = null;
 
       // Play alarm
       playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent');
@@ -96,13 +122,23 @@ export function useTimer({
 
   const toggle = useCallback(() => {
     setIsRunning((prev) => {
-      analytics.track({ name: prev ? 'timer_paused' : 'timer_started' });
+      if (prev) {
+        // Pausing: clear wall-clock tracking
+        startTimestampRef.current = null;
+        analytics.track({ name: 'timer_paused' });
+      } else {
+        // Starting/resuming: record wall-clock anchor
+        startTimestampRef.current = Date.now();
+        startTimeLeftRef.current = timeLeft;
+        analytics.track({ name: 'timer_started' });
+      }
       return !prev;
     });
-  }, []);
+  }, [timeLeft]);
 
   const reset = useCallback(() => {
     setIsRunning(false);
+    startTimestampRef.current = null;
     setMode('work');
     setTimeLeft(workTime * 60);
     completedSessionsRef.current = 0;
@@ -116,6 +152,7 @@ export function useTimer({
     if (elapsed <= 0) return;
 
     setIsRunning(false);
+    startTimestampRef.current = null;
 
     const session: PomodoroSession = {
       date: new Date().toISOString(),

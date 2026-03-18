@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
-import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Download, Lock } from 'lucide-react';
+import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Download, Lock, RefreshCw, Check, AlertCircle } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound, VibrationMode } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
@@ -23,6 +23,7 @@ interface SettingsPanelProps {
   labels: LabelDefinition[];
   onSaveLabels?: (labels: LabelDefinition[]) => void;
   onSaveCustomColors?: (customColors: string[], labels?: LabelDefinition[]) => void;
+  onRefresh?: () => Promise<boolean>;
 }
 
 type SettingsTab = 'general' | 'labels' | 'presets';
@@ -1516,11 +1517,13 @@ function readFileWithEncoding(file: File): Promise<string> {
   });
 }
 
-export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, sessions, labels: externalLabels, onSaveLabels, onSaveCustomColors }: SettingsPanelProps) {
+export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportCsv, sessions, labels: externalLabels, onSaveLabels, onSaveCustomColors, onRefresh }: SettingsPanelProps) {
   const { t } = useI18n();
   const { user, deleteAccount } = useAuth();
   const features = useFeatures();
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [syncResult, setSyncResult] = useState<'idle' | 'success' | 'error'>('idle');
   const [workTime, setWorkTime] = useState(settings.workTime);
   const [breakTime, setBreakTime] = useState(settings.breakTime);
   const [longBreakTime, setLongBreakTime] = useState(settings.longBreakTime ?? 0);
@@ -1717,6 +1720,40 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
         {/* General tab */}
         {tab === 'general' && (
           <div className="space-y-4 p-1">
+            {/* Refresh data button */}
+            {onRefresh && (
+              <button
+                onClick={async () => {
+                  setIsRefreshing(true);
+                  setSyncResult('idle');
+                  try {
+                    const success = await onRefresh();
+                    setSyncResult(success ? 'success' : 'error');
+                  } catch {
+                    setSyncResult('error');
+                  } finally {
+                    setIsRefreshing(false);
+                    setTimeout(() => setSyncResult('idle'), 3000);
+                  }
+                }}
+                disabled={isRefreshing}
+                className={`w-full py-2 rounded-lg border text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  syncResult === 'success'
+                    ? 'border-green-500 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+                    : syncResult === 'error'
+                    ? 'border-red-400 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+                    : 'border-tiffany text-tiffany hover:bg-tiffany/10'
+                }`}
+              >
+                {syncResult === 'success' ? (
+                  <><Check size={14} />{t.syncSuccess}</>
+                ) : syncResult === 'error' ? (
+                  <><AlertCircle size={14} />{t.syncError}</>
+                ) : (
+                  <><RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />{isRefreshing ? t.syncing : t.refreshData}</>
+                )}
+              </button>
+            )}
             {/* 1セットの設定 */}
             <div className="space-y-4">
               <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{t.settingsSessionGroup}</p>

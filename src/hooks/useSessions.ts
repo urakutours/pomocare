@@ -3,6 +3,7 @@ import type { PomodoroSession } from '@/types/session';
 import type { StorageService } from '@/services/storage/types';
 import type { Translations } from '@/i18n';
 import { getWeekStartDate } from '@/utils/date';
+import { SupabaseAdapter } from '@/services/storage/SupabaseAdapter';
 
 export interface DayData {
   day: string;
@@ -18,32 +19,90 @@ export interface MonthDayData {
 }
 
 export function useSessions(storage: StorageService, days: Translations['days']) {
-  const [sessions, setSessions] = useState<PomodoroSession[]>([]);
+  const [sessions, setSessions] = useState<PomodoroSession[]>(() => {
+    const cached = SupabaseAdapter.getCachedSessions() ?? [];
+    console.log('[Sessions] init from cache:', cached.length, 'sessions');
+    return cached;
+  });
   // Ref to avoid stale closures in callbacks — always holds the latest sessions
   const sessionsRef = useRef(sessions);
   sessionsRef.current = sessions;
+  // Guard: true only after sessions have been successfully loaded from the server.
+  // Prevents accidental write-back of empty [] when the load fails/times out,
+  // mirroring the same protection that useSettings has via its serverLoadedRef.
+  const serverLoadedRef = useRef(false);
+
+  // ── Helpers: timeout-wrapped fetchers ──
+  const fetchSessions = useCallback(
+    (timeoutMs: number = 15_000) => Promise.race([
+      storage.getSessions(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('getSessions timeout')), timeoutMs),
+      ),
+    ]),
+    [storage],
+  );
+
+  /** Lightweight fetch for sync triggers — skips migration/flush when available. */
+  const fetchSessionsForSync = useCallback(
+    (timeoutMs: number = 8_000) => {
+      const getter = storage.getSessionsFast
+        ? () => storage.getSessionsFast!()
+        : () => storage.getSessions();
+      return Promise.race([
+        getter(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('sync fetch timeout')), timeoutMs),
+        ),
+      ]);
+    },
+    [storage],
+  );
 
   useEffect(() => {
-    // Keep previous sessions visible until the new storage responds.
-    // Clearing to [] first could cause a brief window where empty state
-    // is read by other effects and accidentally persisted.
-    storage.getSessions().then(setSessions).catch(() => setSessions([]));
-  }, [storage]);
+    let cancelled = false;
+    serverLoadedRef.current = false; // Reset on storage change
+
+    // Fetch sessions from server with retry (3 attempts, exponential backoff).
+    const loadWithRetry = async () => {
+      for (let i = 0; i < 3; i++) {
+        if (cancelled) return;
+        try {
+          const loaded = await fetchSessions(15_000);
+          if (cancelled) return;
+          serverLoadedRef.current = true;
+          setSessions(loaded);
+          return; // success
+        } catch {
+          if (i < 2 && !cancelled) {
+            await new Promise(r => setTimeout(r, 2000 * Math.pow(2, i))); // 2s, 4s
+          }
+        }
+      }
+      console.warn('[useSessions] Initial load failed after 3 attempts');
+    };
+
+    loadWithRetry();
+    return () => { cancelled = true; };
+  }, [fetchSessions]);
 
   // ── Refetch on tab focus (cross-device sync) ──
   useEffect(() => {
     let lastFetch = Date.now();
 
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && Date.now() - lastFetch > 5_000) {
+      if (document.visibilityState === 'visible' && navigator.onLine && Date.now() - lastFetch > 5_000) {
         lastFetch = Date.now();
-        storage.getSessions().then(setSessions);
+        fetchSessionsForSync(8_000).then((s) => {
+          serverLoadedRef.current = true;
+          setSessions(s);
+        }).catch(() => { /* keep current sessions on error */ });
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [storage]);
+  }, [fetchSessionsForSync]);
 
   // ── Remote change subscription (Supabase Broadcast) ──
   useEffect(() => {
@@ -51,25 +110,62 @@ export function useSessions(storage: StorageService, days: Translations['days'])
 
     const unsubscribe = storage.onRemoteChange((table) => {
       if (table === 'sessions') {
-        storage.getSessions().then(setSessions);
+        fetchSessionsForSync(8_000).then((s) => {
+          serverLoadedRef.current = true;
+          setSessions(s);
+        }).catch(() => { /* keep current sessions on error */ });
       }
     });
 
     return unsubscribe;
-  }, [storage]);
+  }, [storage, fetchSessionsForSync]);
 
-  // ── Interval polling (fallback sync every 60s, only for cloud storage) ──
+  // ── Interval polling (fallback sync every 15s, only for cloud storage) ──
   useEffect(() => {
     if (!storage.onRemoteChange) return; // skip for localStorage
 
     const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        storage.getSessions().then(setSessions);
+      if (document.visibilityState === 'visible' && navigator.onLine) {
+        fetchSessionsForSync(10_000).then((s) => {
+          serverLoadedRef.current = true;
+          setSessions(s);
+        }).catch(() => { /* keep current sessions on error */ });
       }
-    }, 60_000);
+    }, 15_000);
 
     return () => clearInterval(interval);
-  }, [storage]);
+  }, [storage, fetchSessionsForSync]);
+
+  // ── Flush pending + refetch when device comes back online ──
+  useEffect(() => {
+    if (!storage.flushPendingSessions) return; // skip for localStorage
+
+    const handleOnline = () => {
+      console.log('[Sessions] online event — flushing pending + refetching');
+      storage.flushPendingSessions!()
+        .then(() => fetchSessionsForSync(10_000))
+        .then((s) => {
+          serverLoadedRef.current = true;
+          setSessions(s);
+        })
+        .catch(() => { /* keep current sessions on error */ });
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [storage, fetchSessionsForSync]);
+
+  // ── Guard helper: try to load from server if not yet loaded ──
+  const ensureServerLoaded = useCallback(async () => {
+    if (serverLoadedRef.current) return;
+    try {
+      const loaded = await fetchSessions(10_000);
+      serverLoadedRef.current = true;
+      setSessions(loaded);
+    } catch {
+      console.warn('[useSessions] ensureServerLoaded failed, proceeding anyway');
+    }
+  }, [fetchSessions]);
 
   // ── Fetch-Merge-Save helpers (cross-device safe) ──
   // Each write operation fetches the latest server data first so that
@@ -77,41 +173,86 @@ export function useSessions(storage: StorageService, days: Translations['days'])
 
   const addSession = useCallback(
     async (session: PomodoroSession) => {
+      // No serverLoadedRef guard — addSession writes to local cache + pending queue first,
+      // then pushes to Supabase in the background. Session data is never lost.
+
       // Optimistic UI update
       setSessions((prev) => [...prev, session]);
-      // Merge with server: keep all server sessions + add new one (dedup by date)
-      const server = await storage.getSessions();
-      const merged = [...server.filter((s) => s.date !== session.date), session];
-      setSessions(merged);
-      await storage.saveSessions(merged);
+      try {
+        if (storage.addSession) {
+          // Atomic insert — no race condition, no data loss possible
+          await storage.addSession(session);
+        } else {
+          // Fallback (localStorage): three-way union merge
+          const server = await storage.getSessions();
+          const allByDate = new Map<string, PomodoroSession>();
+          for (const s of sessionsRef.current) allByDate.set(s.date, s);
+          for (const s of server) allByDate.set(s.date, s);
+          allByDate.set(session.date, session);
+          const merged = Array.from(allByDate.values());
+          setSessions(merged);
+          await storage.saveSessions(merged);
+        }
+      } catch (err) {
+        console.error('[Sessions] addSession failed:', err);
+      }
     },
     [storage],
   );
 
   const updateSession = useCallback(
     async (date: string, patch: Partial<Pick<PomodoroSession, 'label' | 'note'>>) => {
+      await ensureServerLoaded();
       // Optimistic UI update
       setSessions((prev) => prev.map((s) => s.date === date ? { ...s, ...patch } : s));
-      // Apply patch to latest server data
-      const server = await storage.getSessions();
-      const merged = server.map((s) => s.date === date ? { ...s, ...patch } : s);
-      setSessions(merged);
-      await storage.saveSessions(merged);
+      try {
+        if (storage.updateSession) {
+          // Atomic update — only affects the target row
+          await storage.updateSession(date, patch);
+        } else {
+          // Fallback (localStorage): three-way union merge + apply patch
+          const server = await storage.getSessions();
+          const allByDate = new Map<string, PomodoroSession>();
+          for (const s of sessionsRef.current) allByDate.set(s.date, s);
+          for (const s of server) allByDate.set(s.date, s);
+          const target = allByDate.get(date);
+          if (target) allByDate.set(date, { ...target, ...patch });
+          const merged = Array.from(allByDate.values());
+          setSessions(merged);
+          await storage.saveSessions(merged);
+        }
+      } catch (err) {
+        console.error('[Sessions] updateSession failed:', err);
+      }
     },
-    [storage],
+    [storage, ensureServerLoaded],
   );
 
   const deleteSession = useCallback(
     async (date: string) => {
+      await ensureServerLoaded();
       // Optimistic UI update
       setSessions((prev) => prev.filter((s) => s.date !== date));
-      // Apply delete to latest server data
-      const server = await storage.getSessions();
-      const merged = server.filter((s) => s.date !== date);
-      setSessions(merged);
-      await storage.saveSessions(merged);
+      try {
+        if (storage.deleteSession) {
+          // Atomic delete — only removes the target row
+          await storage.deleteSession(date);
+        } else {
+          // Fallback (localStorage): three-way union merge then delete target
+          const server = await storage.getSessions();
+          const allByDate = new Map<string, PomodoroSession>();
+          for (const s of sessionsRef.current) allByDate.set(s.date, s);
+          for (const s of server) allByDate.set(s.date, s);
+          allByDate.delete(date);
+          const merged = Array.from(allByDate.values());
+          setSessions(merged);
+          await storage.saveSessions(merged);
+        }
+      } catch (err) {
+        console.error('[Sessions] deleteSession failed:', err);
+      }
     },
-    [storage],
+    [storage, ensureServerLoaded],
   );
 
   const getTodayCount = useCallback(() => {
@@ -221,24 +362,49 @@ export function useSessions(storage: StorageService, days: Translations['days'])
     [sessions],
   );
 
-  // Import sessions from CSV (merges with server + imported, deduplicates by date)
+  // Import sessions from CSV (three-way union merge: in-memory + server + imported)
   const importSessions = useCallback(
     async (imported: PomodoroSession[]) => {
-      const server = await storage.getSessions();
-      const existingDates = new Set(server.map((s) => s.date));
-      const newSessions = imported.filter((s) => !existingDates.has(s.date));
-      const merged = [...server, ...newSessions];
-      setSessions(merged);
-      await storage.saveSessions(merged);
+      await ensureServerLoaded();
+      try {
+        const server = await storage.getSessions();
+        const allByDate = new Map<string, PomodoroSession>();
+        for (const s of sessionsRef.current) allByDate.set(s.date, s);
+        for (const s of server) allByDate.set(s.date, s);
+        for (const s of imported) allByDate.set(s.date, s); // imported wins ties
+        const merged = Array.from(allByDate.values());
+        setSessions(merged);
+        await storage.saveSessions(merged);
+      } catch (err) {
+        console.error('[Sessions] importSessions failed:', err);
+      }
     },
-    [storage],
+    [storage, ensureServerLoaded],
   );
+
+  const refreshSessions = useCallback(async (): Promise<boolean> => {
+    try {
+      const loaded = await Promise.race([
+        storage.getSessions(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 15_000)
+        ),
+      ]);
+      serverLoadedRef.current = true;
+      setSessions(loaded);
+      return true;
+    } catch (err) {
+      console.warn('[useSessions] refreshSessions failed:', err);
+      return false;
+    }
+  }, [storage]);
 
   return {
     sessions,
     addSession,
     updateSession,
     deleteSession,
+    refreshSessions,
     getTodayCount,
     getTodayTotalSeconds,
     getWeekCount,

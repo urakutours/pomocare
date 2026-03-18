@@ -24,6 +24,10 @@ export interface Translations {
   customMessageLabel: string;
   languageLabel: string;
   applySettings: string;
+  refreshData: string;
+  syncing: string;
+  syncSuccess: string;
+  syncError: string;
   customInput: string;
   presetSettingsLabel: string;
   activePresetsLabel: string;

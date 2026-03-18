@@ -1,11 +1,14 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Lock } from 'lucide-react';
+
+const APP_VERSION = '2026.03.06b';
+console.log(`[PomoCare] v${APP_VERSION}`);
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FeatureProvider, useFeatures } from '@/contexts/FeatureContext';
 import { I18nProvider, useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { createStorageService, createSupabaseStorageService, LocalStorageAdapter } from '@/services/storage';
+import { createStorageService, createSupabaseStorageService, LocalStorageAdapter, SupabaseAdapter } from '@/services/storage';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 import { PaymentSuccessToast } from '@/components/shared/PaymentSuccessToast';
 import { AdBanner } from '@/components/ads/AdBanner';
@@ -25,8 +28,9 @@ import { StatsChart } from '@/components/stats/StatsChart';
 import { SessionSummary } from '@/components/stats/SessionSummary';
 import { EmailActionHandler } from '@/components/auth/EmailActionHandler';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
-import type { PomodoroSettings } from '@/types/settings';
+import { DEFAULT_SETTINGS, type PomodoroSettings } from '@/types/settings';
 import type { StorageService } from '@/services/storage/types';
+import { mergeLabels } from '@/utils/mergeLabels';
 import { LABEL_COLORS } from '@/config/colors';
 
 interface PomodoroAppProps {
@@ -34,6 +38,7 @@ interface PomodoroAppProps {
   settings: PomodoroSettings;
   updateSettings: (settings: PomodoroSettings) => void;
   patchSettings: (patch: Partial<PomodoroSettings>) => void;
+  refreshSettings: () => Promise<boolean>;
 }
 
 // ---- Quick label creator modal (shown from TOP screen) ----
@@ -331,7 +336,7 @@ function LabelSelect({
   );
 }
 
-function PomodoroApp({ storage, settings, updateSettings, patchSettings }: PomodoroAppProps) {
+function PomodoroApp({ storage, settings, updateSettings, patchSettings, refreshSettings }: PomodoroAppProps) {
   const { t } = useI18n();
   const features = useFeatures();
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -348,7 +353,14 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings }: Pomod
     getMonthData,
     getYearData,
     importSessions,
+    refreshSessions,
   } = useSessions(storage, t.days);
+
+  // Refresh all data from server (manual sync button)
+  const handleRefreshData = useCallback(async (): Promise<boolean> => {
+    const results = await Promise.allSettled([refreshSessions(), refreshSettings()]);
+    return results.every(r => r.status === 'fulfilled' && r.value === true);
+  }, [refreshSessions, refreshSettings]);
 
   // Active label & note state
   const [activeLabel, setActiveLabel] = useState<string | null>(settings.activeLabel ?? null);
@@ -515,6 +527,7 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings }: Pomod
             labels={labels}
             onSaveLabels={handleSaveLabels}
             onSaveCustomColors={handleSaveCustomColors}
+            onRefresh={handleRefreshData}
           />
         )}
 
@@ -569,6 +582,7 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings }: Pomod
           labels={labels}
           onSaveLabels={handleSaveLabels}
           onSaveCustomColors={handleSaveCustomColors}
+          onRefresh={handleRefreshData}
         />
       )}
 
@@ -699,53 +713,69 @@ function AppWithStorage() {
     if (prevStorageKeyRef.current === storageKey) return;
     prevStorageKeyRef.current = storageKey;
 
-    setStorage(null);
-
     if (useCloud) {
       const cloud = createSupabaseStorageService(currentUid!);
 
-      // localStorage → Supabase 自動マイグレーション
+      // Set storage immediately — don't block rendering on migration
+      setStorage((prev) => {
+        if (prev && 'destroy' in prev && typeof (prev as SupabaseAdapter).destroy === 'function') {
+          (prev as SupabaseAdapter).destroy();
+        }
+        return cloud;
+      });
+
+      // localStorage → Supabase 自動マイグレーション（バックグラウンド）
       // 既存無料ユーザーが初めてクラウド保存に切り替わった際、
       // localStorage にあるデータを Supabase へ移行する
       const local = new LocalStorageAdapter();
-      let settled = false;
-
-      // タイムアウト: マイグレーションが 8 秒以内に完了しない場合、
-      // クラウドアダプターをそのまま使用して先に進む
-      const timeoutId = setTimeout(() => {
-        if (!settled) {
-          settled = true;
-          setStorage(cloud);
-        }
-      }, 8_000);
-
       (async () => {
         try {
           const [cloudSessions, localSessions] = await Promise.all([
             cloud.getSessions(),
             local.getSessions(),
           ]);
-          // Supabase が空 & localStorage にデータがある → 移行
           if (cloudSessions.length === 0 && localSessions.length > 0) {
+            // Supabase が空 & localStorage にデータがある → フル移行
             const localSettings = await local.getSettings();
             await Promise.all([
               cloud.saveSessions(localSessions),
               cloud.saveSettings(localSettings),
             ]);
-            // 移行完了後に localStorage のデータを削除
+            await local.clearAll();
+          } else if (cloudSessions.length > 0 && localSessions.length > 0) {
+            // 両方にデータがある → localStorage の新しいセッションをマージ
+            const cloudDates = new Set(cloudSessions.map(s => s.date));
+            const newLocal = localSessions.filter(s => !cloudDates.has(s.date));
+            if (newLocal.length > 0) {
+              await cloud.saveSessions([...cloudSessions, ...newLocal]);
+            }
+            // 設定もマージしてからクリア（ラベルはユニオンマージで両デバイス分を保持）
+            const localSettings = await local.getSettings();
+            if (JSON.stringify(localSettings) !== JSON.stringify(DEFAULT_SETTINGS)) {
+              const cloudSettings = await cloud.getSettings();
+              await cloud.saveSettings({
+                ...cloudSettings,
+                ...localSettings,
+                labels: mergeLabels(cloudSettings.labels ?? [], localSettings.labels ?? []),
+                customColors: [...new Set([
+                  ...(cloudSettings.customColors ?? []),
+                  ...(localSettings.customColors ?? []),
+                ])],
+              });
+            }
             await local.clearAll();
           }
         } catch {
           // マイグレーション失敗時はスキップ（データは localStorage に残る）
         }
-        if (!settled) {
-          settled = true;
-          clearTimeout(timeoutId);
-          setStorage(cloud);
-        }
       })();
     } else {
-      setStorage(createStorageService());
+      setStorage((prev) => {
+        if (prev && 'destroy' in prev && typeof (prev as SupabaseAdapter).destroy === 'function') {
+          (prev as SupabaseAdapter).destroy();
+        }
+        return createStorageService();
+      });
     }
   }, [user, authLoading, features.cloudSync]);
 
@@ -780,7 +810,7 @@ function AppWithStorage() {
 }
 
 function AppWithI18n({ storage }: { storage: StorageService }) {
-  const { settings, updateSettings, patchSettings, isLoaded } = useSettings(storage);
+  const { settings, updateSettings, patchSettings, refreshSettings, isLoaded } = useSettings(storage);
   const { refreshTier } = useAuth();
   const [paymentSuccessPlan, setPaymentSuccessPlan] = useState<CheckoutPlan | null>(null);
 
@@ -844,6 +874,7 @@ function AppWithI18n({ storage }: { storage: StorageService }) {
         settings={settings}
         updateSettings={updateSettings}
         patchSettings={patchSettings}
+        refreshSettings={refreshSettings}
       />
       {paymentSuccessPlan && (
         <PaymentSuccessToast

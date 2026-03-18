@@ -3,7 +3,7 @@ import type { TimerMode } from '@/types/timer';
 import type { PomodoroSession } from '@/types/session';
 import type { AlarmSettings } from '@/types/settings';
 import { analytics } from '@/services/analytics/AnalyticsService';
-import { playAlarm } from '@/utils/alarm';
+import { playAlarm, unlockAudio } from '@/utils/alarm';
 
 interface UseTimerOptions {
   workTime: number;
@@ -121,6 +121,9 @@ export function useTimer({
   }, [isRunning, timeLeft, mode, workTime, breakTime, longBreakTime, longBreakInterval, alarm, activeLabel, activeNote, onSessionComplete]);
 
   const toggle = useCallback(() => {
+    // Unlock audio on every user tap so mobile browsers allow later playback
+    unlockAudio();
+
     setIsRunning((prev) => {
       if (prev) {
         // Pausing: clear wall-clock tracking

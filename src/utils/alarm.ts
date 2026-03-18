@@ -15,6 +15,66 @@ function createAudioContext(): AudioContext | null {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Shared AudioContext — mobile browsers require AudioContext to be   */
+/*  created/resumed during a user gesture. We keep a single instance  */
+/*  alive and "unlock" it on the first user tap (e.g. timer start).   */
+/* ------------------------------------------------------------------ */
+let sharedCtx: AudioContext | null = null;
+
+/**
+ * Must be called from a user-gesture handler (tap / click).
+ * Creates the shared AudioContext, resumes it, and plays a silent
+ * buffer so iOS WebKit marks the context as "allowed to play".
+ */
+export function unlockAudio(): void {
+  // Also request notification permission on first interaction
+  requestNotificationPermission();
+
+  if (sharedCtx && sharedCtx.state === 'running') return;
+
+  if (!sharedCtx || sharedCtx.state === 'closed') {
+    sharedCtx = createAudioContext();
+  }
+  if (!sharedCtx) return;
+
+  if (sharedCtx.state === 'suspended') {
+    sharedCtx.resume();
+  }
+
+  // Play a silent buffer to fully unlock on iOS
+  try {
+    const buf = sharedCtx.createBuffer(1, 1, 22050);
+    const src = sharedCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(sharedCtx.destination);
+    src.start(0);
+  } catch {
+    // ignore — context may not be fully ready yet
+  }
+}
+
+/**
+ * Request notification permission (called from user gesture).
+ * On Android, Notification vibration works without user-gesture restrictions.
+ */
+function requestNotificationPermission(): void {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+/** Return the shared AudioContext (creating if needed) and try to resume it. */
+function getSharedContext(): AudioContext | null {
+  if (sharedCtx && sharedCtx.state !== 'closed') {
+    if (sharedCtx.state === 'suspended') sharedCtx.resume();
+    return sharedCtx;
+  }
+  sharedCtx = createAudioContext();
+  if (sharedCtx && sharedCtx.state === 'suspended') sharedCtx.resume();
+  return sharedCtx;
+}
+
 /**
  * マスター GainNode を作成し、volume (0-100) に応じたゲインを設定
  */
@@ -273,14 +333,44 @@ const WAV_SOUNDS: AlarmSound[] = ['classic', 'gentle', 'soft'];
  * バイブレーションパターンを生成（振動ms, 休止ms, ...）
  * repeat 回分の短いバースト振動を鳴らす
  */
-function vibrate(repeat: number): void {
-  if (!navigator.vibrate) return;
+function buildVibrationPattern(repeat: number): number[] {
   const pattern: number[] = [];
   for (let i = 0; i < repeat; i++) {
     if (i > 0) pattern.push(400); // 休止
     pattern.push(300, 100, 300);  // 振動, 短い休止, 振動
   }
-  navigator.vibrate(pattern);
+  return pattern;
+}
+
+function vibrate(repeat: number): void {
+  if (!navigator.vibrate) return;
+  navigator.vibrate(buildVibrationPattern(repeat));
+}
+
+/**
+ * Send a system notification when the timer completes.
+ * On Android, the notification triggers device vibration even without
+ * a user-gesture context (unlike navigator.vibrate()).
+ */
+function sendTimerNotification(vibrationPattern?: number[]): void {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    // renotify & vibrate are valid Web Notification API properties but
+    // missing from TypeScript's built-in NotificationOptions type.
+    const options: NotificationOptions & { renotify?: boolean; vibrate?: number[] } = {
+      body: 'PomoCare',
+      icon: '/icons/icon-192x192.png',
+      tag: 'pomocare-timer',       // replace previous notification
+      renotify: true,              // vibrate even if tag is reused
+      silent: false,               // allow sound & vibration
+    };
+    if (vibrationPattern && vibrationPattern.length > 0) {
+      options.vibrate = vibrationPattern;
+    }
+    new Notification('Timer Complete', options);
+  } catch {
+    // Notification constructor may fail in some contexts; ignore
+  }
 }
 
 export function playAlarm(
@@ -292,13 +382,23 @@ export function playAlarm(
   const isSilent = sound === 'none' || volume === 0;
 
   // バイブレーション判定
-  if (vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent)) {
+  const shouldVibrate = vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent);
+  if (shouldVibrate) {
+    // Try direct vibration (works if user-gesture context is available)
     vibrate(repeat);
+    // Also send a system notification with vibration pattern as fallback
+    // (Android notifications vibrate even without user-gesture context)
+    sendTimerNotification(buildVibrationPattern(repeat));
+  } else {
+    // No vibration requested, but still send a silent notification
+    // so users see the timer completion when the app is backgrounded
+    sendTimerNotification();
   }
 
   if (isSilent) return;
 
-  const ctx = createAudioContext();
+  // Use the shared (pre-unlocked) AudioContext so mobile browsers allow playback
+  const ctx = getSharedContext();
   if (!ctx) return;
 
   const master = createMasterGain(ctx, volume);
@@ -313,20 +413,18 @@ export function playAlarm(
         const d = await playWavAlarm(ctx, master, sound, cursor);
         cursor += d + gap;
       }
-      setTimeout(() => ctx.close(), (cursor - ctx.currentTime + 1) * 1000);
+      // Do NOT close the shared context — it will be reused
     });
   } else {
     resume.then(() => {
-      const now = ctx.currentTime;
-      let cursor = now;
+      let cursor = ctx.currentTime;
       const gap = 0.4;
 
       for (let i = 0; i < repeat; i++) {
         const d = playSingleAlarm(ctx, master, sound, cursor);
         cursor += d + gap;
       }
-
-      setTimeout(() => ctx.close(), (cursor - now + 1) * 1000);
+      // Do NOT close the shared context — it will be reused
     });
   }
 }

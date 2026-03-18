@@ -44,7 +44,7 @@ export const ja: Translations = {
   alarmVibrationOff: 'OFF',
   alarmVibrationSilent: '消音時のみ',
   alarmVibrationAlways: '常にON',
-  alarmVibrationNote: '※ ブラウザ依存のため iPhone では振動しません',
+  alarmVibrationNote: '※ iPhoneでは非対応。Androidではアプリが画面に表示されている時のみ動作します',
   labelNote: 'タスクメモ',
   labelNotePlaceholder: 'このセッションのメモを入力...',
   labelSelectPlaceholder: 'ラベルを選択',

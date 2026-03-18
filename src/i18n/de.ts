@@ -44,7 +44,7 @@ export const de: Translations = {
   alarmVibrationOff: 'AUS',
   alarmVibrationSilent: 'Nur bei Stille',
   alarmVibrationAlways: 'Immer',
-  alarmVibrationNote: '* Vibration ist browserabhängig und auf dem iPhone nicht verfügbar',
+  alarmVibrationNote: '* Nicht verfügbar auf dem iPhone. Auf Android nur bei geöffneter App',
   labelNote: 'Aufgabennotiz',
   labelNotePlaceholder: 'Notiz hinzufügen...',
   labelSelectPlaceholder: 'Beschriftung wählen',

@@ -44,7 +44,7 @@ export const en: Translations = {
   alarmVibrationOff: 'OFF',
   alarmVibrationSilent: 'When silent',
   alarmVibrationAlways: 'Always',
-  alarmVibrationNote: '* Vibration is browser-dependent and not available on iPhone',
+  alarmVibrationNote: '* Not available on iPhone. On Android, works only while the app is on screen',
   labelNote: 'Task Note',
   labelNotePlaceholder: 'Add a note for this session...',
   labelSelectPlaceholder: 'Select label',

@@ -14,6 +14,8 @@ interface UseTimerOptions {
   activeLabel: string | null;
   activeNote: string;
   onSessionComplete: (session: PomodoroSession) => void;
+  onSchedulePush?: (fireAt: number) => void;
+  onCancelPush?: () => void;
 }
 
 export function useTimer({
@@ -25,6 +27,8 @@ export function useTimer({
   activeLabel,
   activeNote,
   onSessionComplete,
+  onSchedulePush,
+  onCancelPush,
 }: UseTimerOptions) {
   const [timeLeft, setTimeLeft] = useState(workTime * 60);
   const [isRunning, setIsRunning] = useState(false);
@@ -77,6 +81,9 @@ export function useTimer({
       setIsRunning(false);
       startTimestampRef.current = null;
 
+      // Cancel any pending push (may have already fired, but cancel to be safe)
+      onCancelPush?.();
+
       // Play alarm
       playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent');
 
@@ -128,25 +135,28 @@ export function useTimer({
       if (prev) {
         // Pausing: clear wall-clock tracking
         startTimestampRef.current = null;
+        onCancelPush?.();
         analytics.track({ name: 'timer_paused' });
       } else {
         // Starting/resuming: record wall-clock anchor
         startTimestampRef.current = Date.now();
         startTimeLeftRef.current = timeLeft;
+        onSchedulePush?.(Date.now() + timeLeft * 1000);
         analytics.track({ name: 'timer_started' });
       }
       return !prev;
     });
-  }, [timeLeft]);
+  }, [timeLeft, onSchedulePush, onCancelPush]);
 
   const reset = useCallback(() => {
     setIsRunning(false);
     startTimestampRef.current = null;
+    onCancelPush?.();
     setMode('work');
     setTimeLeft(workTime * 60);
     completedSessionsRef.current = 0;
     analytics.track({ name: 'timer_reset' });
-  }, [workTime]);
+  }, [workTime, onCancelPush]);
 
   // Complete work session early — record actual elapsed time and move to break
   const completeEarly = useCallback(() => {
@@ -156,6 +166,7 @@ export function useTimer({
 
     setIsRunning(false);
     startTimestampRef.current = null;
+    onCancelPush?.();
 
     const session: PomodoroSession = {
       date: new Date().toISOString(),
@@ -183,7 +194,7 @@ export function useTimer({
       setMode('work');
       setTimeLeft(workTime * 60);
     }
-  }, [mode, workTime, timeLeft, breakTime, longBreakTime, longBreakInterval, activeLabel, activeNote, onSessionComplete]);
+  }, [mode, workTime, timeLeft, breakTime, longBreakTime, longBreakInterval, activeLabel, activeNote, onSessionComplete, onCancelPush]);
 
   return { timeLeft, isRunning, mode, toggle, reset, completeEarly };
 }

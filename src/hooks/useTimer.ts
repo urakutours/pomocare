@@ -40,6 +40,35 @@ export function useTimer({
   const startTimestampRef = useRef<number | null>(null);
   const startTimeLeftRef = useRef<number>(workTime * 60);
 
+  // Backup setTimeout that fires playAlarm at the exact end time.
+  // Unlike setInterval (throttled/killed when screen is off), a single
+  // setTimeout is registered as an OS-level alarm on Android Chrome and
+  // has a much higher chance of firing even with the screen off.
+  const alarmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alarmFiredRef = useRef(false);
+
+  const clearAlarmTimeout = useCallback(() => {
+    if (alarmTimeoutRef.current !== null) {
+      clearTimeout(alarmTimeoutRef.current);
+      alarmTimeoutRef.current = null;
+    }
+    alarmFiredRef.current = false;
+  }, []);
+
+  const scheduleAlarmTimeout = useCallback(
+    (delayMs: number) => {
+      clearAlarmTimeout();
+      alarmTimeoutRef.current = setTimeout(() => {
+        // Guard: only fire if still running and alarm hasn't been handled by the regular tick
+        if (startTimestampRef.current !== null && !alarmFiredRef.current) {
+          alarmFiredRef.current = true;
+          playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent');
+        }
+      }, delayMs);
+    },
+    [alarm, clearAlarmTimeout],
+  );
+
   // Sync timeLeft only when workTime setting changes while not running
   const prevWorkTimeRef = useRef(workTime);
   useEffect(() => {
@@ -83,9 +112,13 @@ export function useTimer({
 
       // Cancel any pending push (may have already fired, but cancel to be safe)
       onCancelPush?.();
+      clearAlarmTimeout();
 
-      // Play alarm
-      playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent');
+      // Play alarm (skip if the backup setTimeout already fired it)
+      if (!alarmFiredRef.current) {
+        playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent');
+      }
+      alarmFiredRef.current = false;
 
       if (mode === 'work') {
         const session: PomodoroSession = {
@@ -135,28 +168,31 @@ export function useTimer({
       if (prev) {
         // Pausing: clear wall-clock tracking
         startTimestampRef.current = null;
+        clearAlarmTimeout();
         onCancelPush?.();
         analytics.track({ name: 'timer_paused' });
       } else {
         // Starting/resuming: record wall-clock anchor
         startTimestampRef.current = Date.now();
         startTimeLeftRef.current = timeLeft;
+        scheduleAlarmTimeout(timeLeft * 1000);
         onSchedulePush?.(Date.now() + timeLeft * 1000);
         analytics.track({ name: 'timer_started' });
       }
       return !prev;
     });
-  }, [timeLeft, onSchedulePush, onCancelPush]);
+  }, [timeLeft, scheduleAlarmTimeout, clearAlarmTimeout, onSchedulePush, onCancelPush]);
 
   const reset = useCallback(() => {
     setIsRunning(false);
     startTimestampRef.current = null;
+    clearAlarmTimeout();
     onCancelPush?.();
     setMode('work');
     setTimeLeft(workTime * 60);
     completedSessionsRef.current = 0;
     analytics.track({ name: 'timer_reset' });
-  }, [workTime, onCancelPush]);
+  }, [workTime, clearAlarmTimeout, onCancelPush]);
 
   // Complete work session early — record actual elapsed time and move to break
   const completeEarly = useCallback(() => {
@@ -166,6 +202,7 @@ export function useTimer({
 
     setIsRunning(false);
     startTimestampRef.current = null;
+    clearAlarmTimeout();
     onCancelPush?.();
 
     const session: PomodoroSession = {
@@ -194,7 +231,7 @@ export function useTimer({
       setMode('work');
       setTimeLeft(workTime * 60);
     }
-  }, [mode, workTime, timeLeft, breakTime, longBreakTime, longBreakInterval, activeLabel, activeNote, onSessionComplete, onCancelPush]);
+  }, [mode, workTime, timeLeft, breakTime, longBreakTime, longBreakInterval, activeLabel, activeNote, onSessionComplete, clearAlarmTimeout, onCancelPush]);
 
   return { timeLeft, isRunning, mode, toggle, reset, completeEarly };
 }

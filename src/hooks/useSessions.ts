@@ -3,7 +3,7 @@ import type { PomodoroSession } from '@/types/session';
 import type { StorageService } from '@/services/storage/types';
 import type { Translations } from '@/i18n';
 import { getWeekStartDate } from '@/utils/date';
-import { SupabaseAdapter } from '@/services/storage/SupabaseAdapter';
+import { NeonAdapter } from '@/services/storage/NeonAdapter';
 
 export interface DayData {
   day: string;
@@ -20,7 +20,7 @@ export interface MonthDayData {
 
 export function useSessions(storage: StorageService, days: Translations['days']) {
   const [sessions, setSessions] = useState<PomodoroSession[]>(() => {
-    const cached = SupabaseAdapter.getCachedSessions() ?? [];
+    const cached = NeonAdapter.getCachedSessions() ?? [];
     console.log('[Sessions] init from cache:', cached.length, 'sessions');
     return cached;
   });
@@ -104,7 +104,7 @@ export function useSessions(storage: StorageService, days: Translations['days'])
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [fetchSessionsForSync]);
 
-  // ── Remote change subscription (Supabase Broadcast) ──
+  // ── Remote change subscription (polling) ──
   useEffect(() => {
     if (!storage.onRemoteChange) return;
 
@@ -174,7 +174,7 @@ export function useSessions(storage: StorageService, days: Translations['days'])
   const addSession = useCallback(
     async (session: PomodoroSession) => {
       // No serverLoadedRef guard — addSession writes to local cache + pending queue first,
-      // then pushes to Supabase in the background. Session data is never lost.
+      // then pushes to Neon in the background. Session data is never lost.
 
       // Optimistic UI update
       setSessions((prev) => [...prev, session]);

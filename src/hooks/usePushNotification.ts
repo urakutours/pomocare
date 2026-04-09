@@ -1,123 +1,72 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { workerPost } from '@/lib/api';
 import { VAPID_PUBLIC_KEY } from '@/config/push';
-
-const SUPABASE_FUNCTIONS_URL =
-  'https://cjylcizaikyirdxkwpao.supabase.co/functions/v1';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-  const rawData = atob(base64);
-  return Uint8Array.from(rawData, (char) => char.charCodeAt(0));
-}
-
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${session?.access_token ?? ''}`,
-  };
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
 }
 
 export function usePushNotification(userId: string | null) {
+  const [isSupported] = useState(() => 'serviceWorker' in navigator && 'PushManager' in window);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
-
-  useEffect(() => {
-    setIsSupported('PushManager' in window && 'serviceWorker' in navigator);
-  }, []);
+  const subRef = useRef<PushSubscription | null>(null);
 
   // Check existing subscription on mount
   useEffect(() => {
     if (!isSupported || !userId) return;
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.pushManager.getSubscription().then((sub) => {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.pushManager.getSubscription().then(sub => {
+        subRef.current = sub;
         setIsSubscribed(!!sub);
       });
     });
   }, [isSupported, userId]);
 
-  /** Request permission and subscribe to Web Push. Call from a user gesture. */
   const subscribe = useCallback(async (): Promise<boolean> => {
-    if (!userId) return false;
+    if (!isSupported || !userId) return false;
     try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') return false;
-
       const reg = await navigator.serviceWorker.ready;
-      let sub = await reg.pushManager.getSubscription();
-      if (!sub) {
-        sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-        });
-      }
-
-      const p256dhKey = sub.getKey('p256dh');
-      const authKey = sub.getKey('auth');
-      if (!p256dhKey || !authKey) return false;
-
-      const headers = await getAuthHeaders();
-      await fetch(`${SUPABASE_FUNCTIONS_URL}/schedule-notification`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          action: 'subscribe',
-          endpoint: sub.endpoint,
-          p256dh: btoa(String.fromCharCode(...new Uint8Array(p256dhKey))),
-          auth: btoa(String.fromCharCode(...new Uint8Array(authKey))),
-        }),
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
-
+      subRef.current = sub;
+      const json = sub.toJSON();
+      await workerPost('/schedule-notification', {
+        action: 'subscribe',
+        endpoint: json.endpoint,
+        p256dh: json.keys?.p256dh,
+        auth: json.keys?.auth,
+      });
       setIsSubscribed(true);
       return true;
     } catch (err) {
       console.error('[usePushNotification] subscribe failed:', err);
       return false;
     }
-  }, [userId]);
+  }, [isSupported, userId]);
 
-  /** Schedule a push notification at the given timestamp (ms). */
   const scheduleNotification = useCallback(
     async (fireAt: number, title: string, body: string) => {
-      if (!userId || !isSubscribed) return;
-      try {
-        const headers = await getAuthHeaders();
-        await fetch(`${SUPABASE_FUNCTIONS_URL}/schedule-notification`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            action: 'schedule',
-            fire_at: new Date(fireAt).toISOString(),
-            title,
-            body,
-          }),
-        });
-      } catch (err) {
-        console.error('[usePushNotification] schedule failed:', err);
-      }
+      if (!userId) return;
+      await workerPost('/schedule-notification', {
+        action: 'schedule',
+        fire_at: new Date(fireAt).toISOString(),
+        title,
+        body,
+      });
     },
-    [userId, isSubscribed],
+    [userId],
   );
 
-  /** Cancel any pending scheduled notifications for this user. */
   const cancelNotification = useCallback(async () => {
     if (!userId) return;
-    try {
-      const headers = await getAuthHeaders();
-      await fetch(`${SUPABASE_FUNCTIONS_URL}/schedule-notification`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ action: 'cancel' }),
-      });
-    } catch (err) {
-      console.error('[usePushNotification] cancel failed:', err);
-    }
+    await workerPost('/schedule-notification', { action: 'cancel' });
   }, [userId]);
 
   return {

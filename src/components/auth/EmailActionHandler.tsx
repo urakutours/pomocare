@@ -7,13 +7,11 @@ interface EmailActionHandlerProps {
 }
 
 /**
- * Supabase パスワードリセットフォーム
+ * Neon Auth (Better Auth) パスワードリセットフォーム
  *
- * Supabase はパスワードリセットリンクをクリックすると
- * PASSWORD_RECOVERY イベントを発火してアプリにリダイレクトする。
- * このコンポーネントで新パスワードを入力させて updateUser で更新する。
- *
- * メール確認は Supabase が自動で処理するためコンポーネント不要。
+ * Better Auth はパスワードリセットリンクをクリックすると
+ * ?token=xxx&type=password-reset パラメータ付きでアプリにリダイレクトする。
+ * このコンポーネントで新パスワードを入力させて resetPassword で更新する。
  */
 export function EmailActionHandler({ onDone }: EmailActionHandlerProps) {
   const { t } = useI18n();
@@ -25,7 +23,10 @@ export function EmailActionHandler({ onDone }: EmailActionHandlerProps) {
     if (newPassword.length < 6) return;
     try {
       setStatus('processing');
-      await authService.confirmPasswordReset('', newPassword);
+      // Better Auth: token is passed via URL query parameter
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token') ?? '';
+      await authService.confirmPasswordReset(token, newPassword);
       setStatus('success');
     } catch (e) {
       setStatus('error');

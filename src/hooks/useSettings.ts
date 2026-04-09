@@ -2,19 +2,19 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { PomodoroSettings } from '@/types/settings';
 import { DEFAULT_SETTINGS } from '@/types/settings';
 import type { StorageService } from '@/services/storage/types';
-import { SupabaseAdapter } from '@/services/storage/SupabaseAdapter';
+import { NeonAdapter } from '@/services/storage/NeonAdapter';
 import { mergeLabels } from '@/utils/mergeLabels';
 
 /** Read cached settings for instant startup (avoids flash of defaults). */
 function getInitialSettings(): { settings: PomodoroSettings; fromCache: boolean } {
-  const cached = SupabaseAdapter.getCachedSettings();
+  const cached = NeonAdapter.getCachedSettings();
   return cached ? { settings: cached, fromCache: true } : { settings: DEFAULT_SETTINGS, fromCache: false };
 }
 
 export function useSettings(storage: StorageService) {
   const { settings: initialSettings, fromCache } = getInitialSettings();
   const [settings, setSettings] = useState<PomodoroSettings>(initialSettings);
-  // If we have cached settings, consider "loaded" immediately (Supabase will update in background)
+  // If we have cached settings, consider "loaded" immediately (Neon will update in background)
   const [isLoaded, setIsLoaded] = useState(fromCache);
   // Track the last-saved settings to detect local vs remote changes
   const lastSavedRef = useRef<string>('');
@@ -102,7 +102,7 @@ export function useSettings(storage: StorageService) {
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [fetchSettings]);
 
-  // ── Remote change subscription (Supabase Broadcast) ──
+  // ── Remote change subscription (polling) ──
   useEffect(() => {
     if (!storage.onRemoteChange) return;
 

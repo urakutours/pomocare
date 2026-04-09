@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { authService, type User, type UserTier } from '@/services/auth/AuthService';
-import { supabase } from '@/lib/supabase';
-import { SupabaseAdapter } from '@/services/storage/SupabaseAdapter';
+import { authClient, neon } from '@/lib/neon';
+import { NeonAdapter } from '@/services/storage/NeonAdapter';
 
 const TIER_CACHE_KEY = 'pomocare-cached-tier';
 
@@ -17,7 +17,7 @@ interface AuthContextValue {
   sendPasswordReset: (email: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   clearPasswordRecovery: () => void;
-  /** 決済完了後などに呼ぶ: Supabaseからtierを再取得してuserステートを更新する */
+  /** 決済完了後などに呼ぶ: DBからtierを再取得してuserステートを更新する */
   refreshTier: () => Promise<void>;
 }
 
@@ -63,33 +63,38 @@ function setCachedTier(userId: string, tier: UserTier) {
 }
 
 async function fetchUserProfile(userId: string): Promise<UserProfileData> {
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('tier, subscription_start_date, subscription_status, subscription_current_period_end')
-    .eq('user_id', userId)
-    .single();
+  try {
+    const { data, error } = await neon
+      .from('user_profiles')
+      .select('tier, subscription_start_date, subscription_status, subscription_current_period_end')
+      .eq('user_id', userId)
+      .single();
 
-  if (error) {
-    if (error.code === 'PGRST116') {
-      console.log('[Auth] No profile row found, creating free tier for', userId);
-      await supabase.from('user_profiles').insert({ user_id: userId, tier: 'free' });
-      setCachedTier(userId, 'free');
-      return { tier: 'free', subscriptionStartDate: null, subscriptionStatus: null, subscriptionCurrentPeriodEnd: null };
+    if (error) {
+      if (error.code === 'PGRST116') {
+        console.log('[Auth] No profile row found, creating free tier for', userId);
+        await neon.from('user_profiles').insert({ user_id: userId, tier: 'free' });
+        setCachedTier(userId, 'free');
+        return { tier: 'free', subscriptionStartDate: null, subscriptionStatus: null, subscriptionCurrentPeriodEnd: null };
+      }
+      console.error('[Auth] fetchUserProfile failed:', error.code, error.message);
+      const cached = getCachedTier(userId);
+      return { tier: cached, subscriptionStartDate: null, subscriptionStatus: null, subscriptionCurrentPeriodEnd: null };
     }
-    console.error('[Auth] fetchUserProfile failed:', error.code, error.message);
-    // Use cached tier instead of defaulting to 'free'
+
+    const tier = (data.tier as UserTier) ?? 'free';
+    setCachedTier(userId, tier);
+    return {
+      tier,
+      subscriptionStartDate: data.subscription_start_date ?? null,
+      subscriptionStatus: data.subscription_status ?? null,
+      subscriptionCurrentPeriodEnd: data.subscription_current_period_end ?? null,
+    };
+  } catch (err) {
+    console.error('[Auth] fetchUserProfile exception:', err);
     const cached = getCachedTier(userId);
     return { tier: cached, subscriptionStartDate: null, subscriptionStatus: null, subscriptionCurrentPeriodEnd: null };
   }
-
-  const tier = (data.tier as UserTier) ?? 'free';
-  setCachedTier(userId, tier);
-  return {
-    tier,
-    subscriptionStartDate: data.subscription_start_date ?? null,
-    subscriptionStatus: data.subscription_status ?? null,
-    subscriptionCurrentPeriodEnd: data.subscription_current_period_end ?? null,
-  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -98,30 +103,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   // Proactive session recovery on tab focus.
-  // When the user returns after idle, ensure the auth session is still valid
-  // and refresh tier from the server to prevent stale 'free' tier display.
   const lastVisibilityCheckRef = useRef(0);
   useEffect(() => {
     const handleVisibility = async () => {
       if (document.visibilityState !== 'visible') return;
-      // Throttle: skip if checked less than 30 seconds ago
       if (Date.now() - lastVisibilityCheckRef.current < 30_000) return;
       lastVisibilityCheckRef.current = Date.now();
 
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          // Session gone — try to refresh it
-          const { error } = await supabase.auth.refreshSession();
-          if (error) {
-            console.warn('[Auth] Session recovery failed on focus:', error.message);
-            // onAuthStateChange will fire with null session → user logged out
-          }
-          return;
-        }
+        const { data } = await authClient.getSession();
+        if (!data?.user) return;
+
         // Session is valid — refresh tier in case it changed while idle
-        const profile = await fetchUserProfile(session.user.id);
-        setUser(prev => prev && prev.id === session.user.id
+        const profile = await fetchUserProfile(data.user.id);
+        setUser(prev => prev && prev.id === data.user.id
           ? { ...prev, tier: profile.tier, subscriptionStartDate: profile.subscriptionStartDate, subscriptionStatus: profile.subscriptionStatus, subscriptionCurrentPeriodEnd: profile.subscriptionCurrentPeriodEnd }
           : prev
         );
@@ -134,62 +129,108 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
+  // Check for password recovery token in URL (Better Auth uses ?token= param)
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          setIsPasswordRecovery(true);
-        }
-
-        if (!session?.user) {
-          setUser(null);
-          setIsLoading(false);
-          return;
-        }
-
-        const sbUser = session.user;
-
-        // Build user — preserve existing tier if same user (avoids flash to 'free' on TOKEN_REFRESHED)
-        // Falls back to localStorage-cached tier for new sessions instead of 'free'
-        setUser(prev => {
-          const isSame = prev && prev.id === sbUser.id;
-          return {
-            id: sbUser.id,
-            email: sbUser.email ?? null,
-            displayName:
-              sbUser.user_metadata?.full_name ??
-              sbUser.user_metadata?.name ??
-              null,
-            photoURL:
-              sbUser.user_metadata?.avatar_url ??
-              sbUser.user_metadata?.picture ??
-              null,
-            tier: isSame ? prev.tier : getCachedTier(sbUser.id),
-            subscriptionStartDate: isSame ? prev.subscriptionStartDate : null,
-            subscriptionStatus: isSame ? prev.subscriptionStatus : null,
-            subscriptionCurrentPeriodEnd: isSame ? prev.subscriptionCurrentPeriodEnd : null,
-            isAnonymous: false,
-            emailVerified: sbUser.email_confirmed_at != null,
-          };
-        });
-        setIsLoading(false);
-
-        // Fetch actual profile asynchronously and always apply it
-        const profile = await fetchUserProfile(sbUser.id);
-        setUser(prev => prev && prev.id === sbUser.id
-          ? {
-              ...prev,
-              tier: profile.tier,
-              subscriptionStartDate: profile.subscriptionStartDate,
-              subscriptionStatus: profile.subscriptionStatus,
-              subscriptionCurrentPeriodEnd: profile.subscriptionCurrentPeriodEnd,
-            }
-          : prev
-        );
-      },
-    );
-    return () => subscription.unsubscribe();
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const type = params.get('type');
+    if (token && type === 'password-reset') {
+      setIsPasswordRecovery(true);
+    }
   }, []);
+
+  // Initial session load + polling for auth state changes
+  useEffect(() => {
+    let cancelled = false;
+    let firstCheck = true;
+    let lastUserId: string | null = null;
+
+    const syncUser = async () => {
+      if (cancelled) return;
+      try {
+        const { data } = await authClient.getSession();
+        const neonUser = data?.user;
+        const currentId = neonUser?.id ?? null;
+
+        if (firstCheck || currentId !== lastUserId) {
+          firstCheck = false;
+          lastUserId = currentId;
+
+          if (!neonUser) {
+            setUser(null);
+            setIsLoading(false);
+            return;
+          }
+
+          // Build user — preserve existing tier if same user (avoids flash to 'free')
+          setUser(prev => {
+            const isSame = prev && prev.id === neonUser.id;
+            return {
+              id: neonUser.id,
+              email: neonUser.email ?? null,
+              displayName: neonUser.name ?? null,
+              photoURL: neonUser.image ?? null,
+              tier: isSame ? prev.tier : getCachedTier(neonUser.id),
+              subscriptionStartDate: isSame ? prev.subscriptionStartDate : null,
+              subscriptionStatus: isSame ? prev.subscriptionStatus : null,
+              subscriptionCurrentPeriodEnd: isSame ? prev.subscriptionCurrentPeriodEnd : null,
+              isAnonymous: false,
+              emailVerified: neonUser.emailVerified ?? false,
+            };
+          });
+          setIsLoading(false);
+
+          // Fetch actual profile asynchronously
+          const profile = await fetchUserProfile(neonUser.id);
+          if (!cancelled) {
+            setUser(prev => prev && prev.id === neonUser.id
+              ? {
+                  ...prev,
+                  tier: profile.tier,
+                  subscriptionStartDate: profile.subscriptionStartDate,
+                  subscriptionStatus: profile.subscriptionStatus,
+                  subscriptionCurrentPeriodEnd: profile.subscriptionCurrentPeriodEnd,
+                }
+              : prev
+            );
+          }
+        }
+      } catch (err) {
+        console.warn('[Auth] syncUser error:', err);
+        // On first check failure, still resolve loading
+        if (firstCheck) {
+          firstCheck = false;
+          setIsLoading(false);
+        }
+      }
+    };
+
+    // Initial check
+    syncUser();
+
+    // Fallback: ensure loading resolves even if getSession hangs
+    const fallbackTimer = setTimeout(() => {
+      if (!cancelled) setIsLoading(false);
+    }, 10_000);
+
+    // Poll for auth state changes (Better Auth doesn't have onAuthStateChange)
+    const interval = setInterval(syncUser, 5000);
+
+    // Cross-tab: listen for storage events
+    const onStorage = (e: StorageEvent) => {
+      if (e.key?.includes('better-auth') || e.key?.includes('session')) {
+        syncUser();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      clearTimeout(fallbackTimer);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const signInWithGoogle = useCallback(async () => {
     await authService.signInWithGoogle();
@@ -204,13 +245,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    // Clear caches for current user to prevent stale data on next login
     const uid = user?.id;
     if (uid) {
-      SupabaseAdapter.clearCacheForUser(uid);
+      NeonAdapter.clearCacheForUser(uid);
       localStorage.removeItem(TIER_CACHE_KEY);
     }
     await authService.signOut();
+    setUser(null);
   }, [user?.id]);
 
   const resendVerificationEmail = useCallback(async () => {
@@ -223,19 +264,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteAccount = useCallback(async () => {
     await authService.deleteAccount();
+    setUser(null);
   }, []);
 
   const clearPasswordRecovery = useCallback(() => {
     setIsPasswordRecovery(false);
+    // Clean up URL params
+    const url = new URL(window.location.href);
+    url.searchParams.delete('token');
+    url.searchParams.delete('type');
+    window.history.replaceState({}, '', url.toString());
   }, []);
 
   const refreshTier = useCallback(async () => {
-    const { data: { user: sbUser } } = await supabase.auth.getUser();
-    if (!sbUser) {
+    const { data } = await authClient.getSession();
+    if (!data?.user) {
       console.warn('[Auth] refreshTier: no authenticated user');
       return;
     }
-    const profile = await fetchUserProfile(sbUser.id);
+    const profile = await fetchUserProfile(data.user.id);
     console.log('[Auth] refreshTier result:', profile.tier);
     setUser(prev => prev
       ? {

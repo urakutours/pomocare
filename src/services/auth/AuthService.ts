@@ -1,5 +1,4 @@
-import { supabase } from '@/lib/supabase';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { authClient } from '@/lib/neon';
 
 export type UserTier = 'free' | 'standard' | 'pro';
 
@@ -16,107 +15,148 @@ export interface User {
   emailVerified: boolean;
 }
 
+interface NeonUser {
+  id: string;
+  email: string;
+  name: string | null;
+  image: string | null;
+  emailVerified: boolean;
+}
+
 function toUser(
-  sbUser: SupabaseUser,
+  neonUser: NeonUser,
   tier: UserTier = 'free',
   subscriptionStartDate: string | null = null,
   subscriptionStatus: string | null = null,
   subscriptionCurrentPeriodEnd: string | null = null,
 ): User {
   return {
-    id: sbUser.id,
-    email: sbUser.email ?? null,
-    displayName:
-      sbUser.user_metadata?.full_name ??
-      sbUser.user_metadata?.name ??
-      null,
-    photoURL:
-      sbUser.user_metadata?.avatar_url ??
-      sbUser.user_metadata?.picture ??
-      null,
+    id: neonUser.id,
+    email: neonUser.email ?? null,
+    displayName: neonUser.name ?? null,
+    photoURL: neonUser.image ?? null,
     tier,
     subscriptionStartDate,
     subscriptionStatus,
     subscriptionCurrentPeriodEnd,
     isAnonymous: false,
-    emailVerified: sbUser.email_confirmed_at != null,
+    emailVerified: neonUser.emailVerified ?? false,
   };
 }
 
 export class AuthService {
   async getCurrentUser(): Promise<User | null> {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user ? toUser(user) : null;
+    const { data, error } = await authClient.getSession();
+    if (error || !data?.user) return null;
+    return toUser(data.user as NeonUser);
   }
 
+  /**
+   * セッション変更を監視する。
+   * Better Auth にはリアルタイムリスナーがないため、
+   * ポーリングで getSession を定期確認し、変化時にコールバックを呼ぶ。
+   */
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        callback(session?.user ? toUser(session.user) : null);
-      },
-    );
-    return () => subscription.unsubscribe();
+    let lastUserId: string | null = null;
+    let cancelled = false;
+
+    const check = async () => {
+      if (cancelled) return;
+      try {
+        const { data } = await authClient.getSession();
+        const currentUser = data?.user as NeonUser | null;
+        const currentId = currentUser?.id ?? null;
+
+        if (currentId !== lastUserId) {
+          lastUserId = currentId;
+          callback(currentUser ? toUser(currentUser) : null);
+        }
+      } catch {
+        // ignore transient errors
+      }
+    };
+
+    // Initial check
+    check();
+
+    // Poll every 5 seconds for auth state changes
+    const interval = setInterval(check, 5000);
+
+    // Listen for storage events (cross-tab sign in/out)
+    const onStorage = (e: StorageEvent) => {
+      if (e.key?.includes('better-auth') || e.key?.includes('session')) {
+        check();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      window.removeEventListener('storage', onStorage);
+    };
   }
 
   async signInWithGoogle(): Promise<void> {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await authClient.signIn.social({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin + window.location.pathname,
-      },
+      callbackURL: window.location.origin + window.location.pathname,
     });
-    if (error) throw error;
-    // Redirect happens — no user returned
+    if (error) throw new Error(error.message ?? 'Google sign-in failed');
   }
 
   async signInWithEmail(email: string, password: string): Promise<User> {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    return toUser(data.user);
+    const { data, error } = await authClient.signIn.email({ email, password });
+    if (error) throw new Error(error.message ?? 'Sign-in failed');
+    if (!data?.user) throw new Error('Sign-in failed');
+    return toUser(data.user as NeonUser);
   }
 
   async signUpWithEmail(email: string, password: string): Promise<User> {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await authClient.signUp.email({
       email,
       password,
-      options: {
-        emailRedirectTo: window.location.origin + window.location.pathname,
-      },
+      name: email.split('@')[0] || 'User',
     });
-    if (error) throw error;
-    if (!data.user) throw new Error('Signup failed');
-    return toUser(data.user);
+    if (error) throw new Error(error.message ?? 'Sign-up failed');
+    if (!data?.user) throw new Error('Sign-up failed');
+    return toUser(data.user as NeonUser);
   }
 
   async resendVerificationEmail(): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user?.email) {
-      await supabase.auth.resend({ type: 'signup', email: user.email });
+    const { data } = await authClient.getSession();
+    if (data?.user?.email) {
+      await authClient.sendVerificationEmail({
+        email: data.user.email,
+        callbackURL: window.location.origin + window.location.pathname,
+      });
     }
   }
 
   async sendPasswordReset(email: string): Promise<void> {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await authClient.requestPasswordReset({
+      email,
       redirectTo: window.location.origin + window.location.pathname,
     });
-    if (error) throw error;
+    if (error) throw new Error(error.message ?? 'Password reset request failed');
   }
 
-  async confirmPasswordReset(_code: string, newPassword: string): Promise<void> {
-    // Supabase password recovery: user clicks email link → lands on app with
-    // PASSWORD_RECOVERY event → we call updateUser to set the new password.
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) throw error;
+  async confirmPasswordReset(token: string, newPassword: string): Promise<void> {
+    const { error } = await authClient.resetPassword({
+      newPassword,
+      token,
+    });
+    if (error) throw new Error(error.message ?? 'Password reset failed');
   }
 
   async deleteAccount(): Promise<void> {
-    const { error } = await supabase.rpc('delete_own_account');
-    if (error) throw error;
-    await supabase.auth.signOut();
+    // TODO: Phase 2 — implement via Cloudflare Worker
+    // For now, sign out only. Account deletion requires server-side logic.
+    await authClient.signOut();
   }
 
   async signOut(): Promise<void> {
-    await supabase.auth.signOut();
+    await authClient.signOut();
   }
 }
 

@@ -8,7 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { FeatureProvider, useFeatures } from '@/contexts/FeatureContext';
 import { I18nProvider, useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { createStorageService, createSupabaseStorageService, LocalStorageAdapter, SupabaseAdapter } from '@/services/storage';
+import { createStorageService, createNeonStorageService, LocalStorageAdapter, NeonAdapter } from '@/services/storage';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 import { PaymentSuccessToast } from '@/components/shared/PaymentSuccessToast';
 import { AdBanner } from '@/components/ads/AdBanner';
@@ -726,7 +726,7 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
 
 // ---- Storage switcher based on auth state + tier ----
 // 未ログイン          → localStorage
-// ログイン + cloudSync → Supabase (クラウド保存)
+// ログイン + cloudSync → Neon (クラウド保存)
 //   free tier: 1デバイス制限あり / standard・pro: 複数デバイスOK
 function AppWithStorage() {
   const { user, isLoading: authLoading, isPasswordRecovery, clearPasswordRecovery } = useAuth();
@@ -739,26 +739,26 @@ function AppWithStorage() {
 
     const currentUid = user?.id ?? null;
     const useCloud = currentUid && features.cloudSync;
-    const storageKey = useCloud ? `supabase:${currentUid}` : `local:${currentUid ?? 'anon'}`;
+    const storageKey = useCloud ? `neon:${currentUid}` : `local:${currentUid ?? 'anon'}`;
 
     // 同じキーなら再初期化不要
     if (prevStorageKeyRef.current === storageKey) return;
     prevStorageKeyRef.current = storageKey;
 
     if (useCloud) {
-      const cloud = createSupabaseStorageService(currentUid!);
+      const cloud = createNeonStorageService(currentUid!);
 
       // Set storage immediately — don't block rendering on migration
       setStorage((prev) => {
-        if (prev && 'destroy' in prev && typeof (prev as SupabaseAdapter).destroy === 'function') {
-          (prev as SupabaseAdapter).destroy();
+        if (prev && 'destroy' in prev && typeof (prev as NeonAdapter).destroy === 'function') {
+          (prev as NeonAdapter).destroy();
         }
         return cloud;
       });
 
-      // localStorage → Supabase 自動マイグレーション（バックグラウンド）
+      // localStorage → Neon 自動マイグレーション（バックグラウンド）
       // 既存無料ユーザーが初めてクラウド保存に切り替わった際、
-      // localStorage にあるデータを Supabase へ移行する
+      // localStorage にあるデータを Neon へ移行する
       const local = new LocalStorageAdapter();
       (async () => {
         try {
@@ -767,7 +767,7 @@ function AppWithStorage() {
             local.getSessions(),
           ]);
           if (cloudSessions.length === 0 && localSessions.length > 0) {
-            // Supabase が空 & localStorage にデータがある → フル移行
+            // Neon が空 & localStorage にデータがある → フル移行
             const localSettings = await local.getSettings();
             await Promise.all([
               cloud.saveSessions(localSessions),
@@ -803,20 +803,18 @@ function AppWithStorage() {
       })();
     } else {
       setStorage((prev) => {
-        if (prev && 'destroy' in prev && typeof (prev as SupabaseAdapter).destroy === 'function') {
-          (prev as SupabaseAdapter).destroy();
+        if (prev && 'destroy' in prev && typeof (prev as NeonAdapter).destroy === 'function') {
+          (prev as NeonAdapter).destroy();
         }
         return createStorageService();
       });
     }
   }, [user, authLoading, features.cloudSync]);
 
-  // Supabase password recovery (user clicked reset link in email)
+  // Password recovery (user clicked reset link in email)
   if (isPasswordRecovery) {
     const handleActionDone = () => {
       clearPasswordRecovery();
-      // Remove hash fragment left by Supabase
-      window.history.replaceState({}, '', window.location.pathname);
     };
     return (
       <I18nProvider language="en">

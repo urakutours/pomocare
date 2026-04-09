@@ -91,8 +91,14 @@ export function EmailActionHandler({ onDone }: EmailActionHandlerProps) {
             </div>
             <p className="text-sm text-red-500 mb-4">{error}</p>
             <button
+              onClick={() => { setStatus('form'); setError(''); setNewPassword(''); }}
+              className="w-full py-2.5 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-xl transition-colors mb-2"
+            >
+              {t.authTryAgain}
+            </button>
+            <button
               onClick={onDone}
-              className="w-full py-2.5 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-xl transition-colors"
+              className="w-full py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
             >
               {t.authOpenApp}
             </button>

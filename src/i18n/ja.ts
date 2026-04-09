@@ -132,6 +132,7 @@ export const ja: Translations = {
   authEmailVerifiedTitle: 'メール認証完了',
   authEmailVerifiedMessage: 'メールアドレスの認証が完了しました。すべての機能をご利用いただけます。',
   authOpenApp: 'アプリを開く',
+  authTryAgain: 'もう一度試す',
   authPasswordResetDoneTitle: 'パスワードリセット完了',
   authPasswordResetDoneMessage: 'パスワードがリセットされました。新しいパスワードでログインできます。',
   authDeleteAccount: 'アカウントを削除',

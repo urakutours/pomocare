@@ -132,6 +132,7 @@ export const it: Translations = {
   authEmailVerifiedTitle: 'E-mail verificata',
   authEmailVerifiedMessage: 'La tua e-mail è stata verificata con successo.',
   authOpenApp: 'Apri app',
+  authTryAgain: 'Riprova',
   authPasswordResetDoneTitle: 'Password reimpostata',
   authPasswordResetDoneMessage: 'La tua password è stata reimpostata. Puoi accedere con la nuova password.',
   authDeleteAccount: 'Elimina account',

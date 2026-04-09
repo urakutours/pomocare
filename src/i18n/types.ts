@@ -167,6 +167,7 @@ export interface Translations {
   authEmailVerifiedTitle: string;
   authEmailVerifiedMessage: string;
   authOpenApp: string;
+  authTryAgain: string;
   authPasswordResetDoneTitle: string;
   authPasswordResetDoneMessage: string;
   authDeleteAccount: string;

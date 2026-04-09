@@ -132,6 +132,7 @@ export const fr: Translations = {
   authEmailVerifiedTitle: 'E-mail vérifié',
   authEmailVerifiedMessage: 'Votre e-mail a été vérifié avec succès.',
   authOpenApp: "Ouvrir l'app",
+  authTryAgain: 'Réessayer',
   authPasswordResetDoneTitle: 'Mot de passe réinitialisé',
   authPasswordResetDoneMessage: 'Votre mot de passe a été réinitialisé. Connectez-vous avec votre nouveau mot de passe.',
   authDeleteAccount: 'Supprimer le compte',

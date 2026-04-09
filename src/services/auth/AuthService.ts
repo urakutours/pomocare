@@ -136,7 +136,7 @@ export class AuthService {
   async sendPasswordReset(email: string): Promise<void> {
     const { error } = await authClient.requestPasswordReset({
       email,
-      redirectTo: window.location.origin + window.location.pathname,
+      redirectTo: window.location.origin + window.location.pathname + '?type=password-reset',
     });
     if (error) throw new Error(error.message ?? 'Password reset request failed');
   }

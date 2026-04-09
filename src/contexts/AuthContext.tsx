@@ -130,11 +130,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Check for password recovery token in URL (Better Auth uses ?token= param)
+  // Neon Auth redirects to callbackURL with ?token=xxx appended.
+  // We include type=password-reset in the redirectTo so it appears in the final URL.
+  // Also accept token-only for robustness (Neon Auth may omit type).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const type = params.get('type');
-    if (token && type === 'password-reset') {
+    if (token && (type === 'password-reset' || !type)) {
       setIsPasswordRecovery(true);
     }
   }, []);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/auth/AuthService';
 import { useI18n } from '@/contexts/I18nContext';
 
@@ -10,20 +11,24 @@ interface EmailActionHandlerProps {
  * Neon Auth (Better Auth) パスワードリセットフォーム
  *
  * Better Auth はパスワードリセットリンクをクリックすると
- * ?token=xxx&type=password-reset パラメータ付きでアプリにリダイレクトする。
- * このコンポーネントで新パスワードを入力させて resetPassword で更新する。
+ * ?token=xxx パラメータ付きでアプリにリダイレクトする。
+ * このコンポーネントで新パスワードを2回入力させて resetPassword で更新する。
  */
 export function EmailActionHandler({ onDone }: EmailActionHandlerProps) {
   const { t } = useI18n();
   const [status, setStatus] = useState<'form' | 'processing' | 'success' | 'error'>('form');
   const [error, setError] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const passwordsMatch = newPassword === confirmPassword;
+  const isValid = newPassword.length >= 6 && confirmPassword.length > 0 && passwordsMatch;
 
   const handlePasswordReset = async () => {
-    if (newPassword.length < 6) return;
+    if (!isValid) return;
     try {
       setStatus('processing');
-      // Better Auth: token is passed via URL query parameter
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token') ?? '';
       await authService.confirmPasswordReset(token, newPassword);
@@ -33,6 +38,8 @@ export function EmailActionHandler({ onDone }: EmailActionHandlerProps) {
       setError(e instanceof Error ? e.message : 'Reset failed');
     }
   };
+
+  const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-tiffany/10 to-white dark:from-neutral-900 dark:to-neutral-800">
@@ -46,17 +53,49 @@ export function EmailActionHandler({ onDone }: EmailActionHandlerProps) {
 
         {status === 'form' && (
           <>
-            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{t.authForgotPasswordTitle}</h3>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder={t.authPassword}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany dark:bg-neutral-700 dark:text-gray-200 mb-4"
-            />
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">{t.authForgotPasswordTitle}</h3>
+
+            {/* New password — no eye icon */}
+            <div className="mb-3">
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder={t.authNewPassword}
+                className={inputClass}
+              />
+            </div>
+
+            {/* Confirm password — with eye icon for reveal & copy */}
+            <div className="relative mb-1">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder={t.authConfirmPassword}
+                className={`${inputClass} pr-10`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              >
+                {showPassword
+                  ? <EyeOff className="w-4 h-4" />
+                  : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+
+            {/* Mismatch warning */}
+            <div className="h-6 mb-2">
+              {confirmPassword.length > 0 && !passwordsMatch && (
+                <p className="text-xs text-red-500">{t.authPasswordMismatch}</p>
+              )}
+            </div>
+
             <button
               onClick={handlePasswordReset}
-              disabled={newPassword.length < 6}
+              disabled={!isValid}
               className="w-full py-2.5 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-xl disabled:opacity-50 transition-colors"
             >
               {t.authSendResetEmail}
@@ -91,7 +130,7 @@ export function EmailActionHandler({ onDone }: EmailActionHandlerProps) {
             </div>
             <p className="text-sm text-red-500 mb-4">{error}</p>
             <button
-              onClick={() => { setStatus('form'); setError(''); setNewPassword(''); }}
+              onClick={() => { setStatus('form'); setError(''); setNewPassword(''); setConfirmPassword(''); }}
               className="w-full py-2.5 text-sm font-medium text-white bg-tiffany hover:bg-tiffany-hover rounded-xl transition-colors mb-2"
             >
               {t.authTryAgain}

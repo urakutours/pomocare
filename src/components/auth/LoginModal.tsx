@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useI18n } from '@/contexts/I18nContext';
 
@@ -18,6 +18,19 @@ export function LoginModal({ onClose }: LoginModalProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+
+  // Only close on backdrop click when mousedown also started on the backdrop
+  // (prevents closing when a text selection drag ends outside the modal)
+  const mouseDownOnBackdrop = useRef(false);
+  const handleBackdropMouseDown = (e: React.MouseEvent) => {
+    mouseDownOnBackdrop.current = e.target === e.currentTarget;
+  };
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget && mouseDownOnBackdrop.current) {
+      onClose();
+    }
+    mouseDownOnBackdrop.current = false;
+  };
 
   const handleGoogleSignIn = async () => {
     setError('');
@@ -140,8 +153,8 @@ export function LoginModal({ onClose }: LoginModalProps) {
   // Forgot password view
   if (view === 'forgotPassword') {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-6 w-80 mx-4" onClick={(e) => e.stopPropagation()}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onMouseDown={handleBackdropMouseDown} onClick={handleBackdropClick}>
+        <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-6 w-80 mx-4">
           <div className="flex justify-between items-center mb-5">
             <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-base">{t.authForgotPasswordTitle}</h3>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">✕</button>

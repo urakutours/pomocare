@@ -202,8 +202,8 @@ export function LoginModal({ onClose }: LoginModalProps) {
 
   // Main login/signup view
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-6 w-80 mx-4" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onMouseDown={handleBackdropMouseDown} onClick={handleBackdropClick}>
+      <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-6 w-80 mx-4">
         <div className="flex justify-between items-center mb-5">
           <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-base">
             {view === 'signin' ? t.authLogin : t.authSignup}

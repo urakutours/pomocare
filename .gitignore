@@ -3,3 +3,19 @@ dist
 *.local
 nul
 .claude/settings.local.json
+
+# Capacitor / Android build outputs
+android/.gradle/
+android/app/build/
+android/build/
+android/capacitor-cordova-android-plugins/
+android/local.properties
+android/.idea/
+*.iml
+
+# Signing keys - managed separately, never commit
+android/app/signing.keystore
+android/app/signing-key-info.txt
+**/signing.keystore
+**/signing-key-info.txt
+.secrets/

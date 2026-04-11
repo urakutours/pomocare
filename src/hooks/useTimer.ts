@@ -3,7 +3,8 @@ import type { TimerMode } from '@/types/timer';
 import type { PomodoroSession } from '@/types/session';
 import type { AlarmSettings } from '@/types/settings';
 import { analytics } from '@/services/analytics/AnalyticsService';
-import { playAlarm, unlockAudio } from '@/utils/alarm';
+import { playAlarm, unlockAudio, tryResumeAudio, scheduleNativeAlarm, cancelNativeAlarm } from '@/utils/alarm';
+import { isNative } from '@/utils/platform';
 
 interface UseTimerOptions {
   workTime: number;
@@ -47,12 +48,21 @@ export function useTimer({
   const alarmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const alarmFiredRef = useRef(false);
 
+  // Native (Capacitor) LocalNotification ID — scheduled at timer start,
+  // fires even if the app is killed. -1 = no native alarm scheduled.
+  const nativeAlarmIdRef = useRef<number>(-1);
+
   const clearAlarmTimeout = useCallback(() => {
     if (alarmTimeoutRef.current !== null) {
       clearTimeout(alarmTimeoutRef.current);
       alarmTimeoutRef.current = null;
     }
     alarmFiredRef.current = false;
+    // Cancel any pending native LocalNotification
+    if (nativeAlarmIdRef.current >= 0) {
+      void cancelNativeAlarm(nativeAlarmIdRef.current);
+      nativeAlarmIdRef.current = -1;
+    }
   }, []);
 
   const scheduleAlarmTimeout = useCallback(
@@ -62,7 +72,7 @@ export function useTimer({
         // Guard: only fire if still running and alarm hasn't been handled by the regular tick
         if (startTimestampRef.current !== null && !alarmFiredRef.current) {
           alarmFiredRef.current = true;
-          playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent');
+          playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent', alarm.channel ?? 'media');
         }
       }, delayMs);
     },
@@ -81,13 +91,15 @@ export function useTimer({
   // Recalculate timeLeft from wall-clock when the page becomes visible again
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (
-        document.visibilityState === 'visible' &&
-        startTimestampRef.current !== null
-      ) {
-        const elapsed = Math.floor((Date.now() - startTimestampRef.current) / 1000);
-        const remaining = Math.max(0, startTimeLeftRef.current - elapsed);
-        setTimeLeft(remaining);
+      if (document.visibilityState === 'visible') {
+        // Try to resume AudioContext on foreground return (helps iOS)
+        tryResumeAudio();
+
+        if (startTimestampRef.current !== null) {
+          const elapsed = Math.floor((Date.now() - startTimestampRef.current) / 1000);
+          const remaining = Math.max(0, startTimeLeftRef.current - elapsed);
+          setTimeLeft(remaining);
+        }
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -116,7 +128,7 @@ export function useTimer({
 
       // Play alarm (skip if the backup setTimeout already fired it)
       if (!alarmFiredRef.current) {
-        playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent');
+        playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent', alarm.channel ?? 'media');
       }
       alarmFiredRef.current = false;
 
@@ -176,12 +188,25 @@ export function useTimer({
         startTimestampRef.current = Date.now();
         startTimeLeftRef.current = timeLeft;
         scheduleAlarmTimeout(timeLeft * 1000);
-        onSchedulePush?.(Date.now() + timeLeft * 1000);
+
+        // On native platforms, also register an OS-level LocalNotification
+        // that fires even if the app is fully killed.
+        if (isNative()) {
+          void scheduleNativeAlarm(
+            Date.now() + timeLeft * 1000,
+            alarm.sound,
+          ).then((id) => {
+            nativeAlarmIdRef.current = id;
+          });
+        } else {
+          // Web: server-side push notification (for logged-in users)
+          onSchedulePush?.(Date.now() + timeLeft * 1000);
+        }
         analytics.track({ name: 'timer_started' });
       }
       return !prev;
     });
-  }, [timeLeft, scheduleAlarmTimeout, clearAlarmTimeout, onSchedulePush, onCancelPush]);
+  }, [timeLeft, alarm, scheduleAlarmTimeout, clearAlarmTimeout, onSchedulePush, onCancelPush]);
 
   const reset = useCallback(() => {
     setIsRunning(false);

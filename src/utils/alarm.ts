@@ -1,5 +1,8 @@
-import type { AlarmSound, VibrationMode } from '@/types/settings';
+import type { AlarmSound, AlarmChannel, VibrationMode } from '@/types/settings';
 import { classicWavB64, gentleWavB64, softWavB64 } from '@/assets/alarmWavData';
+import { isNative } from '@/utils/platform';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 /**
  * Generate alarm sound using Web Audio API (no external audio files needed)
@@ -26,10 +29,15 @@ let sharedCtx: AudioContext | null = null;
  * Must be called from a user-gesture handler (tap / click).
  * Creates the shared AudioContext, resumes it, and plays a silent
  * buffer so iOS WebKit marks the context as "allowed to play".
+ * Also pre-unlocks HTMLAudioElement for iOS fallback.
  */
 export function unlockAudio(): void {
   // Also request notification permission on first interaction
   requestNotificationPermission();
+
+  // On native platforms, also request LocalNotifications permission
+  // (fires Android 13+ runtime prompt). No-op on web.
+  void requestNativeNotificationPermission();
 
   if (sharedCtx && sharedCtx.state === 'running') return;
 
@@ -52,6 +60,77 @@ export function unlockAudio(): void {
   } catch {
     // ignore — context may not be fully ready yet
   }
+
+  // Pre-unlock HTMLAudioElement on iOS (user-gesture context)
+  unlockHtmlAudio();
+}
+
+/**
+ * Try to resume the shared AudioContext (e.g. on visibilitychange).
+ * Exported so useTimer can call it when the app returns to foreground.
+ */
+export function tryResumeAudio(): void {
+  if (sharedCtx && sharedCtx.state === 'suspended') {
+    sharedCtx.resume();
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  HTMLAudioElement fallback — for when AudioContext is suspended     */
+/*  (e.g. iOS returning from background without user gesture).        */
+/* ------------------------------------------------------------------ */
+let htmlAudioUnlocked = false;
+
+/** Pre-unlock HTMLAudioElement by playing silence during user gesture */
+function unlockHtmlAudio(): void {
+  if (htmlAudioUnlocked) return;
+  try {
+    const audio = new Audio();
+    // Tiny silent WAV (44 bytes) as data URI
+    audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
+    audio.volume = 0.01;
+    audio.play().then(() => {
+      htmlAudioUnlocked = true;
+      audio.pause();
+    }).catch(() => { /* ignore */ });
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Play alarm via HTMLAudioElement (fallback when AudioContext is unavailable).
+ * Returns true if playback started successfully.
+ */
+async function playAlarmViaHtmlAudio(
+  sound: AlarmSound,
+  repeat: number,
+  volume: number,
+): Promise<boolean> {
+  if (sound === 'none') return false;
+  const basePath = import.meta.env.BASE_URL || '/';
+  const src = `${basePath}sounds/${sound}.wav`;
+
+  return new Promise<boolean>((resolve) => {
+    const audio = new Audio(src);
+    audio.volume = Math.max(0, Math.min(1, volume / 100));
+    let playCount = 0;
+
+    const onEnded = () => {
+      playCount++;
+      if (playCount < repeat) {
+        setTimeout(() => {
+          audio.currentTime = 0;
+          audio.play().catch(() => { /* ignore */ });
+        }, 400);
+      } else {
+        audio.removeEventListener('ended', onEnded);
+      }
+    };
+    audio.addEventListener('ended', onEnded);
+
+    audio.play().then(() => resolve(true)).catch(() => resolve(false));
+  });
 }
 
 /**
@@ -373,58 +452,225 @@ function sendTimerNotification(vibrationPattern?: number[]): void {
   }
 }
 
+/* ================================================================== */
+/*  Native (Capacitor) alarm handlers                                  */
+/*  On Android/iOS native, use LocalNotifications + Haptics instead    */
+/*  of Web Audio API to bypass all web audio limitations.              */
+/* ================================================================== */
+
+/** Android raw resource name (lowercase, with .wav) for a given alarm sound */
+function nativeSoundResource(sound: AlarmSound): string | undefined {
+  if (sound === 'none') return undefined;
+  return `${sound}.wav`;
+}
+
+/** Fire an immediate native notification with custom sound (no schedule). */
+async function playAlarmNative(
+  sound: AlarmSound,
+  repeat: number,
+  vibrationMode: VibrationMode,
+): Promise<void> {
+  const isSilent = sound === 'none';
+  const shouldVibrate =
+    vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent);
+
+  // Haptic feedback (Android + iOS)
+  if (shouldVibrate) {
+    for (let i = 0; i < repeat; i++) {
+      try {
+        await Haptics.impact({ style: ImpactStyle.Heavy });
+      } catch { /* ignore */ }
+      if (i < repeat - 1) await new Promise((r) => setTimeout(r, 400));
+    }
+  }
+
+  if (isSilent) return;
+
+  // Fire an immediate system notification with sound.
+  // OS plays the bundled resource (android/app/src/main/res/raw/<sound>.wav).
+  try {
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: Date.now() % 2147483647,
+          title: 'Timer Complete',
+          body: 'PomoCare',
+          sound: nativeSoundResource(sound),
+        },
+      ],
+    });
+  } catch (err) {
+    console.warn('[alarm] native notification failed:', err);
+  }
+}
+
+/**
+ * Schedule a native alarm at a future wall-clock time.
+ * Called when the timer starts — the OS will fire the notification
+ * even if the app is killed or the device is idle.
+ * Returns the notification id (use it to cancel), or -1 on failure.
+ */
+export async function scheduleNativeAlarm(
+  fireAt: number,
+  sound: AlarmSound,
+): Promise<number> {
+  if (!isNative()) return -1;
+  const isSilent = sound === 'none';
+  try {
+    // Notification id must fit in 32-bit int; derive deterministically from fireAt
+    const id = Math.floor(fireAt / 1000) % 2147483647;
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id,
+          title: 'Timer Complete',
+          body: 'PomoCare',
+          sound: isSilent ? undefined : nativeSoundResource(sound),
+          schedule: { at: new Date(fireAt), allowWhileIdle: true },
+        },
+      ],
+    });
+    return id;
+  } catch (err) {
+    console.warn('[alarm] scheduleNativeAlarm failed:', err);
+    return -1;
+  }
+}
+
+/** Cancel a previously scheduled native alarm by id. */
+export async function cancelNativeAlarm(id: number): Promise<void> {
+  if (!isNative() || id < 0) return;
+  try {
+    await LocalNotifications.cancel({ notifications: [{ id }] });
+  } catch { /* ignore */ }
+}
+
+/**
+ * Request local notification permission on native platforms.
+ * Safe to call on web — no-op there.
+ */
+export async function requestNativeNotificationPermission(): Promise<void> {
+  if (!isNative()) return;
+  try {
+    const perm = await LocalNotifications.checkPermissions();
+    if (perm.display !== 'granted') {
+      await LocalNotifications.requestPermissions();
+    }
+  } catch { /* ignore */ }
+}
+
 export function playAlarm(
   sound: AlarmSound,
   repeat: number,
   volume: number = 80,
   vibrationMode: VibrationMode = 'silent',
+  channel: AlarmChannel = 'media',
 ): void {
+  // --- Native (Capacitor) path: bypass all web audio fallbacks ---
+  if (isNative()) {
+    void playAlarmNative(sound, repeat, vibrationMode);
+    return;
+  }
+
   const isSilent = sound === 'none' || volume === 0;
 
   // バイブレーション判定
   const shouldVibrate = vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent);
   if (shouldVibrate) {
-    // Try direct vibration (works if user-gesture context is available)
     vibrate(repeat);
-    // Also send a system notification with vibration pattern as fallback
-    // (Android notifications vibrate even without user-gesture context)
     sendTimerNotification(buildVibrationPattern(repeat));
   } else {
-    // No vibration requested, but still send a silent notification
-    // so users see the timer completion when the app is backgrounded
     sendTimerNotification();
   }
 
   if (isSilent) return;
 
-  // Use the shared (pre-unlocked) AudioContext so mobile browsers allow playback
+  // --- Notification channel mode ---
+  // Skip Web Audio / HTMLAudioElement; rely on system notification sound.
+  // System notifications play through the notification channel, not media.
+  if (channel === 'notification') {
+    playViaNotificationChannel(repeat);
+    return;
+  }
+
+  // --- Media channel mode (default) with fallback chain ---
+  playViaMediaChannel(sound, repeat, volume);
+}
+
+/**
+ * Notification channel: fire system notifications with `silent: false`
+ * to produce the default notification sound (works even when media is muted).
+ */
+function playViaNotificationChannel(repeat: number): void {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  for (let i = 0; i < repeat; i++) {
+    setTimeout(() => {
+      try {
+        const options: NotificationOptions & { renotify?: boolean; vibrate?: number[] } = {
+          body: 'PomoCare',
+          icon: '/icons/icon-192x192.png',
+          tag: `pomocare-timer-${i}`, // unique tag per repeat so each one sounds
+          renotify: true,
+          silent: false,
+          vibrate: [300, 100, 300],
+        };
+        new Notification('Timer Complete', options);
+      } catch { /* ignore */ }
+    }, i * 1500);
+  }
+}
+
+/**
+ * Media channel: try Web Audio API first, fall back to HTMLAudioElement,
+ * then finally to system notification sound.
+ */
+function playViaMediaChannel(sound: AlarmSound, repeat: number, volume: number): void {
   const ctx = getSharedContext();
-  if (!ctx) return;
 
-  const master = createMasterGain(ctx, volume);
-  const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
-
-  if (WAV_SOUNDS.includes(sound)) {
-    // WAVベースのサウンドは非同期で順次スケジュール
-    resume.then(async () => {
-      const gap = 0.4;
-      let cursor = ctx.currentTime;
-      for (let i = 0; i < repeat; i++) {
-        const d = await playWavAlarm(ctx, master, sound, cursor);
-        cursor += d + gap;
+  // Attempt Web Audio API
+  if (ctx) {
+    const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
+    resume.then(() => {
+      // Check if context is actually running after resume attempt
+      if (ctx.state === 'running') {
+        const master = createMasterGain(ctx, volume);
+        if (WAV_SOUNDS.includes(sound)) {
+          void (async () => {
+            const gap = 0.4;
+            let cursor = ctx.currentTime;
+            for (let i = 0; i < repeat; i++) {
+              const d = await playWavAlarm(ctx, master, sound, cursor);
+              cursor += d + gap;
+            }
+          })();
+        } else {
+          let cursor = ctx.currentTime;
+          const gap = 0.4;
+          for (let i = 0; i < repeat; i++) {
+            const d = playSingleAlarm(ctx, master, sound, cursor);
+            cursor += d + gap;
+          }
+        }
+      } else {
+        // AudioContext still suspended (e.g. iOS after background) — try HTMLAudioElement
+        void playAlarmViaHtmlAudio(sound, repeat, volume).then((ok) => {
+          if (!ok) {
+            // Last resort: fire a notification with sound
+            playViaNotificationChannel(1);
+          }
+        });
       }
-      // Do NOT close the shared context — it will be reused
+    }).catch(() => {
+      // resume() rejected — try HTMLAudioElement fallback
+      void playAlarmViaHtmlAudio(sound, repeat, volume).then((ok) => {
+        if (!ok) playViaNotificationChannel(1);
+      });
     });
   } else {
-    resume.then(() => {
-      let cursor = ctx.currentTime;
-      const gap = 0.4;
-
-      for (let i = 0; i < repeat; i++) {
-        const d = playSingleAlarm(ctx, master, sound, cursor);
-        cursor += d + gap;
-      }
-      // Do NOT close the shared context — it will be reused
+    // No AudioContext available — try HTMLAudioElement directly
+    void playAlarmViaHtmlAudio(sound, repeat, volume).then((ok) => {
+      if (!ok) playViaNotificationChannel(1);
     });
   }
 }
@@ -435,6 +681,7 @@ export function previewAlarm(
   repeat: number,
   volume: number = 80,
   vibrationMode: VibrationMode = 'silent',
+  channel: AlarmChannel = 'media',
 ): void {
-  playAlarm(sound, repeat, volume, vibrationMode);
+  playAlarm(sound, repeat, volume, vibrationMode, channel);
 }

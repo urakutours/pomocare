@@ -258,5 +258,12 @@ export function useTimer({
     }
   }, [mode, workTime, timeLeft, breakTime, longBreakTime, longBreakInterval, activeLabel, activeNote, onSessionComplete, clearAlarmTimeout, onCancelPush]);
 
+  // Cleanup on unmount: clear any pending web timeout and native LocalNotification
+  useEffect(() => {
+    return () => {
+      clearAlarmTimeout();
+    };
+  }, [clearAlarmTimeout]);
+
   return { timeLeft, isRunning, mode, toggle, reset, completeEarly };
 }

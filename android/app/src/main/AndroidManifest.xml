@@ -58,7 +58,6 @@
 
     <!-- Exact alarms for timer accuracy (Android 12+) -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <!-- Wake device to show notification -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />

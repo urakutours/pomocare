@@ -585,6 +585,9 @@ export function playAlarm(
 
   if (isSilent) return;
 
+  // NOTE: This path is currently unreachable because the channel toggle UI
+  // is gated with isNative() (see SettingsPanel.tsx). Web always uses 'media'.
+  // Kept intentionally as scaffolding for future Web notification-channel support.
   // --- Notification channel mode ---
   // Skip Web Audio / HTMLAudioElement; rely on system notification sound.
   // System notifications play through the notification channel, not media.

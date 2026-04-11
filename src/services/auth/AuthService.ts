@@ -1,4 +1,5 @@
 import { authClient } from '@/lib/neon';
+import { getAuthRedirectBase } from '@/utils/platform';
 
 export type UserTier = 'free' | 'standard' | 'pro';
 
@@ -100,7 +101,7 @@ export class AuthService {
   async signInWithGoogle(): Promise<void> {
     const { error } = await authClient.signIn.social({
       provider: 'google',
-      callbackURL: window.location.origin + window.location.pathname,
+      callbackURL: getAuthRedirectBase(),
     });
     if (error) throw new Error(error.message ?? 'Google sign-in failed');
   }
@@ -128,7 +129,7 @@ export class AuthService {
     if (data?.user?.email) {
       await authClient.sendVerificationEmail({
         email: data.user.email,
-        callbackURL: window.location.origin + window.location.pathname,
+        callbackURL: getAuthRedirectBase(),
       });
     }
   }
@@ -136,7 +137,7 @@ export class AuthService {
   async sendPasswordReset(email: string): Promise<void> {
     const { error } = await authClient.requestPasswordReset({
       email,
-      redirectTo: window.location.origin + window.location.pathname + '?type=password-reset',
+      redirectTo: getAuthRedirectBase() + '?type=password-reset',
     });
     if (error) throw new Error(error.message ?? 'Password reset request failed');
   }

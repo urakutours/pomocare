@@ -21,6 +21,7 @@ export default defineConfig({
         'icons/*.png',
         'favicon.svg',
         'favicon.ico',
+        'sounds/*.wav',
       ],
       manifest: {
         name: 'PomoCare',

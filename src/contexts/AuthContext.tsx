@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, ty
 import { authService, type User, type UserTier } from '@/services/auth/AuthService';
 import { authClient, neon } from '@/lib/neon';
 import { NeonAdapter } from '@/services/storage/NeonAdapter';
+import { App } from '@capacitor/app';
+import { isNative } from '@/utils/platform';
 
 const TIER_CACHE_KEY = 'pomocare-cached-tier';
 
@@ -141,6 +143,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsPasswordRecovery(true);
     }
   }, []);
+
+  // ネイティブアプリ: ディープリンク (appUrlOpen) でパスワードリセットを処理
+  // com.pomocare.app://auth?type=password-reset&token=xxx
+  // または https://app.pomocare.com?type=password-reset&token=xxx
+  useEffect(() => {
+    if (!isNative()) return;
+
+    let listenerHandle: { remove: () => void } | null = null;
+
+    App.addListener('appUrlOpen', (event) => {
+      try {
+        const url = new URL(event.url);
+        const token = url.searchParams.get('token');
+        const type = url.searchParams.get('type');
+
+        if (token && (type === 'password-reset' || !type)) {
+          // window.location.search を更新して EmailActionHandler が読めるようにする
+          window.history.replaceState(
+            {},
+            '',
+            `?token=${encodeURIComponent(token)}&type=password-reset`,
+          );
+          setIsPasswordRecovery(true);
+        } else if (!token) {
+          // OAuth コールバック等: セッションを即時再チェック
+          authClient.getSession().catch(() => {});
+        }
+      } catch {
+        // URL パース失敗は無視
+      }
+    }).then((handle) => {
+      listenerHandle = handle;
+    });
+
+    return () => {
+      listenerHandle?.remove();
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initial session load + polling for auth state changes
   useEffect(() => {

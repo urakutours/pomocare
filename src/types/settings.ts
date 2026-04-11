@@ -7,11 +7,14 @@ export type AlarmSound = 'bell' | 'digital' | 'chime' | 'kitchen' | 'classic' | 
 
 export type VibrationMode = 'off' | 'silent' | 'always';
 
+export type AlarmChannel = 'media' | 'notification';
+
 export interface AlarmSettings {
   sound: AlarmSound;
   repeat: number; // 1-5
   volume: number; // 0-100
   vibration: VibrationMode;
+  channel?: AlarmChannel; // default: 'media' — optional for backward compatibility
 }
 
 export interface PomodoroSettings {
@@ -43,7 +46,7 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   activePresets: DEFAULT_ACTIVE_PRESETS,
   restPresets: DEFAULT_REST_PRESETS,
   theme: 'light',
-  alarm: { sound: 'bell', repeat: 1, volume: 80, vibration: 'silent' },
+  alarm: { sound: 'bell', repeat: 1, volume: 80, vibration: 'silent', channel: 'media' },
   labels: [],
   activeLabel: null,
   customColors: [],

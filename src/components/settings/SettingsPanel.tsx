@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Download, Lock, RefreshCw, Check, AlertCircle } from 'lucide-react';
-import type { PomodoroSettings, ThemeMode, AlarmSound, VibrationMode } from '@/types/settings';
+import type { PomodoroSettings, ThemeMode, AlarmSound, AlarmChannel, VibrationMode } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
 import { LABEL_COLORS } from '@/config/colors';
@@ -11,6 +11,7 @@ import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 import { SUPPORTED_LANGUAGES, getTranslations } from '@/i18n';
 import type { Language } from '@/i18n';
 import { previewAlarm } from '@/utils/alarm';
+import { isNative } from '@/utils/platform';
 import { QuickLabelModal } from '@/App';
 
 interface SettingsPanelProps {
@@ -1347,10 +1348,12 @@ function AlarmSettingsPanel({
   repeat,
   volume,
   vibration,
+  channel,
   onSoundChange,
   onRepeatChange,
   onVolumeChange,
   onVibrationChange,
+  onChannelChange,
   alarmLabel,
   repeatLabel,
   volumeLabel,
@@ -1359,6 +1362,10 @@ function AlarmSettingsPanel({
   vibrationSilentLabel,
   vibrationAlwaysLabel,
   vibrationNote,
+  channelLabel,
+  channelMediaLabel,
+  channelNotificationLabel,
+  channelNote,
   bellLabel,
   digitalLabel,
   chimeLabel,
@@ -1372,10 +1379,12 @@ function AlarmSettingsPanel({
   repeat: number;
   volume: number;
   vibration: VibrationMode;
+  channel: AlarmChannel;
   onSoundChange: (s: AlarmSound) => void;
   onRepeatChange: (n: number) => void;
   onVolumeChange: (v: number) => void;
   onVibrationChange: (v: VibrationMode) => void;
+  onChannelChange: (c: AlarmChannel) => void;
   alarmLabel: string;
   repeatLabel: string;
   volumeLabel: string;
@@ -1384,6 +1393,10 @@ function AlarmSettingsPanel({
   vibrationSilentLabel: string;
   vibrationAlwaysLabel: string;
   vibrationNote: string;
+  channelLabel: string;
+  channelMediaLabel: string;
+  channelNotificationLabel: string;
+  channelNote: string;
   bellLabel: string;
   digitalLabel: string;
   chimeLabel: string;
@@ -1422,7 +1435,7 @@ function AlarmSettingsPanel({
           </select>
           {sound !== 'none' && (
             <button
-              onClick={() => previewAlarm(sound, repeat, volume, vibration)}
+              onClick={() => previewAlarm(sound, repeat, volume, vibration, channel)}
               className="p-2 rounded-lg border border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-600 text-gray-600 dark:text-gray-400"
               title="Preview"
             >
@@ -1494,6 +1507,31 @@ function AlarmSettingsPanel({
         </div>
         <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{vibrationNote}</p>
       </div>
+
+      {isNative() && sound !== 'none' && (
+        <div>
+          <label className={labelClass}>{channelLabel}</label>
+          <div className="flex gap-1.5">
+            {([
+              { value: 'media' as AlarmChannel, label: channelMediaLabel },
+              { value: 'notification' as AlarmChannel, label: channelNotificationLabel },
+            ]).map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => onChannelChange(opt.value)}
+                className={`px-3 h-9 rounded-lg border text-sm font-medium transition-colors ${
+                  channel === opt.value
+                    ? 'border-tiffany bg-tiffany text-white'
+                    : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{channelNote}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -1541,6 +1579,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
   const [alarmRepeat, setAlarmRepeat] = useState(settings.alarm?.repeat ?? 1);
   const [alarmVolume, setAlarmVolume] = useState(settings.alarm?.volume ?? 80);
   const [alarmVibration, setAlarmVibration] = useState<VibrationMode>(settings.alarm?.vibration ?? 'silent');
+  const [alarmChannel, setAlarmChannel] = useState<AlarmChannel>(settings.alarm?.channel ?? 'media');
   const [labels, setLabels] = useState<LabelDefinition[]>(settings.labels ?? []);
   const [customColors, setCustomColors] = useState<string[]>(settings.customColors ?? []);
   const [tab, setTab] = useState<SettingsTab>('general');
@@ -1687,7 +1726,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
       activePresets,
       restPresets,
       theme,
-      alarm: { sound: alarmSound, repeat: alarmRepeat, volume: alarmVolume, vibration: alarmVibration },
+      alarm: { sound: alarmSound, repeat: alarmRepeat, volume: alarmVolume, vibration: alarmVibration, channel: alarmChannel },
       labels,
       activeLabel: settings.activeLabel,
       customColors,
@@ -1810,10 +1849,12 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               repeat={alarmRepeat}
               volume={alarmVolume}
               vibration={alarmVibration}
+              channel={alarmChannel}
               onSoundChange={setAlarmSound}
               onRepeatChange={setAlarmRepeat}
               onVolumeChange={setAlarmVolume}
               onVibrationChange={setAlarmVibration}
+              onChannelChange={setAlarmChannel}
               alarmLabel={t.alarmLabel}
               repeatLabel={t.alarmRepeatLabel}
               volumeLabel={t.alarmVolumeLabel}
@@ -1822,6 +1863,10 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               vibrationSilentLabel={t.alarmVibrationSilent}
               vibrationAlwaysLabel={t.alarmVibrationAlways}
               vibrationNote={t.alarmVibrationNote}
+              channelLabel={t.alarmChannelLabel}
+              channelMediaLabel={t.alarmChannelMedia}
+              channelNotificationLabel={t.alarmChannelNotification}
+              channelNote={t.alarmChannelNote}
               bellLabel={t.alarmSoundBell}
               digitalLabel={t.alarmSoundDigital}
               chimeLabel={t.alarmSoundChime}

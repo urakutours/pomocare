@@ -56,6 +56,10 @@ export interface Translations {
   alarmVibrationSilent: string;
   alarmVibrationAlways: string;
   alarmVibrationNote: string;
+  alarmChannelLabel: string;
+  alarmChannelMedia: string;
+  alarmChannelNotification: string;
+  alarmChannelNote: string;
 
   // Labels
   labelsLabel: string;

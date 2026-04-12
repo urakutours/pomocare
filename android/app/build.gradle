@@ -1,5 +1,20 @@
 apply plugin: 'com.android.application'
 
+// Load signing config from android/local.properties (gitignored) or environment variables.
+// See .secrets/README.md at repo root for the keystore setup instructions.
+def localProps = new Properties()
+def localPropsFile = rootProject.file('local.properties')
+if (localPropsFile.exists()) {
+    localProps.load(localPropsFile.newInputStream())
+}
+
+def releaseKeystorePath = localProps.getProperty('POMOCARE_KEYSTORE_PATH') ?: System.getenv('POMOCARE_KEYSTORE_PATH')
+def releaseKeystorePassword = localProps.getProperty('POMOCARE_KEYSTORE_PASSWORD') ?: System.getenv('POMOCARE_KEYSTORE_PASSWORD')
+def releaseKeyAlias = localProps.getProperty('POMOCARE_KEY_ALIAS') ?: System.getenv('POMOCARE_KEY_ALIAS')
+def releaseKeyPassword = localProps.getProperty('POMOCARE_KEY_PASSWORD') ?: System.getenv('POMOCARE_KEY_PASSWORD')
+
+def hasReleaseSigning = releaseKeystorePath != null && releaseKeystorePassword != null && releaseKeyAlias != null && releaseKeyPassword != null
+
 android {
     namespace = "com.pomocare.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -18,17 +33,22 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('signing.keystore')
-            storePassword 'EUleCaAYZwQa'
-            keyAlias 'my-key-alias'
-            keyPassword 'EUleCaAYZwQa'
+            if (hasReleaseSigning) {
+                storeFile file(releaseKeystorePath)
+                storePassword releaseKeystorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
         }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+            // else: debug 署名で通す（local dev + CI でキーが無くてもビルドが通る）
         }
     }
 }

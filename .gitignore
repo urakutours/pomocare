@@ -18,4 +18,5 @@ android/app/signing.keystore
 android/app/signing-key-info.txt
 **/signing.keystore
 **/signing-key-info.txt
-.secrets/
+.secrets/*
+!.secrets/README.md

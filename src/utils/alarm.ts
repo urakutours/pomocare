@@ -516,9 +516,11 @@ export async function scheduleNativeAlarm(
 ): Promise<number> {
   if (!isNative()) return -1;
   const isSilent = sound === 'none';
+  // Notification id must fit in 32-bit int; derive deterministically from fireAt
+  const id = Math.floor(fireAt / 1000) % 2147483647;
+
+  // Stage 1: exact alarm with allowWhileIdle (requires SCHEDULE_EXACT_ALARM on Android 12+)
   try {
-    // Notification id must fit in 32-bit int; derive deterministically from fireAt
-    const id = Math.floor(fireAt / 1000) % 2147483647;
     await LocalNotifications.schedule({
       notifications: [
         {
@@ -532,7 +534,25 @@ export async function scheduleNativeAlarm(
     });
     return id;
   } catch (err) {
-    console.warn('[alarm] scheduleNativeAlarm failed:', err);
+    console.warn('[alarm] exact schedule failed, retrying without allowWhileIdle:', err);
+  }
+
+  // Stage 2: non-exact fallback (no allowWhileIdle) when SCHEDULE_EXACT_ALARM is denied
+  try {
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id,
+          title: 'Timer Complete',
+          body: 'PomoCare',
+          sound: isSilent ? undefined : nativeSoundResource(sound),
+          schedule: { at: new Date(fireAt) },
+        },
+      ],
+    });
+    return id;
+  } catch (err) {
+    console.warn('[alarm] native schedule failed entirely:', err);
     return -1;
   }
 }

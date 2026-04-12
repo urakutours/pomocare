@@ -1,0 +1,23 @@
+name = "pomocare-api"
+main = "src/index.ts"
+compatibility_date = "2025-03-28"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables are set via `wrangler secret put <KEY>`
+# Required secrets:
+#   NEON_DATABASE_URL        - postgresql://user:pass@host/neondb
+#   BETTER_AUTH_SECRET       - JWT signing secret from Neon Auth
+#   STRIPE_SECRET_KEY        - Stripe API key
+#   STRIPE_WEBHOOK_SECRET    - Stripe webhook signing secret
+#   STRIPE_PRICE_STANDARD    - Price ID for Standard plan
+#   STRIPE_PRICE_PRO         - Price ID for Pro plan
+#   VAPID_SUBJECT            - mailto:xxx or https://xxx
+#   VAPID_PUBLIC_KEY         - VAPID public key
+#   VAPID_PRIVATE_KEY        - VAPID private key
+
+# Optional:
+#   STRIPE_PORTAL_CONFIG_ID  - Custom portal configuration
+
+[triggers]
+# send-push runs every minute
+crons = ["* * * * *"]

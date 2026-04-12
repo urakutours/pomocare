@@ -147,14 +147,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ネイティブアプリ: ディープリンク (appUrlOpen) でパスワードリセットを処理
   // com.pomocare.app://auth?type=password-reset&token=xxx
   // または https://app.pomocare.com?type=password-reset&token=xxx
+  const processedUrlRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!isNative()) return;
 
+    let cancelled = false;
     let listenerHandle: { remove: () => void } | null = null;
 
-    App.addListener('appUrlOpen', (event) => {
+    const handleDeepLinkUrl = (rawUrl: string) => {
+      // 同じ URL を 2 回処理しないようガード
+      if (processedUrlRef.current === rawUrl) return;
+      processedUrlRef.current = rawUrl;
+
       try {
-        const url = new URL(event.url);
+        const url = new URL(rawUrl);
         const token = url.searchParams.get('token');
         const type = url.searchParams.get('type');
 
@@ -173,11 +180,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         // URL パース失敗は無視
       }
+    };
+
+    // cold start フォールバック: アプリが kill されていた場合に getLaunchUrl() で起動 URL を取得
+    App.getLaunchUrl()
+      .then((result) => {
+        if (cancelled) return;
+        if (result?.url) {
+          handleDeepLinkUrl(result.url);
+        }
+      })
+      .catch(() => {
+        // ignore - getLaunchUrl fails harmlessly on non-initial starts
+      });
+
+    App.addListener('appUrlOpen', (event) => {
+      handleDeepLinkUrl(event.url);
     }).then((handle) => {
-      listenerHandle = handle;
+      if (cancelled) {
+        handle.remove();
+      } else {
+        listenerHandle = handle;
+      }
     });
 
     return () => {
+      cancelled = true;
       listenerHandle?.remove();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting to PomoCare...</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    .container { text-align: center; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #ddd;
+      border-top-color: #0abab5;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <p>Redirecting to PomoCare...</p>
+  </div>
+  <script>
+    (function() {
+      var search = window.location.search;
+      var hash = window.location.hash;
+      var target = 'com.pomocare.app://auth' + search + hash;
+
+      // Primary: custom scheme redirect
+      window.location.replace(target);
+
+      // Fallback: Android Intent URL (works reliably in Chrome)
+      setTimeout(function() {
+        window.location.replace(
+          'intent://auth' + search + hash +
+          '#Intent;scheme=com.pomocare.app;package=com.pomocare.app;end'
+        );
+      }, 2000);
+    })();
+  </script>
+</body>
+</html>

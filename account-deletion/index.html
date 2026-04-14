@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0abab5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PomoCare" />
+    <meta name="application-name" content="PomoCare" />
+    <meta name="msapplication-TileColor" content="#0abab5" />
+    <meta name="description" content="A focus timer for deep work sessions" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <title>PomoCare</title>
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-5675101743750825">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5675101743750825" crossorigin="anonymous"></script>
+    <script type="module" crossorigin src="/assets/index-BfgD-p1f.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-6eR47JSq.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+  <body>
+    <script>
+      // GitHub Pages SPA route restore.
+      // 404.html redirects unknown paths to /?/original/path&query. Restore it.
+      (function () {
+        var l = window.location;
+        if (l.search.indexOf('?/') === 1) {
+          var decoded = l.search.slice(2).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(null, '', l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })();
+    </script>
+    <script>
+      // Apply cached theme instantly to prevent flash of wrong theme
+      // Checks user-scoped cache key first, then falls back to legacy unscoped key
+      try {
+        var c = null;
+        var tierRaw = localStorage.getItem('pomocare-cached-tier');
+        if (tierRaw) {
+          var uid = JSON.parse(tierRaw).userId;
+          if (uid) c = localStorage.getItem('pomocare-settings-cache:' + uid);
+        }
+        if (!c) c = localStorage.getItem('pomocare-settings-cache');
+        if (c) {
+          var t = JSON.parse(c).theme;
+          if (t === 'gray' || t === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', t);
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute('content', t === 'gray' ? '#333333' : '#13171b');
+          }
+        }
+      } catch(e) {}
+    </script>
+    <div id="root">
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;height:100dvh;background:var(--bg,#fff)">
+        <div style="width:32px;height:32px;border:3px solid #0abab5;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+      </div>
+      <style>
+        @keyframes spin{to{transform:rotate(360deg)}}
+        html.dark #root>div{--bg:#171717}
+      </style>
+    </div>
+  </body>
+</html>

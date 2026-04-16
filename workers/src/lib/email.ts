@@ -62,7 +62,7 @@ export function emailLayout(content: string, title: string): string {
  */
 export function tiffanyButton(href: string, label: string): string {
   return `<div style="text-align: center; margin: 24px 0;">
-    <a href="${href}" style="display: inline-block; background-color: #0abab5; color: #ffffff; padding: 14px 32px; border-radius: 6px; font-weight: 600; text-decoration: none;">${label}</a>
+    <a href="${href}" style="display: inline-block; background-color: #0abab5; color: #ffffff; padding: 16px 44px; border-radius: 6px; font-size: 16px; font-weight: 700; text-decoration: none;">${label}</a>
   </div>`;
 }
 

@@ -28,11 +28,13 @@ import { SettingsPanel, ColorPicker } from '@/components/settings/SettingsPanel'
 import { StatsChart } from '@/components/stats/StatsChart';
 import { SessionSummary } from '@/components/stats/SessionSummary';
 import { EmailActionHandler } from '@/components/auth/EmailActionHandler';
+import { AccountDeletionPage } from '@/components/auth/AccountDeletionPage';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
 import { DEFAULT_SETTINGS, type PomodoroSettings } from '@/types/settings';
 import type { StorageService } from '@/services/storage/types';
 import { mergeLabels } from '@/utils/mergeLabels';
 import { LABEL_COLORS } from '@/config/colors';
+import { canPurchaseProPlan } from '@/utils/platform';
 
 interface PomodoroAppProps {
   storage: StorageService;
@@ -472,7 +474,9 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
   // Add a new label inline from the TOP screen
   const handleAddLabelInline = (label: LabelDefinition) => {
     if (labels.length >= features.maxLabels) {
-      setShowUpgrade(true);
+      if (canPurchaseProPlan()) {
+        setShowUpgrade(true);
+      }
       setShowLabelCreator(false);
       return;
     }
@@ -683,7 +687,7 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany bg-white dark:bg-neutral-700 dark:text-gray-200 dark:placeholder-gray-400 resize-none"
                 />
               )}
-              {activeLabel && !features.sessionNotes && (
+              {activeLabel && !features.sessionNotes && canPurchaseProPlan() && (
                 <button
                   onClick={() => setShowUpgrade(true)}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-neutral-600 rounded-lg bg-gray-50 dark:bg-neutral-700/50"
@@ -810,6 +814,16 @@ function AppWithStorage() {
       });
     }
   }, [user, authLoading, features.cloudSync]);
+
+  // Account deletion page (standalone, for Google Play store listing's URL requirement)
+  // Accessible at /account-deletion even without signing in; used by Play Console.
+  if (window.location.pathname.replace(/\/$/, '') === '/account-deletion') {
+    return (
+      <I18nProvider language="en">
+        <AccountDeletionPage />
+      </I18nProvider>
+    );
+  }
 
   // Password recovery (user clicked reset link in email)
   if (isPasswordRecovery) {

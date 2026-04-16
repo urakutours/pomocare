@@ -20,6 +20,19 @@
   </head>
   <body>
     <script>
+      // GitHub Pages SPA route restore.
+      // 404.html redirects unknown paths to /?/original/path&query. Restore it.
+      (function () {
+        var l = window.location;
+        if (l.search.indexOf('?/') === 1) {
+          var decoded = l.search.slice(2).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(null, '', l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })();
+    </script>
+    <script>
       // Apply cached theme instantly to prevent flash of wrong theme
       // Checks user-scoped cache key first, then falls back to legacy unscoped key
       try {

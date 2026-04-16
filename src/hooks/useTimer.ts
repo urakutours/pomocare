@@ -191,14 +191,17 @@ export function useTimer({
 
         // On native platforms, also register an OS-level LocalNotification
         // that fires even if the app is fully killed.
-        if (isNative()) {
+        // Only for notification channel — media channel uses WebView audio which
+        // doesn't work when killed, and scheduling would cause double-firing with
+        // the foreground JS tick.
+        if (isNative() && (alarm.channel ?? 'media') === 'notification') {
           void scheduleNativeAlarm(
             Date.now() + timeLeft * 1000,
             alarm.sound,
           ).then((id) => {
             nativeAlarmIdRef.current = id;
           });
-        } else {
+        } else if (!isNative()) {
           // Web: server-side push notification (for logged-in users)
           onSchedulePush?.(Date.now() + timeLeft * 1000);
         }

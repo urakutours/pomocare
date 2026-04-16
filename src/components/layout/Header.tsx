@@ -8,6 +8,7 @@ import { LoginModal } from '@/components/auth/LoginModal';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 import { CancelSubscriptionModal } from '@/components/shared/CancelSubscriptionModal';
 import { createPortalSession } from '@/services/stripe/StripeService';
+import { canPurchaseProPlan } from '@/utils/platform';
 
 interface HeaderProps {
   onLogoClick: () => void;
@@ -98,7 +99,7 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                     </div>
 
                     {/* Free → show upgrade button */}
-                    {isFree && (
+                    {isFree && canPurchaseProPlan() && (
                       <button
                         onClick={() => { setShowUserMenu(false); setShowUpgrade(true); }}
                         className="w-full flex items-start gap-2 px-3 py-2.5 text-sm text-left text-tiffany hover:bg-tiffany/5 transition-colors"
@@ -112,7 +113,7 @@ export function Header({ onLogoClick, onStatsClick, onSettingsClick }: HeaderPro
                     )}
 
                     {/* Standard → show Pro upgrade + Payment management + Cancel */}
-                    {isStandard && (
+                    {isStandard && canPurchaseProPlan() && (
                       <>
                         <button
                           onClick={() => { setShowUserMenu(false); setShowUpgrade(true); }}

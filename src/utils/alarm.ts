@@ -464,30 +464,67 @@ function nativeSoundResource(sound: AlarmSound): string | undefined {
   return `${sound}.wav`;
 }
 
+/**
+ * Android 8+ では notification sound は channel ごとに固定のため、
+ * サウンドごとに個別の channel を作成し、schedule 時に channelId で切替える。
+ * 各 channel はアプリ起動時に一度だけ作成すれば OK。
+ */
+const NOTIFICATION_CHANNELS: { id: string; sound: AlarmSound }[] = [
+  { id: 'pomocare-bell',    sound: 'bell'    },
+  { id: 'pomocare-digital', sound: 'digital' },
+  { id: 'pomocare-chime',   sound: 'chime'   },
+  { id: 'pomocare-kitchen', sound: 'kitchen' },
+  { id: 'pomocare-classic', sound: 'classic' },
+  { id: 'pomocare-gentle',  sound: 'gentle'  },
+  { id: 'pomocare-soft',    sound: 'soft'    },
+  { id: 'pomocare-silent',  sound: 'none'    },
+];
+
+function channelIdFor(sound: AlarmSound): string {
+  return NOTIFICATION_CHANNELS.find((c) => c.sound === sound)?.id ?? 'pomocare-bell';
+}
+
+/** Create one notification channel per sound. Idempotent — safe to call multiple times. */
+export async function ensureNotificationChannels(): Promise<void> {
+  if (!isNative()) return;
+  for (const ch of NOTIFICATION_CHANNELS) {
+    try {
+      await LocalNotifications.createChannel({
+        id: ch.id,
+        name: ch.sound === 'none' ? 'PomoCare (Silent)' : `PomoCare ${ch.sound}`,
+        description: 'PomoCare timer alerts',
+        importance: 5,
+        sound: ch.sound === 'none' ? undefined : nativeSoundResource(ch.sound),
+        vibration: true,
+        visibility: 1,
+      });
+    } catch {
+      // ignore — channel may already exist or platform may not support createChannel
+    }
+  }
+}
+
 /** Fire an immediate native notification with custom sound (no schedule). */
 async function playAlarmNative(
   sound: AlarmSound,
-  repeat: number,
+  _repeat: number,
   vibrationMode: VibrationMode,
 ): Promise<void> {
   const isSilent = sound === 'none';
   const shouldVibrate =
     vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent);
 
-  // Haptic feedback (Android + iOS)
+  // Notification channel は sound も vibration も 1 回のみ（UI の「通知モードでは 1 回のみ」に合わせる）
   if (shouldVibrate) {
-    for (let i = 0; i < repeat; i++) {
-      try {
-        await Haptics.impact({ style: ImpactStyle.Heavy });
-      } catch { /* ignore */ }
-      if (i < repeat - 1) await new Promise((r) => setTimeout(r, 400));
-    }
+    try {
+      await Haptics.impact({ style: ImpactStyle.Heavy });
+    } catch { /* ignore */ }
   }
 
   if (isSilent) return;
 
   // Fire an immediate system notification with sound.
-  // OS plays the bundled resource (android/app/src/main/res/raw/<sound>.wav).
+  // Android 8+ では sound は channelId 経由で決まる（per-notification の sound は無視される）。
   try {
     await LocalNotifications.schedule({
       notifications: [
@@ -496,6 +533,7 @@ async function playAlarmNative(
           title: 'Timer Complete',
           body: 'PomoCare',
           sound: nativeSoundResource(sound),
+          channelId: channelIdFor(sound),
         },
       ],
     });
@@ -528,6 +566,7 @@ export async function scheduleNativeAlarm(
           title: 'Timer Complete',
           body: 'PomoCare',
           sound: isSilent ? undefined : nativeSoundResource(sound),
+          channelId: channelIdFor(sound),
           schedule: { at: new Date(fireAt), allowWhileIdle: true },
         },
       ],
@@ -546,6 +585,7 @@ export async function scheduleNativeAlarm(
           title: 'Timer Complete',
           body: 'PomoCare',
           sound: isSilent ? undefined : nativeSoundResource(sound),
+          channelId: channelIdFor(sound),
           schedule: { at: new Date(fireAt) },
         },
       ],
@@ -586,8 +626,8 @@ export function playAlarm(
   vibrationMode: VibrationMode = 'silent',
   channel: AlarmChannel = 'media',
 ): void {
-  // --- Native (Capacitor) path: bypass all web audio fallbacks ---
-  if (isNative()) {
+  // --- Native + notification channel: OS 通知音（メディア音量と独立、repeat/volume 非対応） ---
+  if (isNative() && channel === 'notification') {
     void playAlarmNative(sound, repeat, vibrationMode);
     return;
   }
@@ -597,26 +637,34 @@ export function playAlarm(
   // バイブレーション判定
   const shouldVibrate = vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent);
   if (shouldVibrate) {
-    vibrate(repeat);
-    sendTimerNotification(buildVibrationPattern(repeat));
-  } else {
+    if (isNative()) {
+      // Native: Capacitor Haptics を使用（navigator.vibrate は WebView で不安定）
+      void (async () => {
+        for (let i = 0; i < repeat; i++) {
+          try {
+            await Haptics.impact({ style: ImpactStyle.Heavy });
+          } catch { /* ignore */ }
+          if (i < repeat - 1) await new Promise((r) => setTimeout(r, 400));
+        }
+      })();
+    } else {
+      vibrate(repeat);
+      sendTimerNotification(buildVibrationPattern(repeat));
+    }
+  } else if (!isNative()) {
     sendTimerNotification();
   }
 
   if (isSilent) return;
 
-  // NOTE: This path is currently unreachable because the channel toggle UI
-  // is gated with isNative() (see SettingsPanel.tsx). Web always uses 'media'.
-  // Kept intentionally as scaffolding for future Web notification-channel support.
-  // --- Notification channel mode ---
-  // Skip Web Audio / HTMLAudioElement; rely on system notification sound.
-  // System notifications play through the notification channel, not media.
+  // NOTE: Web で channel='notification' のパスは現状 UI でガードされ到達しない
+  // （SettingsPanel.tsx の isNative() ガード）。将来拡張のため残す。
   if (channel === 'notification') {
     playViaNotificationChannel(repeat);
     return;
   }
 
-  // --- Media channel mode (default) with fallback chain ---
+  // --- Media channel: Web Audio / HTML5 Audio（volume と repeat に対応、メディア音量連動） ---
   playViaMediaChannel(sound, repeat, volume);
 }
 

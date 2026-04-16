@@ -3,6 +3,7 @@ import { authService, type User, type UserTier } from '@/services/auth/AuthServi
 import { authClient, neon } from '@/lib/neon';
 import { NeonAdapter } from '@/services/storage/NeonAdapter';
 import { App } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 import { isNative } from '@/utils/platform';
 
 const TIER_CACHE_KEY = 'pomocare-cached-tier';
@@ -104,6 +105,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
+  // syncUser を外部（deep link handler 等）から即時呼び出せるよう refs で状態管理
+  const firstCheckRef = useRef(true);
+  const lastUserIdRef = useRef<string | null>(null);
+
+  /**
+   * Android WebView はバックグラウンド復帰後、次のタッチイベントまで描画をスキップする
+   * パワーセーブモードに入ることがある。state 更新後に強制的にペイントを走らせる。
+   */
+  const forceRepaint = () => {
+    requestAnimationFrame(() => {
+      // offsetHeight を読むことで同期的にレイアウト再計算を強制
+      void document.body.offsetHeight;
+      requestAnimationFrame(() => {
+        void document.body.offsetHeight;
+      });
+    });
+  };
+
+  const syncUser = useCallback(async (force = false) => {
+    try {
+      const { data } = await authClient.getSession();
+      const neonUser = data?.user;
+      const currentId = neonUser?.id ?? null;
+
+      if (!force && !firstCheckRef.current && currentId === lastUserIdRef.current) return;
+      firstCheckRef.current = false;
+      lastUserIdRef.current = currentId;
+
+      if (!neonUser) {
+        setUser(null);
+        setIsLoading(false);
+        forceRepaint();
+        return;
+      }
+
+      // Build user — preserve existing tier if same user (avoids flash to 'free')
+      setUser(prev => {
+        const isSame = prev && prev.id === neonUser.id;
+        return {
+          id: neonUser.id,
+          email: neonUser.email ?? null,
+          displayName: neonUser.name ?? null,
+          photoURL: neonUser.image ?? null,
+          tier: isSame ? prev.tier : getCachedTier(neonUser.id),
+          subscriptionStartDate: isSame ? prev.subscriptionStartDate : null,
+          subscriptionStatus: isSame ? prev.subscriptionStatus : null,
+          subscriptionCurrentPeriodEnd: isSame ? prev.subscriptionCurrentPeriodEnd : null,
+          isAnonymous: false,
+          emailVerified: neonUser.emailVerified ?? false,
+        };
+      });
+      setIsLoading(false);
+      forceRepaint();
+
+      // Fetch actual profile asynchronously
+      const profile = await fetchUserProfile(neonUser.id);
+      setUser(prev => prev && prev.id === neonUser.id
+        ? {
+            ...prev,
+            tier: profile.tier,
+            subscriptionStartDate: profile.subscriptionStartDate,
+            subscriptionStatus: profile.subscriptionStatus,
+            subscriptionCurrentPeriodEnd: profile.subscriptionCurrentPeriodEnd,
+          }
+        : prev,
+      );
+    } catch (err) {
+      console.warn('[Auth] syncUser error:', err);
+      if (firstCheckRef.current) {
+        firstCheckRef.current = false;
+        setIsLoading(false);
+        forceRepaint();
+      }
+    }
+  }, []);
+
   // Proactive session recovery on tab focus.
   const lastVisibilityCheckRef = useRef(0);
   useEffect(() => {
@@ -160,22 +237,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (processedUrlRef.current === rawUrl) return;
       processedUrlRef.current = rawUrl;
 
+      // OAuth フローで開いた Chrome Custom Tab があれば閉じる
+      Browser.close().catch(() => {});
+
       try {
         const url = new URL(rawUrl);
         const token = url.searchParams.get('token');
         const type = url.searchParams.get('type');
+        // Neon Auth は OAuth コールバック URL に neon_auth_session_verifier を付けて返す。
+        // このパラメータが window.location.search にあると authClient.getSession() が
+        // 自動的にそれを送信し、外部ブラウザで確立されたセッションを引き継ぐ仕組み。
+        const verifier = url.searchParams.get('neon_auth_session_verifier');
 
         if (token && (type === 'password-reset' || !type)) {
-          // window.location.search を更新して EmailActionHandler が読めるようにする
-          window.history.replaceState(
-            {},
-            '',
-            `?token=${encodeURIComponent(token)}&type=password-reset`,
-          );
-          setIsPasswordRecovery(true);
+          const search = `?token=${encodeURIComponent(token)}&type=password-reset`;
+          if ((window.location.hostname === 'localhost' || window.location.hostname === 'app.pomocare.com')) {
+            window.history.replaceState({}, '', `/${search}`);
+            setIsPasswordRecovery(true);
+          } else {
+            window.location.replace(`${window.location.origin}/${search}`);
+          }
+        } else if (verifier) {
+          // OAuth 成功: verifier をクエリに入れて localhost にロード。
+          // 読み込み後、neon-js クライアントが getSession 時に自動でサーバーへ送信しセッションを確立。
+          const search = `?neon_auth_session_verifier=${encodeURIComponent(verifier)}`;
+          // ローディング表示にしてセッション確立までの間の未ログイン UI のちらつきを防ぐ
+          setIsLoading(true);
+          if ((window.location.hostname === 'localhost' || window.location.hostname === 'app.pomocare.com')) {
+            window.history.replaceState({}, '', `/${search}`);
+            // polling 待ちを回避して即座にセッション再チェック（5s 遅延解消）
+            // force=true: 同じ currentId でも結果を反映させる（null → user の遷移を確実に捕捉）
+            syncUser(true);
+          } else {
+            window.location.replace(`${window.location.origin}/${search}`);
+          }
         } else if (!token) {
-          // OAuth コールバック等: セッションを即時再チェック
-          authClient.getSession().catch(() => {});
+          // フォールバック: verifier も token もない場合もセッションを再チェック
+          if ((window.location.hostname === 'localhost' || window.location.hostname === 'app.pomocare.com')) {
+            syncUser();
+          } else {
+            window.location.replace(`${window.location.origin}/`);
+          }
         }
       } catch {
         // URL パース失敗は無視
@@ -208,73 +310,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       listenerHandle?.remove();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [syncUser]);
 
   // Initial session load + polling for auth state changes
   useEffect(() => {
     let cancelled = false;
-    let firstCheck = true;
-    let lastUserId: string | null = null;
-
-    const syncUser = async () => {
-      if (cancelled) return;
-      try {
-        const { data } = await authClient.getSession();
-        const neonUser = data?.user;
-        const currentId = neonUser?.id ?? null;
-
-        if (firstCheck || currentId !== lastUserId) {
-          firstCheck = false;
-          lastUserId = currentId;
-
-          if (!neonUser) {
-            setUser(null);
-            setIsLoading(false);
-            return;
-          }
-
-          // Build user — preserve existing tier if same user (avoids flash to 'free')
-          setUser(prev => {
-            const isSame = prev && prev.id === neonUser.id;
-            return {
-              id: neonUser.id,
-              email: neonUser.email ?? null,
-              displayName: neonUser.name ?? null,
-              photoURL: neonUser.image ?? null,
-              tier: isSame ? prev.tier : getCachedTier(neonUser.id),
-              subscriptionStartDate: isSame ? prev.subscriptionStartDate : null,
-              subscriptionStatus: isSame ? prev.subscriptionStatus : null,
-              subscriptionCurrentPeriodEnd: isSame ? prev.subscriptionCurrentPeriodEnd : null,
-              isAnonymous: false,
-              emailVerified: neonUser.emailVerified ?? false,
-            };
-          });
-          setIsLoading(false);
-
-          // Fetch actual profile asynchronously
-          const profile = await fetchUserProfile(neonUser.id);
-          if (!cancelled) {
-            setUser(prev => prev && prev.id === neonUser.id
-              ? {
-                  ...prev,
-                  tier: profile.tier,
-                  subscriptionStartDate: profile.subscriptionStartDate,
-                  subscriptionStatus: profile.subscriptionStatus,
-                  subscriptionCurrentPeriodEnd: profile.subscriptionCurrentPeriodEnd,
-                }
-              : prev
-            );
-          }
-        }
-      } catch (err) {
-        console.warn('[Auth] syncUser error:', err);
-        // On first check failure, still resolve loading
-        if (firstCheck) {
-          firstCheck = false;
-          setIsLoading(false);
-        }
-      }
-    };
 
     // Initial check
     syncUser();
@@ -285,12 +325,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 10_000);
 
     // Poll for auth state changes (Better Auth doesn't have onAuthStateChange)
-    const interval = setInterval(syncUser, 5000);
+    const interval = setInterval(() => { if (!cancelled) syncUser(); }, 5000);
 
     // Cross-tab: listen for storage events
     const onStorage = (e: StorageEvent) => {
       if (e.key?.includes('better-auth') || e.key?.includes('session')) {
-        syncUser();
+        if (!cancelled) syncUser();
       }
     };
     window.addEventListener('storage', onStorage);
@@ -301,7 +341,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearTimeout(fallbackTimer);
       window.removeEventListener('storage', onStorage);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [syncUser]);
 
   const signInWithGoogle = useCallback(async () => {
     await authService.signInWithGoogle();

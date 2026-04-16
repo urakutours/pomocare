@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 # Environment variables are set via `wrangler secret put <KEY>`
 # Required secrets:
 #   NEON_DATABASE_URL        - postgresql://user:pass@host/neondb
-#   BETTER_AUTH_SECRET       - JWT signing secret from Neon Auth
+#   NEON_AUTH_URL            - Neon Auth endpoint (session verification)
 #   STRIPE_SECRET_KEY        - Stripe API key
 #   STRIPE_WEBHOOK_SECRET    - Stripe webhook signing secret
 #   STRIPE_PRICE_STANDARD    - Price ID for Standard plan
@@ -14,6 +14,8 @@ compatibility_flags = ["nodejs_compat"]
 #   VAPID_SUBJECT            - mailto:xxx or https://xxx
 #   VAPID_PUBLIC_KEY         - VAPID public key
 #   VAPID_PRIVATE_KEY        - VAPID private key
+#   RESEND_API_KEY           - Resend API key (re_xxx)
+#   RESEND_FROM              - From address (e.g. PomoCare <noreply@pomocare.com>)
 
 # Optional:
 #   STRIPE_PORTAL_CONFIG_ID  - Custom portal configuration

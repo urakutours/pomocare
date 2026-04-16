@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import type { Env } from '../types';
-import { verifyJWT } from '../lib/auth';
+import { verifySession } from '../lib/auth';
 import { getSQL } from '../lib/db';
 import { handleCors, jsonResponse } from '../lib/cors';
 
@@ -18,7 +18,7 @@ export async function handleCreatePortalSession(
   }
 
   try {
-    const user = await verifyJWT(request, env);
+    const user = await verifySession(request, env);
     if (!user) return jsonResponse({ error: 'Unauthorized' }, 401, origin);
 
     const sql = getSQL(env);

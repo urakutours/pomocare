@@ -1,4 +1,3 @@
-import { jwtVerify } from 'jose';
 import type { Env } from '../types';
 
 export interface AuthUser {
@@ -7,14 +6,13 @@ export interface AuthUser {
 }
 
 /**
- * Verify Neon Auth (Better Auth) JWT and extract user info.
- * Better Auth signs session JWTs with HS256 using BETTER_AUTH_SECRET.
+ * Verify session by forwarding the token to Neon Auth's get-session endpoint.
  *
- * The JWT payload typically contains:
- *   sub: user ID (standard claim)
- *   email: user email (custom claim, may not be present)
+ * Neon Auth (managed Better Auth) uses opaque session tokens, not locally-verifiable JWTs.
+ * BETTER_AUTH_SECRET はマネージドサービス側で管理されユーザーに公開されないため、
+ * Worker 側ではセッショントークンを Neon Auth に転送して検証する。
  */
-export async function verifyJWT(
+export async function verifySession(
   request: Request,
   env: Env,
 ): Promise<AuthUser | null> {
@@ -23,21 +21,25 @@ export async function verifyJWT(
 
   const token = authHeader.slice(7);
   try {
-    const secret = new TextEncoder().encode(env.BETTER_AUTH_SECRET);
-    const { payload } = await jwtVerify(token, secret, {
-      algorithms: ['HS256'],
+    const res = await fetch(`${env.NEON_AUTH_URL}/get-session`, {
+      headers: {
+        Cookie: `better-auth.session_token=${token}`,
+      },
     });
 
-    // Better Auth may use `sub` or embed user id differently
-    const userId = payload.sub
-      || (payload as Record<string, unknown>).userId as string | undefined
-      || (payload as Record<string, unknown>).id as string | undefined;
+    if (!res.ok) return null;
 
+    const data = (await res.json()) as {
+      session?: { userId?: string };
+      user?: { id?: string; email?: string };
+    };
+
+    const userId = data.user?.id || data.session?.userId;
     if (!userId) return null;
 
     return {
       id: userId,
-      email: (payload as Record<string, unknown>).email as string | undefined,
+      email: data.user?.email,
     };
   } catch {
     return null;

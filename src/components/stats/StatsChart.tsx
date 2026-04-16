@@ -5,6 +5,7 @@ import type { DayData, MonthDayData } from '@/hooks/useSessions';
 import { useI18n } from '@/contexts/I18nContext';
 import { useFeatures } from '@/contexts/FeatureContext';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
+import { canPurchaseProPlan } from '@/utils/platform';
 import type { PomodoroSession, LabelDefinition } from '@/types/session';
 
 type StatTab = 'weekly' | 'monthly' | 'yearly';
@@ -584,7 +585,9 @@ export function StatsChart({
 
   const handleTabChange = (next: StatTab) => {
     if (!features.advancedStats && (next === 'monthly' || next === 'yearly')) {
-      setShowUpgrade(true);
+      if (canPurchaseProPlan()) {
+        setShowUpgrade(true);
+      }
       return;
     }
     setTab(next);
@@ -665,12 +668,16 @@ export function StatsChart({
         {/* Tab switcher */}
         <div className="flex gap-1 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1 mb-3">
           <button className={tabClass(tab === 'weekly')}  onClick={() => handleTabChange('weekly')}>{t.weekly}</button>
-          <button className={tabClass(tab === 'monthly')} onClick={() => handleTabChange('monthly')}>
-            <span className="inline-flex items-center gap-1">{t.monthly}{!features.advancedStats && <Lock size={11} />}</span>
-          </button>
-          <button className={tabClass(tab === 'yearly')}  onClick={() => handleTabChange('yearly')}>
-            <span className="inline-flex items-center gap-1">{t.yearly}{!features.advancedStats && <Lock size={11} />}</span>
-          </button>
+          {(canPurchaseProPlan() || features.advancedStats) && (
+            <button className={tabClass(tab === 'monthly')} onClick={() => handleTabChange('monthly')}>
+              <span className="inline-flex items-center gap-1">{t.monthly}{!features.advancedStats && <Lock size={11} />}</span>
+            </button>
+          )}
+          {(canPurchaseProPlan() || features.advancedStats) && (
+            <button className={tabClass(tab === 'yearly')}  onClick={() => handleTabChange('yearly')}>
+              <span className="inline-flex items-center gap-1">{t.yearly}{!features.advancedStats && <Lock size={11} />}</span>
+            </button>
+          )}
         </div>
 
         {/* Label filter dropdown */}

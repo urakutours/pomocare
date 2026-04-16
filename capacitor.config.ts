@@ -6,6 +6,9 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
+    // WebView を app.pomocare.com 名義にする。ローカル dist アセットを配信しつつ、
+    // リクエスト Origin が本番ドメインと一致するため、Neon Auth の redirectTo 検証が通る
+    hostname: 'app.pomocare.com',
   },
   plugins: {
     LocalNotifications: {

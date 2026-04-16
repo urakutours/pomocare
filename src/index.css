@@ -21,6 +21,31 @@ html.dark #root {
   background-color: #262626;
 }
 
+/* --- Gray theme (mid-tone, lighter than dark) overrides --- */
+html[data-theme="gray"],
+html[data-theme="gray"] body,
+html[data-theme="gray"] #root {
+  background-color: #3f3f3f;
+}
+
+html[data-theme="gray"] .dark\:bg-neutral-800 {
+  background-color: #3f3f3f !important;
+}
+
+html[data-theme="gray"] .dark\:bg-neutral-700 {
+  background-color: #555555 !important;
+}
+html[data-theme="gray"] .dark\:bg-neutral-700\/40 {
+  background-color: rgba(85, 85, 85, 0.4) !important;
+}
+
+html[data-theme="gray"] .dark\:hover\:bg-neutral-600:hover {
+  background-color: #666666 !important;
+}
+html[data-theme="gray"] .dark\:hover\:bg-neutral-700:hover {
+  background-color: #5c5c5c !important;
+}
+
 /* --- Dark theme (deeper dark) overrides --- */
 html[data-theme="dark"],
 html[data-theme="dark"] body,

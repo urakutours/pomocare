@@ -60,6 +60,8 @@ export interface Translations {
   alarmChannelMedia: string;
   alarmChannelNotification: string;
   alarmChannelNote: string;
+  alarmVolumeSystemControlNote: string;
+  alarmRepeatLockedNote: string;
 
   // Labels
   labelsLabel: string;
@@ -180,6 +182,14 @@ export interface Translations {
   authDeleteAccount: string;
   authDeleteAccountConfirm: string;
   authDeleteAccountSuccess: string;
+  authChangePassword: string;
+  authCurrentPassword: string;
+  authChangePasswordTitle: string;
+  authPasswordChangeSuccess: string;
+  authPasswordSameAsCurrent: string;
+  authUseSameAnyway: string;
+  authSubmitChangePassword: string;
+  authCancel: string;
 
   // Loading
   loadingMessage: string;

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { ChangePasswordModal } from '@/components/auth/ChangePasswordModal';
 import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Download, Lock, RefreshCw, Check, AlertCircle } from 'lucide-react';
 import type { PomodoroSettings, ThemeMode, AlarmSound, AlarmChannel, VibrationMode } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
@@ -10,8 +11,8 @@ import { useFeatures } from '@/contexts/FeatureContext';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 import { SUPPORTED_LANGUAGES, getTranslations } from '@/i18n';
 import type { Language } from '@/i18n';
-import { previewAlarm } from '@/utils/alarm';
-import { isNative } from '@/utils/platform';
+import { previewAlarm, requestNativeNotificationPermission } from '@/utils/alarm';
+import { isNative, canPurchaseProPlan } from '@/utils/platform';
 import { QuickLabelModal } from '@/App';
 
 interface SettingsPanelProps {
@@ -1366,6 +1367,8 @@ function AlarmSettingsPanel({
   channelMediaLabel,
   channelNotificationLabel,
   channelNote,
+  volumeSystemControlNote,
+  repeatLockedNote,
   bellLabel,
   digitalLabel,
   chimeLabel,
@@ -1397,6 +1400,8 @@ function AlarmSettingsPanel({
   channelMediaLabel: string;
   channelNotificationLabel: string;
   channelNote: string;
+  volumeSystemControlNote: string;
+  repeatLockedNote: string;
   bellLabel: string;
   digitalLabel: string;
   chimeLabel: string;
@@ -1456,10 +1461,20 @@ function AlarmSettingsPanel({
               step={5}
               value={volume}
               onChange={(e) => onVolumeChange(Number(e.target.value))}
-              className="flex-1 h-2 rounded-lg appearance-none cursor-pointer accent-tiffany bg-gray-200 dark:bg-neutral-600"
+              disabled={channel === 'notification'}
+              className={`flex-1 h-2 rounded-lg appearance-none accent-tiffany bg-gray-200 dark:bg-neutral-600 ${
+                channel === 'notification' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+              }`}
             />
-            <span className="w-10 text-right text-sm text-gray-600 dark:text-gray-400">{volume}%</span>
+            <span className={`w-10 text-right text-sm ${
+              channel === 'notification'
+                ? 'text-gray-400 dark:text-gray-500'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}>{volume}%</span>
           </div>
+          {channel === 'notification' && (
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{volumeSystemControlNote}</p>
+          )}
         </div>
       )}
 
@@ -1467,20 +1482,30 @@ function AlarmSettingsPanel({
         <div>
           <label className={labelClass}>{repeatLabel}</label>
           <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button
-                key={n}
-                onClick={() => onRepeatChange(n)}
-                className={`w-9 h-9 rounded-lg border text-sm font-medium transition-colors ${
-                  repeat === n
-                    ? 'border-tiffany bg-tiffany text-white'
-                    : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600'
-                }`}
-              >
-                {n}
-              </button>
-            ))}
+            {[1, 2, 3, 4, 5].map((n) => {
+              const disabled = channel === 'notification' && n !== 1;
+              const isSelected = channel === 'notification' ? n === 1 : repeat === n;
+              return (
+                <button
+                  key={n}
+                  onClick={() => !disabled && onRepeatChange(n)}
+                  disabled={disabled}
+                  className={`w-9 h-9 rounded-lg border text-sm font-medium transition-colors ${
+                    isSelected
+                      ? 'border-tiffany bg-tiffany text-white'
+                      : disabled
+                        ? 'border-gray-200 dark:border-neutral-700 text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50'
+                        : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600'
+                  }`}
+                >
+                  {n}
+                </button>
+              );
+            })}
           </div>
+          {channel === 'notification' && (
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{repeatLockedNote}</p>
+          )}
         </div>
       )}
 
@@ -1495,7 +1520,7 @@ function AlarmSettingsPanel({
             <button
               key={opt.value}
               onClick={() => onVibrationChange(opt.value)}
-              className={`px-3 h-9 rounded-lg border text-sm font-medium transition-colors ${
+              className={`flex-1 min-h-9 px-2 py-1.5 rounded-lg border text-sm font-medium leading-tight text-center break-words whitespace-normal transition-colors ${
                 vibration === opt.value
                   ? 'border-tiffany bg-tiffany text-white'
                   : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600'
@@ -1518,8 +1543,15 @@ function AlarmSettingsPanel({
             ]).map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => onChannelChange(opt.value)}
-                className={`px-3 h-9 rounded-lg border text-sm font-medium transition-colors ${
+                onClick={() => {
+                  onChannelChange(opt.value);
+                  // Android 13+: notification チャネルを選んだ瞬間に通知権限を要求する。
+                  // さもないと次にセッション開始するまで LocalNotifications が silently 失敗する。
+                  if (opt.value === 'notification') {
+                    void requestNativeNotificationPermission();
+                  }
+                }}
+                className={`flex-1 min-h-9 px-2 py-1.5 rounded-lg border text-sm font-medium leading-tight text-center break-words whitespace-normal transition-colors ${
                   channel === opt.value
                     ? 'border-tiffany bg-tiffany text-white'
                     : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600'
@@ -1589,6 +1621,10 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
 
   // Account delete
   const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
+
+  // Change password
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
 
   // CSV import
   const [showImportModal, setShowImportModal] = useState(false);
@@ -1867,6 +1903,8 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               channelMediaLabel={t.alarmChannelMedia}
               channelNotificationLabel={t.alarmChannelNotification}
               channelNote={t.alarmChannelNote}
+              volumeSystemControlNote={t.alarmVolumeSystemControlNote}
+              repeatLockedNote={t.alarmRepeatLockedNote}
               bellLabel={t.alarmSoundBell}
               digitalLabel={t.alarmSoundDigital}
               chimeLabel={t.alarmSoundChime}
@@ -1910,43 +1948,47 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
             </div>
 
             {/* CSV import */}
-            <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
-              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
-                {t.csvImportTitle}
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
-                {t.csvImportDescription}
-              </p>
-              <button
-                onClick={features.exportData ? () => { setImportStatus(null); setShowImportModal(true); } : () => setShowUpgrade(true)}
-                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
-              >
-                {features.exportData ? <Upload size={14} /> : <Lock size={14} />}
-                {t.csvImportButton}
-              </button>
-              {importStatus && (
-                <p className={`mt-2 text-xs text-center ${importStatus.error ? 'text-red-500' : 'text-tiffany'}`}>
-                  {importStatus.error ?? `${importStatus.count} ${t.sessions}`}
+            {(features.exportData || canPurchaseProPlan()) && (
+              <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                  {t.csvImportTitle}
                 </p>
-              )}
-            </div>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                  {t.csvImportDescription}
+                </p>
+                <button
+                  onClick={features.exportData ? () => { setImportStatus(null); setShowImportModal(true); } : () => setShowUpgrade(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+                >
+                  {features.exportData ? <Upload size={14} /> : <Lock size={14} />}
+                  {t.csvImportButton}
+                </button>
+                {importStatus && (
+                  <p className={`mt-2 text-xs text-center ${importStatus.error ? 'text-red-500' : 'text-tiffany'}`}>
+                    {importStatus.error ?? `${importStatus.count} ${t.sessions}`}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* CSV export */}
-            <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
-              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
-                {t.csvExportTitle}
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
-                {t.csvExportDescription}
-              </p>
-              <button
-                onClick={features.exportData ? handleExportCsv : () => setShowUpgrade(true)}
-                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
-              >
-                {features.exportData ? <Download size={14} /> : <Lock size={14} />}
-                {t.exportCsv}
-              </button>
-            </div>
+            {(features.exportData || canPurchaseProPlan()) && (
+              <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                  {t.csvExportTitle}
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                  {t.csvExportDescription}
+                </p>
+                <button
+                  onClick={features.exportData ? handleExportCsv : () => setShowUpgrade(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+                >
+                  {features.exportData ? <Download size={14} /> : <Lock size={14} />}
+                  {t.exportCsv}
+                </button>
+              </div>
+            )}
 
             {/* Data reset — at the bottom of General tab */}
             <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
@@ -1963,6 +2005,24 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
                 {t.dataResetButton}
               </button>
             </div>
+
+            {/* Change password (only for logged-in users) */}
+            {user && (
+              <div className="pt-4 border-t border-gray-200 dark:border-neutral-700">
+                <button
+                  onClick={() => setShowChangePasswordModal(true)}
+                  className="w-full py-2 rounded-lg border border-gray-300 dark:border-neutral-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+                >
+                  {t.authChangePassword}
+                </button>
+                {passwordChangeSuccess && (
+                  <div className="mt-2 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-green-500 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 text-sm font-medium">
+                    <Check size={14} />
+                    {t.authPasswordChangeSuccess}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Account deletion (only for logged-in users) */}
             {user && (
@@ -1993,7 +2053,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
               saveLabel="OK"
               maxLabels={features.maxLabels}
               limitMessage={!features.unlimitedLabels ? t.freeLabelLimit : undefined}
-              onUpgrade={() => setShowUpgrade(true)}
+              onUpgrade={canPurchaseProPlan() ? () => setShowUpgrade(true) : undefined}
               customColors={customColors}
               onRegisterColor={handleRegisterCustomColor}
               onChangeCustomColor={handleChangeCustomColor}
@@ -2055,6 +2115,18 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
           cancelLabel={t.dataResetCancel}
           onConfirm={handleDeleteAccount}
           onCancel={() => setShowDeleteAccountConfirm(false)}
+        />
+      )}
+
+      {/* Change password modal */}
+      {showChangePasswordModal && (
+        <ChangePasswordModal
+          onSuccess={() => {
+            setShowChangePasswordModal(false);
+            setPasswordChangeSuccess(true);
+            setTimeout(() => setPasswordChangeSuccess(false), 3000);
+          }}
+          onClose={() => setShowChangePasswordModal(false)}
         />
       )}
 

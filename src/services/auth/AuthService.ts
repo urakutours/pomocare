@@ -99,6 +99,10 @@ export class AuthService {
   }
 
   async signInWithGoogle(): Promise<void> {
+    // Native も Web も同じ: authClient が POST → state cookie 設定 → Google OAuth へ遷移。
+    // Native では Capacitor WebView 内で OAuth フローが進み、最後に callbackURL
+    // （https://app.pomocare.com/auth/native-callback）→ 中間ページ経由で
+    // カスタムスキームへ戻り、appUrlOpen で WebView を /localhost/ にリセットする。
     const { error } = await authClient.signIn.social({
       provider: 'google',
       callbackURL: getAuthRedirectBase(),
@@ -150,10 +154,28 @@ export class AuthService {
     if (error) throw new Error(error.message ?? 'Password reset failed');
   }
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const { error } = await authClient.changePassword({
+      currentPassword,
+      newPassword,
+      revokeOtherSessions: true,
+    });
+    if (error) throw new Error(error.message ?? 'Password change failed');
+  }
+
   async deleteAccount(): Promise<void> {
-    // TODO: Phase 2 — implement via Cloudflare Worker
-    // For now, sign out only. Account deletion requires server-side logic.
-    await authClient.signOut();
+    // Call Cloudflare Worker which:
+    //   1. Cancels Stripe subscription if any
+    //   2. Deletes all user data from Neon DB
+    //   3. Calls Neon Auth /delete-user to remove the auth user
+    const { workerPost } = await import('@/lib/api');
+    await workerPost('/delete-account');
+    // Ensure local session is cleared after successful server deletion
+    try {
+      await authClient.signOut();
+    } catch {
+      // ignore - user is already deleted on server
+    }
   }
 
   async signOut(): Promise<void> {

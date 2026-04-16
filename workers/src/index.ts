@@ -2,9 +2,11 @@ import type { Env } from './types';
 import { handleCreateCheckoutSession } from './routes/create-checkout-session';
 import { handleCreatePortalSession } from './routes/create-portal-session';
 import { handleCancelSubscription } from './routes/cancel-subscription';
+import { handleDeleteAccount } from './routes/delete-account';
 import { handleStripeWebhook } from './routes/stripe-webhook';
 import { handleScheduleNotification } from './routes/schedule-notification';
 import { handleSendPush } from './routes/send-push';
+import { handleNeonAuthWebhook } from './routes/neon-auth-webhook';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -18,6 +20,8 @@ export default {
         return handleCreatePortalSession(request, env);
       case '/cancel-subscription':
         return handleCancelSubscription(request, env);
+      case '/delete-account':
+        return handleDeleteAccount(request, env);
       case '/stripe-webhook':
         return handleStripeWebhook(request, env);
       case '/schedule-notification':
@@ -26,6 +30,8 @@ export default {
         // HTTP trigger requires secret header (validated inside handler)
         await handleSendPush(env, request);
         return Response.json({ ok: true });
+      case '/neon-auth-webhook':
+        return handleNeonAuthWebhook(request, env);
       case '/health':
         return Response.json({ ok: true, ts: Date.now() });
       default:

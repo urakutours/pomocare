@@ -18,6 +18,7 @@ import { useSessions } from '@/hooks/useSessions';
 import { useTimer } from '@/hooks/useTimer';
 import { usePushNotification } from '@/hooks/usePushNotification';
 import { AppShell } from '@/components/layout/AppShell';
+import { CookieBanner } from '@/components/layout/CookieBanner';
 import { Header } from '@/components/layout/Header';
 import { InstallBanner } from '@/components/layout/InstallBanner';
 import { TimerDisplay } from '@/components/timer/TimerDisplay';
@@ -920,6 +921,7 @@ function AppWithI18n({ storage }: { storage: StorageService }) {
         patchSettings={patchSettings}
         refreshSettings={refreshSettings}
       />
+      <CookieBanner />
       {paymentSuccessPlan && (
         <PaymentSuccessToast
           plan={paymentSuccessPlan}

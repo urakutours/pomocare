@@ -225,4 +225,9 @@ export const es: Translations = {
   affiliateUpsellSubtitle: 'Desbloquea sincronización, exportación y funciones premium',
   affiliateUpsellCta: 'Mejorar',
 
+  // Cookie consent banner
+  cookieConsentMessage: 'Usamos Google Analytics para mejorar el servicio. Puedes rechazar para no ser medido.',
+  cookieConsentAccept: 'Aceptar',
+  cookieConsentDecline: 'Rechazar',
+
 };

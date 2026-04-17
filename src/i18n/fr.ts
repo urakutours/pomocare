@@ -225,4 +225,9 @@ export const fr: Translations = {
   affiliateUpsellSubtitle: 'Synchro cloud, export et toutes les fonctions premium',
   affiliateUpsellCta: 'Passer Pro',
 
+  // Cookie consent banner
+  cookieConsentMessage: 'Nous utilisons Google Analytics pour améliorer le service. Vous pouvez refuser.',
+  cookieConsentAccept: 'Accepter',
+  cookieConsentDecline: 'Refuser',
+
 };

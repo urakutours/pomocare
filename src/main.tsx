@@ -6,6 +6,10 @@ import { AdMob } from '@capacitor-community/admob';
 import App from './App';
 import './index.css';
 import { ensureNotificationChannels } from '@/utils/alarm';
+import { analytics } from '@/services/analytics/AnalyticsService';
+
+// Google Analytics 4（Consent Mode v2 で初期化、同意後に granted に昇格）
+analytics.init();
 
 // Android 15+ は edge-to-edge が強制される。明示的に overlay: true とし、
 // CSS の env(safe-area-inset-*) で content 側にパディングを付けて対処する。

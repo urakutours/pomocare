@@ -120,7 +120,7 @@
       <h2>3. データの保存場所</h2>
       <ul>
         <li><strong>ゲスト利用（未ログイン）:</strong> すべてのデータはお使いのデバイスのローカルストレージに保存されます。当社はこれらのデータにアクセスしません。ブラウザのキャッシュクリアやデータ消去によりデータが失われる可能性があります。</li>
-        <li><strong>ログイン済みユーザー（Free / Standard / Pro）:</strong> 利用データは当社が利用するSupabase（米国）のサーバーに暗号化して保存され、複数デバイス間で同期されます。</li>
+        <li><strong>ログイン済みユーザー（Free / Standard / Pro）:</strong> 利用データは当社が利用するNeon（米国）のマネージドPostgreSQLに暗号化して保存され、複数デバイス間で同期されます。</li>
       </ul>
 
       <h2>4. データの利用目的と法的根拠</h2>
@@ -154,11 +154,12 @@
           <tr><th>サービス</th><th>提供者</th><th>所在地</th><th>用途</th></tr>
         </thead>
         <tbody>
-          <tr><td>Supabase</td><td>Supabase, Inc.</td><td>米国</td><td>認証・データベース・クラウド同期</td></tr>
+          <tr><td>Neon (Better Auth)</td><td>Neon, Inc.</td><td>米国</td><td>認証・データベース・クラウド同期</td></tr>
           <tr><td>Stripe</td><td>Stripe, Inc.</td><td>米国</td><td>決済処理</td></tr>
           <tr><td>GitHub Pages</td><td>GitHub, Inc.</td><td>米国</td><td>アプリのホスティング</td></tr>
           <tr><td>Amazon アソシエイト</td><td>Amazon.com, Inc. / Amazon Japan G.K.</td><td>米国・日本</td><td>アフィリエイトリンクによる商品紹介（Cookie 等による成果計測）</td></tr>
           <tr><td>Google AdMob</td><td>Google LLC</td><td>米国</td><td>Android 版アプリでの広告配信</td></tr>
+          <tr><td>Google Analytics (GA4)</td><td>Google LLC</td><td>米国</td><td>利用状況の分析（国・ブラウザ等の匿名統計）</td></tr>
         </tbody>
       </table>
       <p>当社は個人情報を第三者に販売（sell）または共有（share、CCPAの定義による）しません。</p>
@@ -175,6 +176,7 @@
           <tr><td>ローカルストレージ（セッションデータ）</td><td>タイマー・統計データの保存（未ログイン時）</td><td>無期限（ブラウザデータ消去まで）</td><td>必須</td></tr>
           <tr><td>Cookie同意ステータス</td><td>Cookie同意の記録</td><td>無期限</td><td>必須</td></tr>
           <tr><td>第三者Cookie（広告）</td><td>広告配信・パーソナライズ（Free / ゲスト）</td><td>サービスにより異なる</td><td>任意（同意が必要）</td></tr>
+          <tr><td>第三者Cookie（Google Analytics: _ga, _ga_*）</td><td>匿名の利用状況分析（国・ブラウザ種別等の集計）</td><td>最大2年</td><td>任意（同意が必要）</td></tr>
         </tbody>
       </table>
 
@@ -231,7 +233,7 @@
       </ul>
 
       <h2>13. 国際データ転送</h2>
-      <p>当社は日本に所在し、Supabase（米国）やStripe（米国）等のクラウドサービスを利用しています。お客様のデータがEU/EEA域外に転送される場合、以下の保護措置に基づいて行われます。</p>
+      <p>当社は日本に所在し、Neon（米国）、Stripe（米国）、Google（米国）等のクラウドサービスを利用しています。お客様のデータがEU/EEA域外に転送される場合、以下の保護措置に基づいて行われます。</p>
       <ul>
         <li>欧州委員会が認定した十分性認定に基づく転送（日本は2019年にEUより十分性認定を取得）</li>
         <li>標準契約条項（SCCs）に基づく転送</li>
@@ -320,7 +322,7 @@
       <h2>3. Data Storage</h2>
       <ul>
         <li><strong>Guest Use (Not Logged In):</strong> All data is stored in your device's local storage. We do not access this data. Data may be lost if you clear your browser cache or data.</li>
-        <li><strong>Logged-In Users (Free / Standard / Pro):</strong> Usage data is encrypted and stored on Supabase (USA) servers, enabling safe synchronization across multiple devices.</li>
+        <li><strong>Logged-In Users (Free / Standard / Pro):</strong> Usage data is encrypted and stored on Neon (USA) managed PostgreSQL servers, enabling safe synchronization across multiple devices.</li>
       </ul>
 
       <h2>4. Purpose of Data Use &amp; Legal Basis</h2>
@@ -354,11 +356,12 @@
           <tr><th>Service</th><th>Provider</th><th>Location</th><th>Purpose</th></tr>
         </thead>
         <tbody>
-          <tr><td>Supabase</td><td>Supabase, Inc.</td><td>USA</td><td>Authentication, database, cloud sync</td></tr>
+          <tr><td>Neon (Better Auth)</td><td>Neon, Inc.</td><td>USA</td><td>Authentication, database, cloud sync</td></tr>
           <tr><td>Stripe</td><td>Stripe, Inc.</td><td>USA</td><td>Payment processing</td></tr>
           <tr><td>GitHub Pages</td><td>GitHub, Inc.</td><td>USA</td><td>App hosting</td></tr>
           <tr><td>Amazon Associates</td><td>Amazon.com, Inc. / Amazon Japan G.K.</td><td>USA / Japan</td><td>Affiliate product referrals (cookie-based conversion tracking)</td></tr>
           <tr><td>Google AdMob</td><td>Google LLC</td><td>USA</td><td>Ad delivery in the Android app</td></tr>
+          <tr><td>Google Analytics (GA4)</td><td>Google LLC</td><td>USA</td><td>Usage analytics (aggregated, anonymous country/browser stats)</td></tr>
         </tbody>
       </table>
       <p>We do not sell or share (as defined by the CCPA) your personal information to third parties.</p>
@@ -375,6 +378,7 @@
           <tr><td>Local storage (session data)</td><td>Stores timer and stats data (when not logged in)</td><td>Persistent (until browser data cleared)</td><td>Required</td></tr>
           <tr><td>Cookie consent status</td><td>Records cookie consent preference</td><td>Persistent</td><td>Required</td></tr>
           <tr><td>Third-party cookies (advertising)</td><td>Ad delivery and personalization (Free / Guest)</td><td>Varies by service</td><td>Optional (consent required)</td></tr>
+          <tr><td>Third-party cookies (Google Analytics: _ga, _ga_*)</td><td>Aggregated, anonymous usage analytics (country, browser, etc.)</td><td>Up to 2 years</td><td>Optional (consent required)</td></tr>
         </tbody>
       </table>
 
@@ -431,7 +435,7 @@
       </ul>
 
       <h2>13. International Data Transfers</h2>
-      <p>We are based in Japan and use cloud services including Supabase (USA) and Stripe (USA). When your data is transferred outside the EU/EEA, the following safeguards apply:</p>
+      <p>We are based in Japan and use cloud services including Neon (USA), Stripe (USA), and Google (USA). When your data is transferred outside the EU/EEA, the following safeguards apply:</p>
       <ul>
         <li>Transfers based on an adequacy decision by the European Commission (Japan received an adequacy decision from the EU in 2019)</li>
         <li>Transfers under Standard Contractual Clauses (SCCs)</li>
@@ -545,6 +549,7 @@
     </div>
   </div>
 
+  <script src="../js/analytics.js"></script>
   <script src="../js/i18n.js"></script>
   <script src="../js/theme.js"></script>
   <script src="../js/main.js"></script>

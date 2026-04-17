@@ -273,4 +273,9 @@ export interface Translations {
   affiliateUpsellSubtitle: string; // upsell subtitle
   affiliateUpsellCta: string;    // "アップグレード"
 
+  // Cookie consent banner
+  cookieConsentMessage: string;  // Body text
+  cookieConsentAccept: string;   // Accept button
+  cookieConsentDecline: string;  // Decline button
+
 }

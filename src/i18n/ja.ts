@@ -225,4 +225,9 @@ export const ja: Translations = {
   affiliateUpsellSubtitle: 'クラウド同期・エクスポートなど全機能を開放',
   affiliateUpsellCta: 'アップグレード',
 
+  // Cookie consent banner
+  cookieConsentMessage: 'サービス改善のため Google Analytics を使用します。拒否すると計測されません。',
+  cookieConsentAccept: '同意する',
+  cookieConsentDecline: '拒否する',
+
 };

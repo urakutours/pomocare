@@ -225,4 +225,9 @@ export const en: Translations = {
   affiliateUpsellSubtitle: 'Unlock cloud sync, export, and all premium features',
   affiliateUpsellCta: 'Upgrade',
 
+  // Cookie consent banner
+  cookieConsentMessage: 'We use Google Analytics to improve this service. You can decline to opt out.',
+  cookieConsentAccept: 'Accept',
+  cookieConsentDecline: 'Decline',
+
 };

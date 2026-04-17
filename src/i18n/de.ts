@@ -225,4 +225,9 @@ export const de: Translations = {
   affiliateUpsellSubtitle: 'Cloud-Sync, Export und alle Premium-Funktionen freischalten',
   affiliateUpsellCta: 'Upgrade',
 
+  // Cookie consent banner
+  cookieConsentMessage: 'Wir nutzen Google Analytics zur Verbesserung des Dienstes. Du kannst ablehnen, um nicht erfasst zu werden.',
+  cookieConsentAccept: 'Akzeptieren',
+  cookieConsentDecline: 'Ablehnen',
+
 };

@@ -225,4 +225,9 @@ export const it: Translations = {
   affiliateUpsellSubtitle: 'Sblocca sincronizzazione cloud, export e funzioni premium',
   affiliateUpsellCta: 'Aggiorna',
 
+  // Cookie consent banner
+  cookieConsentMessage: 'Usiamo Google Analytics per migliorare il servizio. Puoi rifiutare per non essere tracciato.',
+  cookieConsentAccept: 'Accetta',
+  cookieConsentDecline: 'Rifiuta',
+
 };

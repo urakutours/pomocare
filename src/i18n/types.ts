@@ -266,4 +266,11 @@ export interface Translations {
   checkoutProcessing: string;
   checkoutError: string;
 
+  // Affiliate banner
+  adDisclosure: string;          // "広告" / "Ad" etc.
+  affiliateCtaAmazon: string;    // "Amazonで見る" / "View on Amazon"
+  affiliateUpsellTitle: string;  // "PomoCare Pro" upsell title
+  affiliateUpsellSubtitle: string; // upsell subtitle
+  affiliateUpsellCta: string;    // "アップグレード"
+
 }

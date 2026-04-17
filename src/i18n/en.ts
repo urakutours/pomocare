@@ -218,4 +218,11 @@ export const en: Translations = {
   checkoutProcessing: 'Redirecting to checkout...',
   checkoutError: 'Checkout failed. Please try again.',
 
+  // Affiliate banner
+  adDisclosure: 'Ad',
+  affiliateCtaAmazon: 'View on Amazon',
+  affiliateUpsellTitle: 'PomoCare Pro',
+  affiliateUpsellSubtitle: 'Unlock cloud sync, export, and all premium features',
+  affiliateUpsellCta: 'Upgrade',
+
 };

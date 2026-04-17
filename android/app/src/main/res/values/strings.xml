@@ -4,4 +4,7 @@
     <string name="title_activity_main">PomoCare</string>
     <string name="package_name">com.pomocare.app</string>
     <string name="custom_url_scheme">com.pomocare.app</string>
+    <!-- Google AdMob App ID (PomoCare production App ID) -->
+    <!-- Test App ID (reference): ca-app-pub-3940256099942544~3347511713 -->
+    <string name="admob_app_id">ca-app-pub-5675101743750825~5440393507</string>
 </resources>

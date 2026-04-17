@@ -120,6 +120,16 @@ html[data-theme="dark"] .focus\:ring-tiffany:focus {
   }
 }
 
+/* AdMob native banner overlays the WebView. Reserve space at the bottom
+   so app content isn't hidden behind the ad. The CSS variable is set
+   dynamically by AdMobBanner via BannerAdPluginEvents.SizeChanged. */
+:root {
+  --admob-banner-height: 0px;
+}
+#root {
+  padding-bottom: var(--admob-banner-height);
+}
+
 /*
   landscape:* クラスをスマホ横向き（max-width: 767px）のみに限定する。
   Tailwind v3 の組み込み landscape バリアントは @media(orientation:landscape) 固定のため、

@@ -218,4 +218,11 @@ export const it: Translations = {
   checkoutProcessing: 'Reindirizzamento al pagamento...',
   checkoutError: 'Pagamento fallito. Riprova.',
 
+  // Affiliate banner
+  adDisclosure: 'Pubblicità',
+  affiliateCtaAmazon: 'Vedi su Amazon',
+  affiliateUpsellTitle: 'PomoCare Pro',
+  affiliateUpsellSubtitle: 'Sblocca sincronizzazione cloud, export e funzioni premium',
+  affiliateUpsellCta: 'Aggiorna',
+
 };

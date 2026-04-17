@@ -218,4 +218,11 @@ export const ja: Translations = {
   checkoutProcessing: '決済ページへ移動中...',
   checkoutError: '決済処理に失敗しました。もう一度お試しください。',
 
+  // Affiliate banner
+  adDisclosure: '広告',
+  affiliateCtaAmazon: 'Amazonで見る',
+  affiliateUpsellTitle: 'PomoCare Pro',
+  affiliateUpsellSubtitle: 'クラウド同期・エクスポートなど全機能を開放',
+  affiliateUpsellCta: 'アップグレード',
+
 };

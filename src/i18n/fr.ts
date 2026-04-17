@@ -218,4 +218,11 @@ export const fr: Translations = {
   checkoutProcessing: 'Redirection vers le paiement...',
   checkoutError: 'Échec du paiement. Veuillez réessayer.',
 
+  // Affiliate banner
+  adDisclosure: 'Annonce',
+  affiliateCtaAmazon: 'Voir sur Amazon',
+  affiliateUpsellTitle: 'PomoCare Pro',
+  affiliateUpsellSubtitle: 'Synchro cloud, export et toutes les fonctions premium',
+  affiliateUpsellCta: 'Passer Pro',
+
 };

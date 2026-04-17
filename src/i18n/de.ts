@@ -218,4 +218,11 @@ export const de: Translations = {
   checkoutProcessing: 'Weiterleitung zum Checkout...',
   checkoutError: 'Zahlung fehlgeschlagen. Bitte versuche es erneut.',
 
+  // Affiliate banner
+  adDisclosure: 'Anzeige',
+  affiliateCtaAmazon: 'Auf Amazon ansehen',
+  affiliateUpsellTitle: 'PomoCare Pro',
+  affiliateUpsellSubtitle: 'Cloud-Sync, Export und alle Premium-Funktionen freischalten',
+  affiliateUpsellCta: 'Upgrade',
+
 };

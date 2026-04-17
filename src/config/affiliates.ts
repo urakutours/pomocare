@@ -325,9 +325,85 @@ const CONFIGS: Record<AffiliateRegion, AffiliateConfig> = {
   br: BR,
 };
 
-/** 言語から Amazon 設定を解決する */
+/**
+ * ブラウザのタイムゾーンから地域を推定する。
+ *
+ * 実ユーザーの居住地を示す最も信頼できる客観的シグナル（IP ルックアップや
+ * 位置情報 API を使わずに済む）。UI 言語を英語にしている日本在住ユーザーにも
+ * amazon.co.jp の広告を出せる。
+ *
+ * 判定できない / 未対応地域の場合は null を返し、呼び出し側で言語フォールバック。
+ */
+export function detectRegionFromTimezone(): AffiliateRegion | null {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!tz) return null;
+
+    // 日本
+    if (tz === 'Asia/Tokyo' || tz === 'Japan') return 'jp';
+
+    // 英国・アイルランド（uk としてまとめる）
+    if (tz === 'Europe/London' || tz === 'Europe/Dublin') return 'uk';
+
+    // ドイツ語圏（DACH）
+    if (
+      tz === 'Europe/Berlin' ||
+      tz === 'Europe/Vienna' ||
+      tz === 'Europe/Zurich'
+    ) {
+      return 'de';
+    }
+
+    // フランス（+ モナコ、ベルギー仏語圏の一部をカバー）
+    if (tz === 'Europe/Paris' || tz === 'Europe/Monaco') return 'fr';
+
+    // イタリア
+    if (tz === 'Europe/Rome' || tz === 'Europe/Vatican') return 'it';
+
+    // スペイン
+    if (tz === 'Europe/Madrid' || tz === 'Atlantic/Canary') return 'es';
+
+    // ブラジル（ポルトガル語）
+    if (tz.startsWith('America/Sao_Paulo') || tz.startsWith('America/Fortaleza') || tz.startsWith('America/Recife') || tz === 'America/Bahia') {
+      return 'br';
+    }
+
+    // 米国・カナダ（広域）
+    if (tz.startsWith('America/') || tz.startsWith('US/') || tz.startsWith('Pacific/Honolulu')) {
+      return 'us';
+    }
+
+    // 未対応地域
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 表示すべき地域を解決する。
+ *   1. タイムゾーン（実在地域）を優先
+ *   2. その地域が未登録なら言語に基づく地域
+ *   3. それでも未登録なら元のタイムゾーン判定を返す（呼び出し側で Pro 誘導にフォールバック）
+ */
+export function resolveRegion(language: Language): AffiliateRegion {
+  const byTz = detectRegionFromTimezone();
+  const byLang = LOCALE_TO_REGION[language];
+
+  // タイムゾーンで地域が取れて、かつ trackingId があればそれを使う
+  if (byTz && CONFIGS[byTz].trackingId) return byTz;
+
+  // 言語ベースの地域に trackingId があるならそっち
+  if (CONFIGS[byLang].trackingId) return byLang;
+
+  // どっちも未登録。タイムゾーンがあればそれを、なければ言語ベースを返す
+  // （trackingId が無いので AmazonBanner は Pro 誘導にフォールバックする）
+  return byTz ?? byLang;
+}
+
+/** 解決された地域から Amazon 設定を取得する */
 export function getAffiliateConfig(language: Language): AffiliateConfig {
-  const region = LOCALE_TO_REGION[language];
+  const region = resolveRegion(language);
   return CONFIGS[region];
 }
 

@@ -1422,6 +1422,11 @@ function AlarmSettingsPanel({
     { value: 'none', label: noneLabel },
   ];
 
+  // Web では channel='notification' は再生時に 'media' に降格される (alarm.ts playAlarm 参照)。
+  // UI もそれに合わせて、Android 等で保存された 'notification' 設定が残っていても
+  // Web では volume / repeat のロック表示を出さず、media モードと同じ UI にする。
+  const effectiveChannel: AlarmChannel = !isNative() && channel === 'notification' ? 'media' : channel;
+
   return (
     <div className="space-y-3">
       <div>
@@ -1440,7 +1445,7 @@ function AlarmSettingsPanel({
           </select>
           {sound !== 'none' && (
             <button
-              onClick={() => previewAlarm(sound, repeat, volume, vibration, channel)}
+              onClick={() => previewAlarm(sound, repeat, volume, vibration, effectiveChannel)}
               className="p-2 rounded-lg border border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-600 text-gray-600 dark:text-gray-400"
               title="Preview"
             >
@@ -1461,18 +1466,18 @@ function AlarmSettingsPanel({
               step={5}
               value={volume}
               onChange={(e) => onVolumeChange(Number(e.target.value))}
-              disabled={channel === 'notification'}
+              disabled={effectiveChannel === 'notification'}
               className={`flex-1 h-2 rounded-lg appearance-none accent-tiffany bg-gray-200 dark:bg-neutral-600 ${
-                channel === 'notification' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                effectiveChannel === 'notification' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
               }`}
             />
             <span className={`w-10 text-right text-sm ${
-              channel === 'notification'
+              effectiveChannel === 'notification'
                 ? 'text-gray-400 dark:text-gray-500'
                 : 'text-gray-600 dark:text-gray-400'
             }`}>{volume}%</span>
           </div>
-          {channel === 'notification' && (
+          {effectiveChannel === 'notification' && (
             <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{volumeSystemControlNote}</p>
           )}
         </div>
@@ -1483,8 +1488,8 @@ function AlarmSettingsPanel({
           <label className={labelClass}>{repeatLabel}</label>
           <div className="flex gap-1.5">
             {[1, 2, 3, 4, 5].map((n) => {
-              const disabled = channel === 'notification' && n !== 1;
-              const isSelected = channel === 'notification' ? n === 1 : repeat === n;
+              const disabled = effectiveChannel === 'notification' && n !== 1;
+              const isSelected = effectiveChannel === 'notification' ? n === 1 : repeat === n;
               return (
                 <button
                   key={n}
@@ -1503,7 +1508,7 @@ function AlarmSettingsPanel({
               );
             })}
           </div>
-          {channel === 'notification' && (
+          {effectiveChannel === 'notification' && (
             <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{repeatLockedNote}</p>
           )}
         </div>

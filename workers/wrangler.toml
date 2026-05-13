@@ -11,15 +11,16 @@ compatibility_flags = ["nodejs_compat"]
 #   STRIPE_WEBHOOK_SECRET    - Stripe webhook signing secret
 #   STRIPE_PRICE_STANDARD    - Price ID for Standard plan
 #   STRIPE_PRICE_PRO         - Price ID for Pro plan
-#   VAPID_SUBJECT            - mailto:xxx or https://xxx
-#   VAPID_PUBLIC_KEY         - VAPID public key
-#   VAPID_PRIVATE_KEY        - VAPID private key
 #   RESEND_API_KEY           - Resend API key (re_xxx)
 #   RESEND_FROM              - From address (e.g. PomoCare <noreply@pomocare.com>)
 
 # Optional:
 #   STRIPE_PORTAL_CONFIG_ID  - Custom portal configuration
 
-[triggers]
-# send-push runs every minute
-crons = ["* * * * *"]
+# Legacy (kept for rollback window, can be removed after 2026-06-13):
+#   VAPID_SUBJECT / VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY — used by the old
+#   server-side Web Push pipeline (cron + /schedule-notification + /send-push).
+#   The pipeline was removed because tab-open delivery via Service Worker
+#   showNotification() is sufficient for PomoCare's UX, and the 1-min cron was
+#   polling Neon 24/7 and dominating Free tier CU-hrs. See migration file
+#   `supabase/migrations/20260513_drop_push_notifications.sql`.

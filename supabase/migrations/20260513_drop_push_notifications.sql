@@ -1,0 +1,33 @@
+-- Drop the old server-side Web Push tables.
+--
+-- These were used by a Cloudflare Worker cron (every minute) that polled
+-- `scheduled_notifications` to send Web Push messages on timer end. The
+-- pipeline was removed in favor of client-side Service Worker
+-- `registration.showNotification()` because:
+--   1. The cron kept Neon's compute alive 24/7, dominating Free tier CU-hrs
+--      (~170 CU-hrs/month vs 100 CU-hrs Free tier limit).
+--   2. The original UX goal (notify after tab close) was deemed unnecessary —
+--      PomoCare timers run while the user has the tab open by definition.
+--
+-- ⚠️  DO NOT RUN THIS MIGRATION AUTOMATICALLY.
+--
+-- Execution plan:
+--   1. Merge this file commit (table stays alive, no apply).
+--   2. Deploy `workers/` with cron + routes removed (PR-B).
+--   3. Observe production for 1–2 weeks; confirm no remaining writes via:
+--        SELECT count(*) FROM scheduled_notifications
+--        WHERE created_at > now() - interval '7 days';
+--      should return 0.
+--   4. Manually run the statements below in Neon SQL Editor.
+--   5. Follow-up small PR: remove `'push_subscriptions'`,
+--      `'scheduled_notifications'` from the `tables` array in
+--      `workers/src/routes/delete-account.ts` (kept until table drop to avoid
+--      noisy DELETE-from-nonexistent-table errors).
+--
+-- Rollback: re-run the contents of
+--   `supabase/migrations/20260319_push_notifications.sql`
+-- if the server-side pipeline needs to come back. VAPID secrets are kept on
+-- Cloudflare for at least one month post-deploy to preserve a rollback path.
+
+DROP TABLE IF EXISTS scheduled_notifications;
+DROP TABLE IF EXISTS push_subscriptions;

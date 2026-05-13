@@ -312,7 +312,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [syncUser]);
 
-  // Initial session load + polling for auth state changes
+  // Initial session load + cross-tab sync.
+  // Auth state changes are picked up by:
+  //   - visibility handler above (refreshes tier on tab focus)
+  //   - storage event below (cross-tab sign-out / sign-in)
+  //   - syncUser() call sites (deep link handler, refreshTier, etc.)
+  // 5s polling was removed to let Neon auto-suspend the DB compute.
   useEffect(() => {
     let cancelled = false;
 
@@ -324,9 +329,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!cancelled) setIsLoading(false);
     }, 10_000);
 
-    // Poll for auth state changes (Better Auth doesn't have onAuthStateChange)
-    const interval = setInterval(() => { if (!cancelled) syncUser(); }, 5000);
-
     // Cross-tab: listen for storage events
     const onStorage = (e: StorageEvent) => {
       if (e.key?.includes('better-auth') || e.key?.includes('session')) {
@@ -337,7 +339,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
       clearTimeout(fallbackTimer);
       window.removeEventListener('storage', onStorage);
     };

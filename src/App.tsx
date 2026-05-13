@@ -343,7 +343,6 @@ function LabelSelect({
 function PomodoroApp({ storage, settings, updateSettings, patchSettings, refreshSettings }: PomodoroAppProps) {
   const { t } = useI18n();
   const features = useFeatures();
-  const { user } = useAuth();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const {
     sessions,
@@ -405,33 +404,8 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
     [addSession],
   );
 
-  // Web Push notifications (logged-in users only)
-  const {
-    isSubscribed: isPushSubscribed,
-    subscribe: subscribePush,
-    scheduleNotification,
-    cancelNotification,
-  } = usePushNotification(user?.id ?? null);
-
-  const handleSchedulePush = useCallback(
-    (fireAt: number) => {
-      if (!user) return;
-      if (!isPushSubscribed) {
-        // Auto-subscribe on first timer start, then schedule
-        subscribePush().then((ok) => {
-          if (ok) scheduleNotification(fireAt, 'Timer Complete', 'PomoCare');
-        });
-      } else {
-        scheduleNotification(fireAt, 'Timer Complete', 'PomoCare');
-      }
-    },
-    [user, isPushSubscribed, subscribePush, scheduleNotification],
-  );
-
-  const handleCancelPush = useCallback(() => {
-    if (!user) return;
-    cancelNotification();
-  }, [user, cancelNotification]);
+  // Service Worker OS notification on timer end (no server round-trip)
+  const { notify } = usePushNotification();
 
   const { timeLeft, isRunning, mode, toggle, reset, completeEarly } = useTimer({
     workTime: effectiveWorkTime,
@@ -442,8 +416,7 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
     activeLabel,
     activeNote,
     onSessionComplete,
-    onSchedulePush: handleSchedulePush,
-    onCancelPush: handleCancelPush,
+    onNotify: notify,
   });
 
   const [view, setView] = useState<'timer' | 'settings' | 'stats'>('timer');

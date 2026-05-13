@@ -123,7 +123,7 @@ const JP: AffiliateConfig = {
 const US: AffiliateConfig = {
   region: 'us',
   host: 'amazon.com',
-  trackingId: null, // TODO: Amazon Associates US 登録後に差し替え (例: 'pomocare-20')
+  trackingId: 'pomocare-20',
   products: [
     {
       id: 'us-deep-work',
@@ -172,7 +172,7 @@ const US: AffiliateConfig = {
 const UK: AffiliateConfig = {
   region: 'uk',
   host: 'amazon.co.uk',
-  trackingId: null, // TODO: Amazon Associates UK 登録後に差し替え (例: 'pomocare-21')
+  trackingId: 'pomocare-21',
   products: [
     {
       id: 'uk-deep-work',

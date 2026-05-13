@@ -632,6 +632,15 @@ export function playAlarm(
     return;
   }
 
+  // Web では notification channel を選ぶ手段が UI 側でガードされているが、Android 版で
+  // `channel: 'notification'` を保存したアカウントが Web からログインすると古い値が残る。
+  // Web の OS 通知 API (`new Notification` with `silent: false`) は環境次第で完全に
+  // 無音になる（Windows Focus Assist / 通知音 OFF / macOS Do Not Disturb など）。
+  // Web 側では一律 `media` 経路（Web Audio API）に降格させ、音量・繰り返しが効く挙動に揃える。
+  if (channel === 'notification') {
+    channel = 'media';
+  }
+
   const isSilent = sound === 'none' || volume === 0;
 
   // バイブレーション判定
@@ -657,14 +666,9 @@ export function playAlarm(
 
   if (isSilent) return;
 
-  // NOTE: Web で channel='notification' のパスは現状 UI でガードされ到達しない
-  // （SettingsPanel.tsx の isNative() ガード）。将来拡張のため残す。
-  if (channel === 'notification') {
-    playViaNotificationChannel(repeat);
-    return;
-  }
-
   // --- Media channel: Web Audio / HTML5 Audio（volume と repeat に対応、メディア音量連動） ---
+  // 上で notification → media に降格済みなので、Web では必ずこの経路を通る。
+  // Native + notification は冒頭で early-return 済み。
   playViaMediaChannel(sound, repeat, volume);
 }
 

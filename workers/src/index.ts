@@ -4,8 +4,6 @@ import { handleCreatePortalSession } from './routes/create-portal-session';
 import { handleCancelSubscription } from './routes/cancel-subscription';
 import { handleDeleteAccount } from './routes/delete-account';
 import { handleStripeWebhook } from './routes/stripe-webhook';
-import { handleScheduleNotification } from './routes/schedule-notification';
-import { handleSendPush } from './routes/send-push';
 import { handleNeonAuthWebhook } from './routes/neon-auth-webhook';
 
 export default {
@@ -24,12 +22,6 @@ export default {
         return handleDeleteAccount(request, env);
       case '/stripe-webhook':
         return handleStripeWebhook(request, env);
-      case '/schedule-notification':
-        return handleScheduleNotification(request, env);
-      case '/send-push':
-        // HTTP trigger requires secret header (validated inside handler)
-        await handleSendPush(env, request);
-        return Response.json({ ok: true });
       case '/neon-auth-webhook':
         return handleNeonAuthWebhook(request, env);
       case '/health':
@@ -37,10 +29,5 @@ export default {
       default:
         return new Response('Not Found', { status: 404 });
     }
-  },
-
-  // Cloudflare Cron Trigger — runs send-push every minute
-  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
-    await handleSendPush(env);
   },
 } satisfies ExportedHandler<Env>;

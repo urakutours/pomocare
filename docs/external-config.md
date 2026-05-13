@@ -326,8 +326,8 @@ pomocare は `workers/` 配下に Cloudflare Worker（`pomocare-api`）を持ち
 | `/create-portal-session` | Stripe カスタマーポータル |
 | `/cancel-subscription` | サブスクリプションキャンセル |
 | `/stripe-webhook` | Stripe Webhook 受信 |
-| `/schedule-notification` | プッシュ通知スケジュール登録 |
-| `/send-push` | プッシュ通知送信（Cron `* * * * *` でも自動実行） |
+| `/neon-auth-webhook` | Neon Auth メールリンク送信 |
+| `/delete-account` | アカウント削除 |
 | `/health` | ヘルスチェック |
 
 現在 `VITE_WORKER_URL` は placeholder のままで、デプロイ後に発行される
@@ -369,12 +369,14 @@ npx wrangler secret put STRIPE_SECRET_KEY
 npx wrangler secret put STRIPE_WEBHOOK_SECRET
 npx wrangler secret put STRIPE_PRICE_STANDARD
 npx wrangler secret put STRIPE_PRICE_PRO
-npx wrangler secret put VAPID_SUBJECT
-npx wrangler secret put VAPID_PUBLIC_KEY
-npx wrangler secret put VAPID_PRIVATE_KEY
 
 # 任意（カスタムポータル設定がある場合）
 # npx wrangler secret put STRIPE_PORTAL_CONFIG_ID
+
+# Legacy (2026-05-13 までに登録されたものは rollback 用に当面保持。
+# 通知パイプラインは Service Worker 直接発火に切替済 — 詳細は
+# supabase/migrations/20260513_drop_push_notifications.sql)：
+#   VAPID_SUBJECT / VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY
 ```
 
 #### 5.3. デプロイ

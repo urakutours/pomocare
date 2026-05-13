@@ -15,8 +15,7 @@ interface UseTimerOptions {
   activeLabel: string | null;
   activeNote: string;
   onSessionComplete: (session: PomodoroSession) => void;
-  onSchedulePush?: (fireAt: number) => void;
-  onCancelPush?: () => void;
+  onNotify?: (title: string, body: string) => void;
 }
 
 export function useTimer({
@@ -28,8 +27,7 @@ export function useTimer({
   activeLabel,
   activeNote,
   onSessionComplete,
-  onSchedulePush,
-  onCancelPush,
+  onNotify,
 }: UseTimerOptions) {
   const [timeLeft, setTimeLeft] = useState(workTime * 60);
   const [isRunning, setIsRunning] = useState(false);
@@ -122,8 +120,6 @@ export function useTimer({
       setIsRunning(false);
       startTimestampRef.current = null;
 
-      // Cancel any pending push (may have already fired, but cancel to be safe)
-      onCancelPush?.();
       clearAlarmTimeout();
 
       // Play alarm (skip if the backup setTimeout already fired it)
@@ -131,6 +127,12 @@ export function useTimer({
         playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent', alarm.channel ?? 'media');
       }
       alarmFiredRef.current = false;
+
+      // Fire OS notification via Service Worker (web only — native uses LocalNotifications).
+      // Background tabs with permission can still raise OS notifications via reg.showNotification.
+      if (!isNative()) {
+        onNotify?.('Timer Complete', 'PomoCare');
+      }
 
       if (mode === 'work') {
         const session: PomodoroSession = {
@@ -170,7 +172,7 @@ export function useTimer({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, timeLeft, mode, workTime, breakTime, longBreakTime, longBreakInterval, alarm, activeLabel, activeNote, onSessionComplete]);
+  }, [isRunning, timeLeft, mode, workTime, breakTime, longBreakTime, longBreakInterval, alarm, activeLabel, activeNote, onSessionComplete, onNotify, clearAlarmTimeout]);
 
   const toggle = useCallback(() => {
     // Unlock audio on every user tap so mobile browsers allow later playback
@@ -181,7 +183,6 @@ export function useTimer({
         // Pausing: clear wall-clock tracking
         startTimestampRef.current = null;
         clearAlarmTimeout();
-        onCancelPush?.();
         analytics.track({ name: 'timer_paused' });
       } else {
         // Starting/resuming: record wall-clock anchor
@@ -201,26 +202,22 @@ export function useTimer({
           ).then((id) => {
             nativeAlarmIdRef.current = id;
           });
-        } else if (!isNative()) {
-          // Web: server-side push notification (for logged-in users)
-          onSchedulePush?.(Date.now() + timeLeft * 1000);
         }
         analytics.track({ name: 'timer_started' });
       }
       return !prev;
     });
-  }, [timeLeft, alarm, scheduleAlarmTimeout, clearAlarmTimeout, onSchedulePush, onCancelPush]);
+  }, [timeLeft, alarm, scheduleAlarmTimeout, clearAlarmTimeout]);
 
   const reset = useCallback(() => {
     setIsRunning(false);
     startTimestampRef.current = null;
     clearAlarmTimeout();
-    onCancelPush?.();
     setMode('work');
     setTimeLeft(workTime * 60);
     completedSessionsRef.current = 0;
     analytics.track({ name: 'timer_reset' });
-  }, [workTime, clearAlarmTimeout, onCancelPush]);
+  }, [workTime, clearAlarmTimeout]);
 
   // Complete work session early — record actual elapsed time and move to break
   const completeEarly = useCallback(() => {
@@ -231,7 +228,6 @@ export function useTimer({
     setIsRunning(false);
     startTimestampRef.current = null;
     clearAlarmTimeout();
-    onCancelPush?.();
 
     const session: PomodoroSession = {
       date: new Date().toISOString(),
@@ -259,7 +255,7 @@ export function useTimer({
       setMode('work');
       setTimeLeft(workTime * 60);
     }
-  }, [mode, workTime, timeLeft, breakTime, longBreakTime, longBreakInterval, activeLabel, activeNote, onSessionComplete, clearAlarmTimeout, onCancelPush]);
+  }, [mode, workTime, timeLeft, breakTime, longBreakTime, longBreakInterval, activeLabel, activeNote, onSessionComplete, clearAlarmTimeout]);
 
   // Cleanup on unmount: clear any pending web timeout and native LocalNotification
   useEffect(() => {

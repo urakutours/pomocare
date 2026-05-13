@@ -1,79 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { workerPost } from '@/lib/api';
-import { VAPID_PUBLIC_KEY } from '@/config/push';
+import { useCallback, useEffect, useRef } from 'react';
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const raw = atob(base64);
-  const out = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-  return out;
-}
+export function usePushNotification() {
+  const regRef = useRef<ServiceWorkerRegistration | null>(null);
 
-export function usePushNotification(userId: string | null) {
-  const [isSupported] = useState(() => 'serviceWorker' in navigator && 'PushManager' in window);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const subRef = useRef<PushSubscription | null>(null);
-
-  // Check existing subscription on mount
   useEffect(() => {
-    if (!isSupported || !userId) return;
-    navigator.serviceWorker.ready.then(reg => {
-      reg.pushManager.getSubscription().then(sub => {
-        subRef.current = sub;
-        setIsSubscribed(!!sub);
-      });
+    if (!('serviceWorker' in navigator)) return;
+    void navigator.serviceWorker.ready.then((reg) => {
+      regRef.current = reg;
     });
-  }, [isSupported, userId]);
+  }, []);
 
-  const subscribe = useCallback(async (): Promise<boolean> => {
-    if (!isSupported || !userId) return false;
-    try {
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-      });
-      subRef.current = sub;
-      const json = sub.toJSON();
-      await workerPost('/schedule-notification', {
-        action: 'subscribe',
-        endpoint: json.endpoint,
-        p256dh: json.keys?.p256dh,
-        auth: json.keys?.auth,
-      });
-      setIsSubscribed(true);
-      return true;
-    } catch (err) {
-      console.error('[usePushNotification] subscribe failed:', err);
-      return false;
-    }
-  }, [isSupported, userId]);
+  const notify = useCallback(async (title: string, body: string) => {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    if (!('serviceWorker' in navigator)) return;
+    const reg = regRef.current ?? (await navigator.serviceWorker.ready);
+    const options: NotificationOptions & { renotify?: boolean; vibrate?: number[] } = {
+      body,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-96x96.png',
+      tag: 'pomocare-timer',
+      renotify: true,
+      vibrate: [300, 100, 300, 100, 300],
+      data: { url: '/' },
+    };
+    await reg.showNotification(title, options);
+  }, []);
 
-  const scheduleNotification = useCallback(
-    async (fireAt: number, title: string, body: string) => {
-      if (!userId) return;
-      await workerPost('/schedule-notification', {
-        action: 'schedule',
-        fire_at: new Date(fireAt).toISOString(),
-        title,
-        body,
-      });
-    },
-    [userId],
-  );
-
-  const cancelNotification = useCallback(async () => {
-    if (!userId) return;
-    await workerPost('/schedule-notification', { action: 'cancel' });
-  }, [userId]);
-
-  return {
-    isSupported,
-    isSubscribed,
-    subscribe,
-    scheduleNotification,
-    cancelNotification,
-  };
+  return { notify };
 }

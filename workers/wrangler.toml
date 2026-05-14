@@ -24,3 +24,14 @@ compatibility_flags = ["nodejs_compat"]
 #   showNotification() is sufficient for PomoCare's UX, and the 1-min cron was
 #   polling Neon 24/7 and dominating Free tier CU-hrs. See migration file
 #   `supabase/migrations/20260513_drop_push_notifications.sql`.
+
+# Cron triggers are intentionally empty. Removing the previous `crons = ["* * * * *"]`
+# entry by deleting this block was insufficient — per Cloudflare docs:
+#   "If the `triggers` or `crons` property are undefined then the currently
+#    deployed Cron Triggers are left in-place. To disable a Cron Trigger,
+#    set `crons = []`."
+# So we explicitly write an empty array to ensure no cron is ever attached
+# to this Worker via wrangler deploy. If you ever need to add a cron back,
+# document why and watch the Neon CU-hrs impact.
+[triggers]
+crons = []

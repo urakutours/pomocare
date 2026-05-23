@@ -21,9 +21,12 @@ android/app/signing-key-info.txt
 .secrets/*
 !.secrets/README.md
 
-# 環境変数（追加分）
-.env
+# 環境変数 (案 3: .env 1 file selective encrypt、2026-05-22 Phase 2b)
+# .env は commit 対象 — DEPLOY_* (5 keys) は dotenvx で暗号化、VITE_* (3 keys) は平文残留。
+# 詳細運用: docs/env-setup.md
+.env.keys
 .env.production
 .env.staging
 .env.development
 .env.vercel
+# .env.local は *.local で自動 ignore (上記参照)

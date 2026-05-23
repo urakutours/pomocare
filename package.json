@@ -11,7 +11,7 @@
     "deploy": "gh-pages -d dist --dotfiles",
     "lp:dev": "sass --watch lp/scss/main.scss:lp/css/style.css --source-map",
     "lp:build": "sass lp/scss/main.scss:lp/css/style.css --style=compressed --no-source-map",
-    "lp:deploy": "npm run lp:build && node --env-file=.env scripts/deploy-lp.mjs",
+    "lp:deploy": "npm run lp:build && dotenvx run -f .env -- node scripts/deploy-lp.mjs",
     "generate-icons": "node scripts/generate-icons.mjs",
     "generate-sounds": "node scripts/generate-alarm-sounds.mjs",
     "cap:sync": "cap sync",
@@ -39,6 +39,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.67.0",
     "@eslint/js": "^9.19.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { ChangePasswordModal } from '@/components/auth/ChangePasswordModal';
 import { X, Plus, Trash2, Sun, Moon, Play, MoreVertical, Pencil, GripVertical, Upload, Download, Lock, RefreshCw, Check, AlertCircle } from 'lucide-react';
-import type { PomodoroSettings, ThemeMode, AlarmSound, AlarmChannel, VibrationMode } from '@/types/settings';
+import type { PomodoroSettings, ThemeMode, AlarmSound, VibrationMode } from '@/types/settings';
 import { DEFAULT_ACTIVE_PRESETS, DEFAULT_REST_PRESETS } from '@/types/settings';
 import type { LabelDefinition, PomodoroSession } from '@/types/session';
 import { LABEL_COLORS } from '@/config/colors';
@@ -11,8 +11,8 @@ import { useFeatures } from '@/contexts/FeatureContext';
 import { UpgradePrompt } from '@/components/shared/UpgradePrompt';
 import { SUPPORTED_LANGUAGES, getTranslations } from '@/i18n';
 import type { Language } from '@/i18n';
-import { previewAlarm, requestNativeNotificationPermission } from '@/utils/alarm';
-import { isNative, canPurchaseProPlan } from '@/utils/platform';
+import { previewAlarm } from '@/utils/alarm';
+import { canPurchaseProPlan } from '@/utils/platform';
 import { QuickLabelModal } from '@/App';
 
 interface SettingsPanelProps {
@@ -1346,86 +1346,57 @@ function LabelManager({
 // ---- Alarm Settings ----
 function AlarmSettingsPanel({
   sound,
-  repeat,
   volume,
   vibration,
-  channel,
   onSoundChange,
-  onRepeatChange,
   onVolumeChange,
   onVibrationChange,
-  onChannelChange,
   alarmLabel,
-  repeatLabel,
   volumeLabel,
   vibrationLabel,
   vibrationOffLabel,
-  vibrationSilentLabel,
   vibrationAlwaysLabel,
   vibrationNote,
-  channelLabel,
-  channelMediaLabel,
-  channelNotificationLabel,
-  channelNote,
-  volumeSystemControlNote,
-  repeatLockedNote,
-  bellLabel,
-  digitalLabel,
-  chimeLabel,
-  kitchenLabel,
+  windchimeLabel,
+  canonLabel,
+  boxingLabel,
+  cuckooLabel,
   classicLabel,
   gentleLabel,
   softLabel,
   noneLabel,
 }: {
   sound: AlarmSound;
-  repeat: number;
   volume: number;
   vibration: VibrationMode;
-  channel: AlarmChannel;
   onSoundChange: (s: AlarmSound) => void;
-  onRepeatChange: (n: number) => void;
   onVolumeChange: (v: number) => void;
   onVibrationChange: (v: VibrationMode) => void;
-  onChannelChange: (c: AlarmChannel) => void;
   alarmLabel: string;
-  repeatLabel: string;
   volumeLabel: string;
   vibrationLabel: string;
   vibrationOffLabel: string;
-  vibrationSilentLabel: string;
   vibrationAlwaysLabel: string;
   vibrationNote: string;
-  channelLabel: string;
-  channelMediaLabel: string;
-  channelNotificationLabel: string;
-  channelNote: string;
-  volumeSystemControlNote: string;
-  repeatLockedNote: string;
-  bellLabel: string;
-  digitalLabel: string;
-  chimeLabel: string;
-  kitchenLabel: string;
+  windchimeLabel: string;
+  canonLabel: string;
+  boxingLabel: string;
+  cuckooLabel: string;
   classicLabel: string;
   gentleLabel: string;
   softLabel: string;
   noneLabel: string;
 }) {
   const sounds: { value: AlarmSound; label: string }[] = [
-    { value: 'bell', label: bellLabel },
-    { value: 'digital', label: digitalLabel },
-    { value: 'chime', label: chimeLabel },
-    { value: 'kitchen', label: kitchenLabel },
     { value: 'classic', label: classicLabel },
+    { value: 'windchime', label: windchimeLabel },
     { value: 'gentle', label: gentleLabel },
+    { value: 'cuckoo', label: cuckooLabel },
+    { value: 'boxing', label: boxingLabel },
+    { value: 'canon', label: canonLabel },
     { value: 'soft', label: softLabel },
     { value: 'none', label: noneLabel },
   ];
-
-  // Web では channel='notification' は再生時に 'media' に降格される (alarm.ts playAlarm 参照)。
-  // UI もそれに合わせて、Android 等で保存された 'notification' 設定が残っていても
-  // Web では volume / repeat のロック表示を出さず、media モードと同じ UI にする。
-  const effectiveChannel: AlarmChannel = !isNative() && channel === 'notification' ? 'media' : channel;
 
   return (
     <div className="space-y-3">
@@ -1445,7 +1416,7 @@ function AlarmSettingsPanel({
           </select>
           {sound !== 'none' && (
             <button
-              onClick={() => previewAlarm(sound, repeat, volume, vibration, effectiveChannel)}
+              onClick={() => previewAlarm(sound, 1, volume)}
               className="p-2 rounded-lg border border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-600 text-gray-600 dark:text-gray-400"
               title="Preview"
             >
@@ -1466,51 +1437,10 @@ function AlarmSettingsPanel({
               step={5}
               value={volume}
               onChange={(e) => onVolumeChange(Number(e.target.value))}
-              disabled={effectiveChannel === 'notification'}
-              className={`flex-1 h-2 rounded-lg appearance-none accent-tiffany bg-gray-200 dark:bg-neutral-600 ${
-                effectiveChannel === 'notification' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-              }`}
+              className="flex-1 h-2 rounded-lg appearance-none accent-tiffany bg-gray-200 dark:bg-neutral-600 cursor-pointer"
             />
-            <span className={`w-10 text-right text-sm ${
-              effectiveChannel === 'notification'
-                ? 'text-gray-400 dark:text-gray-500'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}>{volume}%</span>
+            <span className="w-10 text-right text-sm text-gray-600 dark:text-gray-400">{volume}%</span>
           </div>
-          {effectiveChannel === 'notification' && (
-            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{volumeSystemControlNote}</p>
-          )}
-        </div>
-      )}
-
-      {sound !== 'none' && (
-        <div>
-          <label className={labelClass}>{repeatLabel}</label>
-          <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map((n) => {
-              const disabled = effectiveChannel === 'notification' && n !== 1;
-              const isSelected = effectiveChannel === 'notification' ? n === 1 : repeat === n;
-              return (
-                <button
-                  key={n}
-                  onClick={() => !disabled && onRepeatChange(n)}
-                  disabled={disabled}
-                  className={`w-9 h-9 rounded-lg border text-sm font-medium transition-colors ${
-                    isSelected
-                      ? 'border-tiffany bg-tiffany text-white'
-                      : disabled
-                        ? 'border-gray-200 dark:border-neutral-700 text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50'
-                        : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600'
-                  }`}
-                >
-                  {n}
-                </button>
-              );
-            })}
-          </div>
-          {effectiveChannel === 'notification' && (
-            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{repeatLockedNote}</p>
-          )}
         </div>
       )}
 
@@ -1519,7 +1449,6 @@ function AlarmSettingsPanel({
         <div className="flex gap-1.5">
           {([
             { value: 'off' as VibrationMode, label: vibrationOffLabel },
-            { value: 'silent' as VibrationMode, label: vibrationSilentLabel },
             { value: 'always' as VibrationMode, label: vibrationAlwaysLabel },
           ]).map((opt) => (
             <button
@@ -1538,37 +1467,6 @@ function AlarmSettingsPanel({
         <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{vibrationNote}</p>
       </div>
 
-      {isNative() && sound !== 'none' && (
-        <div>
-          <label className={labelClass}>{channelLabel}</label>
-          <div className="flex gap-1.5">
-            {([
-              { value: 'media' as AlarmChannel, label: channelMediaLabel },
-              { value: 'notification' as AlarmChannel, label: channelNotificationLabel },
-            ]).map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => {
-                  onChannelChange(opt.value);
-                  // Android 13+: notification チャネルを選んだ瞬間に通知権限を要求する。
-                  // さもないと次にセッション開始するまで LocalNotifications が silently 失敗する。
-                  if (opt.value === 'notification') {
-                    void requestNativeNotificationPermission();
-                  }
-                }}
-                className={`flex-1 min-h-9 px-2 py-1.5 rounded-lg border text-sm font-medium leading-tight text-center break-words whitespace-normal transition-colors ${
-                  channel === opt.value
-                    ? 'border-tiffany bg-tiffany text-white'
-                    : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-600'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{channelNote}</p>
-        </div>
-      )}
     </div>
   );
 }
@@ -1612,11 +1510,13 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
   const [restPresets, setRestPresets] = useState(
     settings.restPresets ?? DEFAULT_REST_PRESETS,
   );
-  const [alarmSound, setAlarmSound] = useState<AlarmSound>(settings.alarm?.sound ?? 'bell');
-  const [alarmRepeat, setAlarmRepeat] = useState(settings.alarm?.repeat ?? 1);
+  const [alarmSound, setAlarmSound] = useState<AlarmSound>(settings.alarm?.sound ?? 'classic');
   const [alarmVolume, setAlarmVolume] = useState(settings.alarm?.volume ?? 80);
-  const [alarmVibration, setAlarmVibration] = useState<VibrationMode>(settings.alarm?.vibration ?? 'silent');
-  const [alarmChannel, setAlarmChannel] = useState<AlarmChannel>(settings.alarm?.channel ?? 'media');
+  const [alarmVibration, setAlarmVibration] = useState<VibrationMode>(() => {
+    // 旧 JSONB に残存する 'silent' 値を 2択廃止に合わせて 'off' に読み替える（後方互換）
+    const raw = settings.alarm?.vibration as string | undefined;
+    return raw === 'always' ? 'always' : 'off';
+  });
   const [labels, setLabels] = useState<LabelDefinition[]>(settings.labels ?? []);
   const [customColors, setCustomColors] = useState<string[]>(settings.customColors ?? []);
   const [tab, setTab] = useState<SettingsTab>('general');
@@ -1767,7 +1667,7 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
       activePresets,
       restPresets,
       theme,
-      alarm: { sound: alarmSound, repeat: alarmRepeat, volume: alarmVolume, vibration: alarmVibration, channel: alarmChannel },
+      alarm: { sound: alarmSound, repeat: 1, volume: alarmVolume, vibration: alarmVibration },
       labels,
       activeLabel: settings.activeLabel,
       customColors,
@@ -1887,33 +1787,21 @@ export function SettingsPanel({ settings, onSave, onClose, onClearAll, onImportC
             <div className="border-t border-gray-200 dark:border-neutral-700" />
             <AlarmSettingsPanel
               sound={alarmSound}
-              repeat={alarmRepeat}
               volume={alarmVolume}
               vibration={alarmVibration}
-              channel={alarmChannel}
               onSoundChange={setAlarmSound}
-              onRepeatChange={setAlarmRepeat}
               onVolumeChange={setAlarmVolume}
               onVibrationChange={setAlarmVibration}
-              onChannelChange={setAlarmChannel}
               alarmLabel={t.alarmLabel}
-              repeatLabel={t.alarmRepeatLabel}
               volumeLabel={t.alarmVolumeLabel}
               vibrationLabel={t.alarmVibrationLabel}
               vibrationOffLabel={t.alarmVibrationOff}
-              vibrationSilentLabel={t.alarmVibrationSilent}
               vibrationAlwaysLabel={t.alarmVibrationAlways}
               vibrationNote={t.alarmVibrationNote}
-              channelLabel={t.alarmChannelLabel}
-              channelMediaLabel={t.alarmChannelMedia}
-              channelNotificationLabel={t.alarmChannelNotification}
-              channelNote={t.alarmChannelNote}
-              volumeSystemControlNote={t.alarmVolumeSystemControlNote}
-              repeatLockedNote={t.alarmRepeatLockedNote}
-              bellLabel={t.alarmSoundBell}
-              digitalLabel={t.alarmSoundDigital}
-              chimeLabel={t.alarmSoundChime}
-              kitchenLabel={t.alarmSoundKitchen}
+              windchimeLabel={t.alarmSoundWindchime}
+              canonLabel={t.alarmSoundCanon}
+              boxingLabel={t.alarmSoundBoxing}
+              cuckooLabel={t.alarmSoundCuckoo}
               classicLabel={t.alarmSoundClassic}
               gentleLabel={t.alarmSoundGentle}
               softLabel={t.alarmSoundSoft}

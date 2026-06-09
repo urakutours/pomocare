@@ -13,7 +13,8 @@ const config: CapacitorConfig = {
   plugins: {
     LocalNotifications: {
       iconColor: '#0abab5',
-      sound: 'bell.wav',
+      // Fallback for notifications without an explicit channel; channel-targeted schedules use each channel's own sound and this value is not reached.
+      sound: 'classic.mp3',
     },
     SplashScreen: {
       launchShowDuration: 1000,

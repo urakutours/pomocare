@@ -2,7 +2,7 @@ import { neon } from '@/lib/neon';
 import type { StorageService } from './types';
 import type { PomodoroSession } from '@/types/session';
 import type { PomodoroSettings } from '@/types/settings';
-import { DEFAULT_SETTINGS } from '@/types/settings';
+import { DEFAULT_SETTINGS, migrateAlarmSound, migrateVibration } from '@/types/settings';
 
 /**
  * Neon ストレージアダプター
@@ -365,9 +365,17 @@ export class NeonAdapter implements StorageService {
       if (error.code === 'PGRST116') return DEFAULT_SETTINGS;
       throw error;
     }
-    const settings = { ...DEFAULT_SETTINGS, ...(data?.data as Partial<PomodoroSettings>) };
-    this.cacheSettings(settings);
-    return settings;
+    const merged: PomodoroSettings = { ...DEFAULT_SETTINGS, ...(data?.data as Partial<PomodoroSettings>) };
+    // Backward-compat: migrate removed synth4 IDs (bell/digital/chime/kitchen) to default
+    if (merged.alarm?.sound) {
+      merged.alarm = { ...merged.alarm, sound: migrateAlarmSound(merged.alarm.sound as string) };
+    }
+    // Backward-compat: normalize legacy vibration values (e.g. 'silent' removed in T2e) to 'off' | 'always'
+    if (merged.alarm?.vibration !== undefined) {
+      merged.alarm = { ...merged.alarm, vibration: migrateVibration(merged.alarm.vibration as string) };
+    }
+    this.cacheSettings(merged);
+    return merged;
   }
 
   async saveSettings(settings: PomodoroSettings): Promise<void> {

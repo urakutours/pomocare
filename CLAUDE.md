@@ -283,19 +283,46 @@ npm run generate-sounds
 - タイトル・タブ・コンテンツは全体がスクロール可能
 - 下部のアクションボタン（「設定を適用」「前の週/次の週」等）は固定
 
-### アラームの二系統ディスパッチ（Web / Native）
+### アラームディスパッチ設計（②′ 仕様、2026-06-05 確定）
 
-- **Web ブラウザ版:** Web Audio API（アプリ内生成）+ HTMLAudioElement フォールバック（iOS 向け）
-- **Capacitor Android 版:** `LocalNotifications.schedule()` で OS レベルに予約（アプリが kill されても OS が発火）+ `Haptics.impact()` で振動
-- `src/utils/alarm.ts` 内で `isNative()`（`src/utils/platform.ts`）を判定して dispatch
-- 7 種類のサウンド + OFF
+> 出典: judgment #2（web 版 ① escalate 確定方針）+ 実機検証 (A)(B) PASS（S22/One UI 8.0）。
+> 旧「二系統ディスパッチ（Web / Native）」・「AlarmChannel（media/notification）」節を本節に統合置換。
 
-### AlarmChannel 設定（media / notification）
+#### AlarmScheduler 薄1インタフェース
 
-- Android では鳴らし方の経路を 2 種類から選べる
-  - `media`: アプリ内の Audio で鳴らす（メディア音量連動、画面オフで kill されると鳴らない）
-  - `notification`: OS 通知として鳴らす（画面オフでも鳴る、通知権限要、マナーモードで制限あり）
-- UI は `isNative()` ガードで Android アプリ版のみ表示
+`src/utils/alarmScheduler.ts`（新設）に「未来時刻 T にアラームを予約/取消する」責務のみを閉じ込める。
+
+```ts
+export interface AlarmScheduler {
+  schedule(fireAtMs: number, sound: AlarmSound): Promise<void>; // 冪等
+  cancel(): Promise<void>;
+}
+export const alarmScheduler = isNative() ? new NativeAlarmScheduler() : new WebAlarmScheduler();
+```
+
+- **NativeAlarmScheduler（Android）**: `LocalNotifications.schedule({ at, allowWhileIdle: true })` 1段のみ。通知チャンネルに長尺MP3を添付し OS が発火・フル再生。アプリ内 HTMLAudio 不使用。
+- **WebAlarmScheduler（Web / iOS）**: 内部 setTimeout + フォアグラウンド時のみ再生（Web Audio / HTMLAudio fallback 1段）。OS 予約はしない。
+
+#### 振る舞い表（②′ 製品仕様の正本）
+
+| 状態 | Android (native) | Web / PWA | iOS |
+|---|---|---|---|
+| アプリ前面（画面オン） | 終了時アラーム（未決 #1） | in-app 音（volume 連動） | in-app 音（HTMLAudio fallback） |
+| バックグラウンド | **OS 予約通知で発火 ✅** | 鳴らない（仕様） | 鳴らない（仕様） |
+| 画面オフ / kill | **OS 予約通知で定刻発火 ✅**（~5 秒ラグ許容） | 鳴らない（仕様） | 鳴らない（仕様） |
+| 復帰時 | wall-clock 再計算で状態同期（音は予約通知が発火済） | 跨いだ終了は鳴らさず状態のみ fast-forward | 同左 |
+
+**Android = 画面オフ・バックグラウンド・kill でも定刻発火**（exact-alarm + 長尺 MP3 を通知音、~5 秒 OS 配信ラグ許容）。
+
+**Web・iOS = フォアグラウンド時のみ**。画面オフ・バックグラウンドでの通知は技術的に不可（SW setTimeout は数十秒〜数分でアイドル停止、Notification Triggers は stable 未到達）。これは機能の欠如ではなく仕様の明示であり品質の表明。Web で画面オフを将来確実化するにはサーバ Web Push 復活が唯一手段（別タスク、本 sprint 外）。
+
+#### 廃止・変更事項
+
+- **`AlarmChannel`（media / notification）廃止**: `channel` 二軸の設定 UI と型を削除。Android は常に OS 予約通知 = 既定で画面オフ発火。`DEFAULT_SETTINGS.alarm.channel` 削除済。旧 localStorage/Neon に残存した `channel` 値は新コードが読まないため無害、能動マイグレーション不要。
+- **`repeat` は `@deprecated`**: `AlarmSettings.repeat` に `@deprecated` 付与。AlarmScheduler は repeat 不使用（長尺音 1 回再生）。旧 `repeat:N` 保存値は無視（1:1 置換）。完全削除は次 sprint。
+- **vibration は off / always ON の 2 択**: `'silent'` 表現は OS 通知方式では機能しない。2 択に簡素化（旧 3 択廃止）。
+- **音源**: 長尺 3 種（classic / gentle / soft MP3）維持。短い合成音 WAV 4 種は新規デザイン検討中。既定はアラーム音あり（画面オフでも鳴る）。
+- **channel 再作成注意**: Android の通知チャンネル sound は immutable。旧チャンネルが残存する端末では新 MP3 が鳴らないため、channelId バージョニング（例: `pomocare-gentle-v2`）または `deleteChannel` → 再作成が必須（T2d AC）。
 
 ### 認証のネイティブ対応
 

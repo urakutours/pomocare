@@ -3,18 +3,37 @@ import type { LabelDefinition } from '@/types/session';
 
 export type ThemeMode = 'light' | 'gray' | 'dark';
 
-export type AlarmSound = 'bell' | 'digital' | 'chime' | 'kitchen' | 'classic' | 'gentle' | 'soft' | 'none';
+export type AlarmSound = 'windchime' | 'canon' | 'boxing' | 'cuckoo' | 'classic' | 'gentle' | 'soft' | 'none';
 
-export type VibrationMode = 'off' | 'silent' | 'always';
+/** Backward-compat: map legacy synth4 IDs to the new default. Used at read-time to avoid crash on old stored values. */
+export function migrateAlarmSound(raw: string): AlarmSound {
+  const LEGACY_MAP: Record<string, AlarmSound> = {
+    bell: 'classic',
+    digital: 'classic',
+    chime: 'classic',
+    kitchen: 'classic',
+  };
+  if (raw in LEGACY_MAP) return LEGACY_MAP[raw as keyof typeof LEGACY_MAP];
+  const valid: AlarmSound[] = ['windchime', 'canon', 'boxing', 'cuckoo', 'classic', 'gentle', 'soft', 'none'];
+  if ((valid as string[]).includes(raw)) return raw as AlarmSound;
+  return 'classic'; // unknown → default
+}
 
-export type AlarmChannel = 'media' | 'notification';
+/** off = no vibration / always = vibrate on every alarm */
+export type VibrationMode = 'off' | 'always';
+
+/** Backward-compat: map legacy vibration values (e.g. 'silent' removed in T2e) to valid VibrationMode. */
+export function migrateVibration(raw: string): VibrationMode {
+  if (raw === 'always') return 'always';
+  return 'off'; // 'silent' or any unknown value → off
+}
 
 export interface AlarmSettings {
   sound: AlarmSound;
+  /** @deprecated AlarmScheduler uses long-form single playback; repeat value is ignored. Kept for backward-compat read of stored JSONB. */
   repeat: number; // 1-5
   volume: number; // 0-100
   vibration: VibrationMode;
-  channel?: AlarmChannel; // default: 'media' — optional for backward compatibility
 }
 
 export interface PomodoroSettings {
@@ -46,7 +65,7 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   activePresets: DEFAULT_ACTIVE_PRESETS,
   restPresets: DEFAULT_REST_PRESETS,
   theme: 'light',
-  alarm: { sound: 'bell', repeat: 1, volume: 80, vibration: 'silent', channel: 'media' },
+  alarm: { sound: 'classic', repeat: 1, volume: 80, vibration: 'off' },
   labels: [],
   activeLabel: null,
   customColors: [],

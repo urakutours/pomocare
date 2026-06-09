@@ -62,7 +62,12 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Exact alarms for timer accuracy (Android 12+) -->
+    <!-- SCHEDULE_EXACT_ALARM: Android 12 端末の後方互換として残置（削除しない） -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- USE_EXACT_ALARM: Android 13+ (API33+) でインストール時に自動付与・ユーザー無効化不可。
+         timer app / alarm clock app として適格。canScheduleExactAlarms()=true が全ユーザーで保証され
+         LocalNotifications が setExactAndAllowWhileIdle 経路に入る（画面オフでも ~0秒発火）。 -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <!-- Wake device to show notification -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />

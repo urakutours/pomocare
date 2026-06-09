@@ -41,27 +41,19 @@ export interface Translations {
 
   // Alarm settings
   alarmLabel: string;
-  alarmSoundBell: string;
-  alarmSoundDigital: string;
-  alarmSoundChime: string;
-  alarmSoundKitchen: string;
+  alarmSoundWindchime: string;
+  alarmSoundCanon: string;
+  alarmSoundBoxing: string;
+  alarmSoundCuckoo: string;
   alarmSoundClassic: string;
   alarmSoundGentle: string;
   alarmSoundSoft: string;
   alarmSoundNone: string;
-  alarmRepeatLabel: string;
   alarmVolumeLabel: string;
   alarmVibrationLabel: string;
   alarmVibrationOff: string;
-  alarmVibrationSilent: string;
   alarmVibrationAlways: string;
   alarmVibrationNote: string;
-  alarmChannelLabel: string;
-  alarmChannelMedia: string;
-  alarmChannelNotification: string;
-  alarmChannelNote: string;
-  alarmVolumeSystemControlNote: string;
-  alarmRepeatLockedNote: string;
 
   // Labels
   labelsLabel: string;

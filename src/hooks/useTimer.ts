@@ -3,8 +3,13 @@ import type { TimerMode } from '@/types/timer';
 import type { PomodoroSession } from '@/types/session';
 import type { AlarmSettings } from '@/types/settings';
 import { analytics } from '@/services/analytics/AnalyticsService';
-import { playAlarm, unlockAudio, tryResumeAudio, scheduleNativeAlarm, cancelNativeAlarm } from '@/utils/alarm';
+import { unlockAudio, tryResumeAudio, stopAlarm, deactivateTouchStopListener, notifyAlarmRinging } from '@/utils/alarm';
 import { isNative } from '@/utils/platform';
+import { alarmScheduler, WebAlarmScheduler } from '@/utils/alarmScheduler';
+// fix5(i): Capacitor App state — document.visibilityState は WebView で前面でも 'hidden' を返す場合がある
+import { App } from '@capacitor/app';
+// fix9 (B-3 / C): delivered 通知クリア用
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 interface UseTimerOptions {
   workTime: number;
@@ -39,43 +44,19 @@ export function useTimer({
   const startTimestampRef = useRef<number | null>(null);
   const startTimeLeftRef = useRef<number>(workTime * 60);
 
-  // Backup setTimeout that fires playAlarm at the exact end time.
-  // Unlike setInterval (throttled/killed when screen is off), a single
-  // setTimeout is registered as an OS-level alarm on Android Chrome and
-  // has a much higher chance of firing even with the screen off.
-  const alarmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // alarmFiredRef: Web timeout 経由でアラームが発火した場合のダブル発火防止フラグ
   const alarmFiredRef = useRef(false);
 
-  // Native (Capacitor) LocalNotification ID — scheduled at timer start,
-  // fires even if the app is killed. -1 = no native alarm scheduled.
-  const nativeAlarmIdRef = useRef<number>(-1);
+  // fix5(i): Capacitor App の isActive 状態を Ref で保持する。
+  // document.visibilityState は Capacitor WebView で前面でも 'hidden' を返す場合があり信頼できない。
+  // App.addListener('appStateChange') で最新の isActive を常に追跡する。
+  // 初期値: true（アプリ起動直後は前面前提）。Web では使わないが Ref は必ず初期化する。
+  const appIsActiveRef = useRef<boolean>(true);
 
   const clearAlarmTimeout = useCallback(() => {
-    if (alarmTimeoutRef.current !== null) {
-      clearTimeout(alarmTimeoutRef.current);
-      alarmTimeoutRef.current = null;
-    }
     alarmFiredRef.current = false;
-    // Cancel any pending native LocalNotification
-    if (nativeAlarmIdRef.current >= 0) {
-      void cancelNativeAlarm(nativeAlarmIdRef.current);
-      nativeAlarmIdRef.current = -1;
-    }
+    void alarmScheduler.cancel();
   }, []);
-
-  const scheduleAlarmTimeout = useCallback(
-    (delayMs: number) => {
-      clearAlarmTimeout();
-      alarmTimeoutRef.current = setTimeout(() => {
-        // Guard: only fire if still running and alarm hasn't been handled by the regular tick
-        if (startTimestampRef.current !== null && !alarmFiredRef.current) {
-          alarmFiredRef.current = true;
-          playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent', alarm.channel ?? 'media');
-        }
-      }, delayMs);
-    },
-    [alarm, clearAlarmTimeout],
-  );
 
   // Sync timeLeft only when workTime setting changes while not running
   const prevWorkTimeRef = useRef(workTime);
@@ -104,6 +85,49 @@ export function useTimer({
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
+  // fix5(i): Capacitor App.getState() で初期値を取得し、
+  // appStateChange リスナーで isActive を常に最新に保つ。
+  // Web では isNative() === false のため早期リターン。
+  useEffect(() => {
+    if (!isNative()) return;
+
+    // 初期状態を取得（アプリ起動直後は true が期待値だが念のため同期）
+    void App.getState().then((state) => {
+      appIsActiveRef.current = state.isActive;
+    });
+
+    // アプリの前面/背景遷移を追跡
+    const listenerPromise = App.addListener('appStateChange', (state) => {
+      appIsActiveRef.current = state.isActive;
+      // 前面復帰時は AudioContext も resume する
+      if (state.isActive) {
+        tryResumeAudio();
+
+        // fix9 (B-3): 前面復帰時に delivered 通知をトレイからクリアする
+        void LocalNotifications.removeAllDeliveredNotifications().catch(() => { /* ignore */ });
+
+        // fix9 (C): 画面オフ中にアラームが発火していた場合、overlay を mount して dismiss surface を提供する。
+        // wall-clock で「残り時間を使い果たした」かを判定する。
+        // startTimestampRef.current !== null かつ経過 >= startTimeLeftRef.current ならアラーム発火済み。
+        if (startTimestampRef.current !== null) {
+          const elapsed = Math.floor((Date.now() - startTimestampRef.current) / 1000);
+          if (elapsed >= startTimeLeftRef.current) {
+            // アラームが発火済み → overlay mount
+            notifyAlarmRinging(true);
+            // auto-unmount: OS 通知音が止まっても画面を恒久ブロックしないようにする (~31s + 余裕)
+            setTimeout(() => {
+              notifyAlarmRinging(false);
+            }, 35000);
+          }
+        }
+      }
+    });
+
+    return () => {
+      void listenerPromise.then((handle) => handle.remove());
+    };
+  }, []);
+
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
 
@@ -120,13 +144,34 @@ export function useTimer({
       setIsRunning(false);
       startTimestampRef.current = null;
 
-      clearAlarmTimeout();
-
-      // Play alarm (skip if the backup setTimeout already fired it)
-      if (!alarmFiredRef.current) {
-        playAlarm(alarm.sound, alarm.repeat, alarm.volume ?? 80, alarm.vibration ?? 'silent', alarm.channel ?? 'media');
-      }
+      // P0 fix: 完了分岐では alarmScheduler.cancel() を呼ばない。
+      // clearAlarmTimeout() は cancel() を内包するため、ここで呼ぶと
+      // OS が発火した直後（~1.3s 後）の通知（長尺音 30.8s）を kill してしまう。
+      // alarmFiredRef は false に戻すだけにとどめる。
+      // cancel が必要な経路（pause / reset / completeEarly / unmount）は別途 clearAlarmTimeout() を呼ぶ。
       alarmFiredRef.current = false;
+
+      // T2d: fix2 — 背景時は alarmScheduler.cancel() を呼ばない。
+      // 終了時刻に cancel() を呼ぶと OS が通知を配信する直前に cancel が届き、
+      // 発火前に通知がキャンセルされる race condition が発生する。
+      //
+      // fix3 Issue-A: アプリが前面/可視 (document.visibilityState === 'visible') なら
+      // native でも in-app 音を即時再生し（遅延ゼロ）、pending OS 通知を cancel する。
+      // 背景（不可視）なら従来どおり OS 通知に委ねる。
+
+      // fix5(i): 前面判定を document.visibilityState から Capacitor App.isActive に切替え。
+      // fix6 変更B: native 前面でも予約済み OS 通知がそのまま発火する（in-app 音は呼ばない）。
+      // Web は alarmScheduler(WebAlarmScheduler) の setTimeout が発火して in-app 音を再生する。
+      if (isNative() && appIsActiveRef.current) {
+        // Android 前面: OS 通知がそのまま発火。AlarmOverlay を mount して dismiss surface を提供する。
+        notifyAlarmRinging(true);
+        // auto-unmount: OS 通知音が止まっても画面を恒久ブロックしないように (~31s + 余裕)
+        setTimeout(() => {
+          notifyAlarmRinging(false);
+        }, 35000);
+      }
+      // Web: alarmScheduler(WebAlarmScheduler) の setTimeout が発火済み or まもなく発火する
+      // 背景 native: OS 通知に委ねる（fix2 挙動を維持）
 
       // Fire OS notification via Service Worker (web only — native uses LocalNotifications).
       // Background tabs with permission can still raise OS notifications via reg.showNotification.
@@ -180,39 +225,39 @@ export function useTimer({
 
     setIsRunning((prev) => {
       if (prev) {
-        // Pausing: clear wall-clock tracking
+        // Pausing: clear wall-clock tracking and cancel scheduler
         startTimestampRef.current = null;
         clearAlarmTimeout();
+        // fix3 Issue-C: 再生中の前面アラームがあれば停止
+        stopAlarm();
+        deactivateTouchStopListener();
         analytics.track({ name: 'timer_paused' });
       } else {
-        // Starting/resuming: record wall-clock anchor
+        // Starting/resuming: record wall-clock anchor, schedule alarm
         startTimestampRef.current = Date.now();
         startTimeLeftRef.current = timeLeft;
-        scheduleAlarmTimeout(timeLeft * 1000);
 
-        // On native platforms, also register an OS-level LocalNotification
-        // that fires even if the app is fully killed.
-        // Only for notification channel — media channel uses WebView audio which
-        // doesn't work when killed, and scheduling would cause double-firing with
-        // the foreground JS tick.
-        if (isNative() && (alarm.channel ?? 'media') === 'notification') {
-          void scheduleNativeAlarm(
-            Date.now() + timeLeft * 1000,
-            alarm.sound,
-          ).then((id) => {
-            nativeAlarmIdRef.current = id;
+        // Web: params を先にバインドしてから schedule
+        if (!isNative() && alarmScheduler instanceof WebAlarmScheduler) {
+          alarmScheduler.setParams({
+            volume: alarm.volume ?? 80,
+            repeat: alarm.repeat ?? 1,
+            vibration: alarm.vibration ?? 'off',
           });
         }
+        void alarmScheduler.schedule(Date.now() + timeLeft * 1000, alarm.sound);
         analytics.track({ name: 'timer_started' });
       }
       return !prev;
     });
-  }, [timeLeft, alarm, scheduleAlarmTimeout, clearAlarmTimeout]);
+  }, [timeLeft, alarm, clearAlarmTimeout]);
 
   const reset = useCallback(() => {
     setIsRunning(false);
     startTimestampRef.current = null;
     clearAlarmTimeout();
+    stopAlarm();
+    deactivateTouchStopListener();
     setMode('work');
     setTimeLeft(workTime * 60);
     completedSessionsRef.current = 0;
@@ -228,6 +273,8 @@ export function useTimer({
     setIsRunning(false);
     startTimestampRef.current = null;
     clearAlarmTimeout();
+    stopAlarm();
+    deactivateTouchStopListener();
 
     const session: PomodoroSession = {
       date: new Date().toISOString(),
@@ -261,6 +308,9 @@ export function useTimer({
   useEffect(() => {
     return () => {
       clearAlarmTimeout();
+      // fix3 Issue-C: アンマウント時も再生中音を停止
+      stopAlarm();
+      deactivateTouchStopListener();
     };
   }, [clearAlarmTimeout]);
 

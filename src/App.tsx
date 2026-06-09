@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Lock } from 'lucide-react';
+// fix6 変更D: React オーバーレイによる in-app 音 tap-dismiss
+import { AlarmOverlay } from '@/components/timer/AlarmOverlay';
+import { setAlarmRingingCallback, setPreviewPlayingCallback } from '@/utils/alarm';
 
 const APP_VERSION = '2026.03.06b';
 console.log(`[PomoCare] v${APP_VERSION}`);
@@ -407,12 +410,26 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
   // Service Worker OS notification on timer end (no server round-trip)
   const { notify } = usePushNotification();
 
+  // fix6 変更D: in-app 音鳴動中フラグ → AlarmOverlay の条件マウントに使う
+  const [alarmRinging, setAlarmRinging] = useState(false);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
+
+  // alarm.ts のコールバックを登録 (マウント時に登録、アンマウント時に解除)
+  useEffect(() => {
+    setAlarmRingingCallback(setAlarmRinging);
+    setPreviewPlayingCallback(setPreviewPlaying);
+    return () => {
+      setAlarmRingingCallback(null);
+      setPreviewPlayingCallback(null);
+    };
+  }, []);
+
   const { timeLeft, isRunning, mode, toggle, reset, completeEarly } = useTimer({
     workTime: effectiveWorkTime,
     breakTime: settings.breakTime,
     longBreakTime: settings.longBreakTime ?? 0,
     longBreakInterval: settings.longBreakInterval ?? 0,
-    alarm: settings.alarm ?? { sound: 'bell', repeat: 1 },
+    alarm: settings.alarm ?? { sound: 'classic', repeat: 1 },
     activeLabel,
     activeNote,
     onSessionComplete,
@@ -497,17 +514,38 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
   // Paused mid-session: timer was started but user pressed stop (not reset)
   const isPaused = !isRunning && mode === 'work' && timeLeft < effectiveWorkTime * 60;
 
+  // fix8 変更: alarm/preview overlay を document.body に portal で最上位レイヤーに出す。
+  // これにより設定画面（SettingsPanel）がどのビュー分岐にあっても overlay が覆える。
+  // alarm overlay は (a) 非回帰のため従来どおりの動作を維持しつつ portal 化。
+  // preview overlay は (b) 修正: 設定画面上の tap-dismiss を可能にするために portal 化。
+  const alarmOverlays = (
+    <>
+      {alarmRinging && createPortal(
+        <AlarmOverlay isAlarm={true} onDismiss={() => setAlarmRinging(false)} />,
+        document.body,
+      )}
+      {previewPlaying && createPortal(
+        <AlarmOverlay isAlarm={false} onDismiss={() => setPreviewPlaying(false)} />,
+        document.body,
+      )}
+    </>
+  );
+
   // Both running and paused mid-session use the same full-screen FocusMode layout
   if (isFocusMode || isPaused) {
     return (
-      <FocusMode
-        timeLeft={timeLeft}
-        isRunning={isRunning}
-        onStop={handleFocusStop}
-        onResume={toggle}
-        onComplete={completeEarly}
-        onReset={reset}
-      />
+      <>
+        <FocusMode
+          timeLeft={timeLeft}
+          isRunning={isRunning}
+          onStop={handleFocusStop}
+          onResume={toggle}
+          onComplete={completeEarly}
+          onReset={reset}
+        />
+        {/* fix8: portal ベース overlay（alarm + preview 共通）*/}
+        {alarmOverlays}
+      </>
     );
   }
 
@@ -516,6 +554,7 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
 
   if (isBreakMode) {
     return (
+      <>
       <div className="fixed inset-0 flex flex-col">
       <AppShell
         header={
@@ -567,10 +606,14 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
       </AppShell>
       <AdBanner />
       </div>
+      {/* fix8: portal ベース overlay（alarm + preview 共通）*/}
+      {alarmOverlays}
+      </>
     );
   }
 
   return (
+    <>
     <div className="fixed inset-0 flex flex-col">
     <AppShell
       header={
@@ -699,6 +742,9 @@ function PomodoroApp({ storage, settings, updateSettings, patchSettings, refresh
     </AppShell>
     <AdBanner />
     </div>
+    {/* fix8: portal ベース overlay（alarm + preview 共通）*/}
+    {alarmOverlays}
+    </>
   );
 }
 

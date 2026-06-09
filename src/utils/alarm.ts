@@ -1,5 +1,4 @@
-import type { AlarmSound, AlarmChannel, VibrationMode } from '@/types/settings';
-import { classicWavB64, gentleWavB64, softWavB64 } from '@/assets/alarmWavData';
+import type { AlarmSound, VibrationMode } from '@/types/settings';
 import { isNative } from '@/utils/platform';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -102,36 +101,16 @@ function unlockHtmlAudio(): void {
  * Play alarm via HTMLAudioElement (fallback when AudioContext is unavailable).
  * Returns true if playback started successfully.
  */
-async function playAlarmViaHtmlAudio(
-  sound: AlarmSound,
-  repeat: number,
-  volume: number,
-): Promise<boolean> {
-  if (sound === 'none') return false;
-  const basePath = import.meta.env.BASE_URL || '/';
-  const src = `${basePath}sounds/${sound}.wav`;
-
-  return new Promise<boolean>((resolve) => {
-    const audio = new Audio(src);
-    audio.volume = Math.max(0, Math.min(1, volume / 100));
-    let playCount = 0;
-
-    const onEnded = () => {
-      playCount++;
-      if (playCount < repeat) {
-        setTimeout(() => {
-          audio.currentTime = 0;
-          audio.play().catch(() => { /* ignore */ });
-        }, 400);
-      } else {
-        audio.removeEventListener('ended', onEnded);
-      }
-    };
-    audio.addEventListener('ended', onEnded);
-
-    audio.play().then(() => resolve(true)).catch(() => resolve(false));
-  });
+/** Return the file extension for a given alarm sound in public/sounds/
+ * All alarm sounds are now MP3 (windchime/canon/boxing/cuckoo converted from WAV masters,
+ * classic/gentle/soft are original MP3 long-form masters).
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function soundExt(sound: AlarmSound): string {
+  void sound; // all sounds are MP3
+  return 'mp3';
 }
+
 
 /**
  * Request notification permission (called from user gesture).
@@ -165,228 +144,38 @@ function createMasterGain(ctx: AudioContext, volume: number): GainNode {
 }
 
 /**
- * Bell: ハンドベル音 - 打撃音 + 金属的倍音 + 急速アタック・長い余韻
- * ハンドベルらしい「コーン」という澄んだ金属打撃音
+ * MP3 file → AudioBuffer のキャッシュ
+ * classic/gentle/soft は public/sounds/*.mp3 から fetch して decodeAudioData する。
+ * decodeAudioData は MP3 に対応（全モダンブラウザ / iOS Safari / Android WebView）。
  */
-function playBell(ctx: AudioContext, dest: AudioNode, startTime: number): number {
-  const duration = 3.2;
+const mp3BufferCache: Partial<Record<AlarmSound, AudioBuffer | null>> = {};
 
-  // ハンドベルの基本音 (E5 = 659Hz 付近)
-  // 非整数倍音が金属っぽさを生む
-  const partials: { freq: number; gain: number; decay: number; detune: number }[] = [
-    { freq: 659,   gain: 0.50, decay: duration,        detune: 0 },      // 基音
-    { freq: 1318,  gain: 0.18, decay: duration * 0.75, detune: 0 },      // 2倍音
-    { freq: 1976,  gain: 0.12, decay: duration * 0.55, detune: 5 },      // 3倍音 (少しシャープ)
-    { freq: 2794,  gain: 0.09, decay: duration * 0.40, detune: -8 },     // 非整数倍音
-    { freq: 3729,  gain: 0.06, decay: duration * 0.30, detune: 10 },     // 倍音
-    { freq: 5273,  gain: 0.04, decay: duration * 0.20, detune: -5 },     // 高倍音
-  ];
-
-  partials.forEach(({ freq, gain, decay, detune }) => {
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    osc.connect(gainNode);
-    gainNode.connect(dest);
-
-    osc.type = 'sine';
-    const f = freq * Math.pow(2, detune / 1200); // cent detune
-    osc.frequency.setValueAtTime(f, startTime);
-    // ハンドベルは打撃後わずかにピッチが下がる
-    osc.frequency.exponentialRampToValueAtTime(f * 0.995, startTime + duration);
-
-    gainNode.gain.setValueAtTime(0, startTime);
-    // 非常に鋭いアタック (ハンドベルらしさ)
-    gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.003);
-    // 最初に素早く減衰してから長い余韻
-    gainNode.gain.exponentialRampToValueAtTime(gain * 0.3, startTime + 0.15);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
-
-    osc.start(startTime);
-    osc.stop(startTime + decay);
-  });
-
-  // 打撃音 (クリック成分 - ベルを叩く瞬間の音)
-  const clickOsc = ctx.createOscillator();
-  const clickGain = ctx.createGain();
-  const clickFilter = ctx.createBiquadFilter();
-  clickOsc.connect(clickFilter);
-  clickFilter.connect(clickGain);
-  clickGain.connect(dest);
-  clickFilter.type = 'bandpass';
-  clickFilter.frequency.setValueAtTime(4000, startTime);
-  clickFilter.Q.setValueAtTime(0.5, startTime);
-  clickOsc.type = 'square';
-  clickOsc.frequency.setValueAtTime(800, startTime);
-  clickGain.gain.setValueAtTime(0, startTime);
-  clickGain.gain.linearRampToValueAtTime(0.15, startTime + 0.002);
-  clickGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.04);
-  clickOsc.start(startTime);
-  clickOsc.stop(startTime + 0.05);
-
-  return duration;
-}
-
-/**
- * Digital: 目覚まし時計風 - 「ピピピ、ピピピ、ピピピ」の3連パターン
- */
-function playDigital(ctx: AudioContext, dest: AudioNode, startTime: number): number {
-  // 3回の「ピピピ」を繰り返す
-  const beepFreq = 880;    // ピ の周波数
-  const beepOn   = 0.07;   // 1ビープのON時間
-  const beepOff  = 0.05;   // 1ビープ間のOFF
-  const burstSize = 3;     // 「ピピピ」の回数
-  const burstGap  = 0.20;  // 「ピピピ」間の沈黙
-  const totalBursts = 3;   // 3回繰り返す
-
-  const burstDuration = burstSize * (beepOn + beepOff) - beepOff; // 1バーストの長さ
-  const totalDuration = totalBursts * (burstDuration + burstGap) - burstGap;
-
-  for (let burst = 0; burst < totalBursts; burst++) {
-    const burstStart = startTime + burst * (burstDuration + burstGap);
-    for (let b = 0; b < burstSize; b++) {
-      const t = burstStart + b * (beepOn + beepOff);
-
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2500, t);
-
-      osc.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(dest);
-
-      osc.type = 'square';
-      // 最初のビープを少し高く (デジタル感)
-      osc.frequency.setValueAtTime(b === 0 ? beepFreq * 1.05 : beepFreq, t);
-
-      gainNode.gain.setValueAtTime(0, t);
-      gainNode.gain.linearRampToValueAtTime(0.22, t + 0.004);
-      gainNode.gain.setValueAtTime(0.22, t + beepOn - 0.008);
-      gainNode.gain.linearRampToValueAtTime(0, t + beepOn);
-
-      osc.start(t);
-      osc.stop(t + beepOn + 0.01);
-    }
-  }
-
-  return totalDuration;
-}
-
-/**
- * Kitchen Timer: ポモドーロ型キッチンタイマーの「チーン」音
- * ゼンマイが解ける最後の「チン！」をイメージした金属的な高音
- */
-function playKitchen(ctx: AudioContext, dest: AudioNode, startTime: number): number {
-  const duration = 3.0;
-
-  // メインの「チン！」: 高い金属音
-  const mainPartials: { freq: number; gain: number; decay: number }[] = [
-    { freq: 2000, gain: 0.45, decay: duration },
-    { freq: 4000, gain: 0.25, decay: duration * 0.7 },
-    { freq: 6500, gain: 0.15, decay: duration * 0.5 },
-    { freq: 1000, gain: 0.20, decay: duration * 0.8 },
-  ];
-
-  mainPartials.forEach(({ freq, gain, decay }) => {
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    osc.connect(gainNode);
-    gainNode.connect(dest);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, startTime);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.97, startTime + decay);
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.003);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
-    osc.start(startTime);
-    osc.stop(startTime + decay);
-  });
-
-  // ゼンマイの「カチカチ」余韻 (0.3秒後に短いノイズバースト)
-  for (let i = 0; i < 3; i++) {
-    const t = startTime + 0.3 + i * 0.15;
-    const osc2 = ctx.createOscillator();
-    const g2 = ctx.createGain();
-    osc2.connect(g2);
-    g2.connect(dest);
-    osc2.type = 'square';
-    osc2.frequency.setValueAtTime(800 - i * 80, t);
-    g2.gain.setValueAtTime(0, t);
-    g2.gain.linearRampToValueAtTime(0.05, t + 0.005);
-    g2.gain.linearRampToValueAtTime(0, t + 0.04);
-    osc2.start(t);
-    osc2.stop(t + 0.05);
-  }
-
-  return duration;
-}
-
-/**
- * Chime: 3音アルペジオ
- */
-function playChime(ctx: AudioContext, dest: AudioNode, startTime: number): number {
-  const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
-  const noteDuration = 0.5;
-  const noteGap = 0.12;
-
-  notes.forEach((freq, i) => {
-    const t = startTime + i * (noteDuration * 0.5 + noteGap);
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    osc.connect(gainNode);
-    gainNode.connect(dest);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, t);
-    gainNode.gain.setValueAtTime(0, t);
-    gainNode.gain.linearRampToValueAtTime(0.35, t + 0.005);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, t + noteDuration);
-    osc.start(t);
-    osc.stop(t + noteDuration);
-  });
-
-  return notes.length * (noteDuration * 0.5 + noteGap) + noteDuration;
-}
-
-/**
- * WAV (Base64) → AudioBuffer のキャッシュ
- */
-const wavBufferCache: Partial<Record<AlarmSound, AudioBuffer | null>> = {};
-
-async function decodeWavB64(ctx: AudioContext, b64: string): Promise<AudioBuffer | null> {
+async function fetchAndDecodeMp3(ctx: AudioContext, sound: AlarmSound): Promise<AudioBuffer | null> {
   try {
-    const binary = atob(b64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return await ctx.decodeAudioData(bytes.buffer);
+    const basePath = import.meta.env.BASE_URL || '/';
+    const url = `${basePath}sounds/${sound}.mp3`;
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const arrayBuf = await resp.arrayBuffer();
+    return await ctx.decodeAudioData(arrayBuf);
   } catch {
     return null;
   }
 }
 
-const WAV_B64_MAP: Partial<Record<AlarmSound, string>> = {
-  classic: classicWavB64,
-  gentle:  gentleWavB64,
-  soft:    softWavB64,
-};
-
 /**
- * WAVアラーム音を再生し、再生時間(秒)を返す
+ * MP3アラーム音を再生し、再生時間(秒)を返す
  */
-async function playWavAlarm(
+async function playMp3Alarm(
   ctx: AudioContext,
   dest: AudioNode,
   sound: AlarmSound,
   startTime: number,
 ): Promise<number> {
-  const b64 = WAV_B64_MAP[sound];
-  if (!b64) return 0;
-
-  let buffer = wavBufferCache[sound];
+  let buffer = mp3BufferCache[sound];
   if (buffer === undefined) {
-    buffer = await decodeWavB64(ctx, b64);
-    wavBufferCache[sound] = buffer;
+    buffer = await fetchAndDecodeMp3(ctx, sound);
+    mp3BufferCache[sound] = buffer;
   }
   if (!buffer) return 0;
 
@@ -396,17 +185,6 @@ async function playWavAlarm(
   source.start(startTime);
   return buffer.duration;
 }
-
-function playSingleAlarm(ctx: AudioContext, dest: AudioNode, sound: AlarmSound, startTime: number): number {
-  if (sound === 'bell') return playBell(ctx, dest, startTime);
-  if (sound === 'digital') return playDigital(ctx, dest, startTime);
-  if (sound === 'chime') return playChime(ctx, dest, startTime);
-  if (sound === 'kitchen') return playKitchen(ctx, dest, startTime);
-  return 0;
-}
-
-/** WAVベースサウンドかどうか */
-const WAV_SOUNDS: AlarmSound[] = ['classic', 'gentle', 'soft'];
 
 /**
  * バイブレーションパターンを生成（振動ms, 休止ms, ...）
@@ -426,184 +204,7 @@ function vibrate(repeat: number): void {
   navigator.vibrate(buildVibrationPattern(repeat));
 }
 
-/**
- * Send a system notification when the timer completes.
- * On Android, the notification triggers device vibration even without
- * a user-gesture context (unlike navigator.vibrate()).
- */
-function sendTimerNotification(vibrationPattern?: number[]): void {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  try {
-    // renotify & vibrate are valid Web Notification API properties but
-    // missing from TypeScript's built-in NotificationOptions type.
-    const options: NotificationOptions & { renotify?: boolean; vibrate?: number[] } = {
-      body: 'PomoCare',
-      icon: '/icons/icon-192x192.png',
-      tag: 'pomocare-timer',       // replace previous notification
-      renotify: true,              // vibrate even if tag is reused
-      silent: false,               // allow sound & vibration
-    };
-    if (vibrationPattern && vibrationPattern.length > 0) {
-      options.vibrate = vibrationPattern;
-    }
-    new Notification('Timer Complete', options);
-  } catch {
-    // Notification constructor may fail in some contexts; ignore
-  }
-}
 
-/* ================================================================== */
-/*  Native (Capacitor) alarm handlers                                  */
-/*  On Android/iOS native, use LocalNotifications + Haptics instead    */
-/*  of Web Audio API to bypass all web audio limitations.              */
-/* ================================================================== */
-
-/** Android raw resource name (lowercase, with .wav) for a given alarm sound */
-function nativeSoundResource(sound: AlarmSound): string | undefined {
-  if (sound === 'none') return undefined;
-  return `${sound}.wav`;
-}
-
-/**
- * Android 8+ では notification sound は channel ごとに固定のため、
- * サウンドごとに個別の channel を作成し、schedule 時に channelId で切替える。
- * 各 channel はアプリ起動時に一度だけ作成すれば OK。
- */
-const NOTIFICATION_CHANNELS: { id: string; sound: AlarmSound }[] = [
-  { id: 'pomocare-bell',    sound: 'bell'    },
-  { id: 'pomocare-digital', sound: 'digital' },
-  { id: 'pomocare-chime',   sound: 'chime'   },
-  { id: 'pomocare-kitchen', sound: 'kitchen' },
-  { id: 'pomocare-classic', sound: 'classic' },
-  { id: 'pomocare-gentle',  sound: 'gentle'  },
-  { id: 'pomocare-soft',    sound: 'soft'    },
-  { id: 'pomocare-silent',  sound: 'none'    },
-];
-
-function channelIdFor(sound: AlarmSound): string {
-  return NOTIFICATION_CHANNELS.find((c) => c.sound === sound)?.id ?? 'pomocare-bell';
-}
-
-/** Create one notification channel per sound. Idempotent — safe to call multiple times. */
-export async function ensureNotificationChannels(): Promise<void> {
-  if (!isNative()) return;
-  for (const ch of NOTIFICATION_CHANNELS) {
-    try {
-      await LocalNotifications.createChannel({
-        id: ch.id,
-        name: ch.sound === 'none' ? 'PomoCare (Silent)' : `PomoCare ${ch.sound}`,
-        description: 'PomoCare timer alerts',
-        importance: 5,
-        sound: ch.sound === 'none' ? undefined : nativeSoundResource(ch.sound),
-        vibration: true,
-        visibility: 1,
-      });
-    } catch {
-      // ignore — channel may already exist or platform may not support createChannel
-    }
-  }
-}
-
-/** Fire an immediate native notification with custom sound (no schedule). */
-async function playAlarmNative(
-  sound: AlarmSound,
-  _repeat: number,
-  vibrationMode: VibrationMode,
-): Promise<void> {
-  const isSilent = sound === 'none';
-  const shouldVibrate =
-    vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent);
-
-  // Notification channel は sound も vibration も 1 回のみ（UI の「通知モードでは 1 回のみ」に合わせる）
-  if (shouldVibrate) {
-    try {
-      await Haptics.impact({ style: ImpactStyle.Heavy });
-    } catch { /* ignore */ }
-  }
-
-  if (isSilent) return;
-
-  // Fire an immediate system notification with sound.
-  // Android 8+ では sound は channelId 経由で決まる（per-notification の sound は無視される）。
-  try {
-    await LocalNotifications.schedule({
-      notifications: [
-        {
-          id: Date.now() % 2147483647,
-          title: 'Timer Complete',
-          body: 'PomoCare',
-          sound: nativeSoundResource(sound),
-          channelId: channelIdFor(sound),
-        },
-      ],
-    });
-  } catch (err) {
-    console.warn('[alarm] native notification failed:', err);
-  }
-}
-
-/**
- * Schedule a native alarm at a future wall-clock time.
- * Called when the timer starts — the OS will fire the notification
- * even if the app is killed or the device is idle.
- * Returns the notification id (use it to cancel), or -1 on failure.
- */
-export async function scheduleNativeAlarm(
-  fireAt: number,
-  sound: AlarmSound,
-): Promise<number> {
-  if (!isNative()) return -1;
-  const isSilent = sound === 'none';
-  // Notification id must fit in 32-bit int; derive deterministically from fireAt
-  const id = Math.floor(fireAt / 1000) % 2147483647;
-
-  // Stage 1: exact alarm with allowWhileIdle (requires SCHEDULE_EXACT_ALARM on Android 12+)
-  try {
-    await LocalNotifications.schedule({
-      notifications: [
-        {
-          id,
-          title: 'Timer Complete',
-          body: 'PomoCare',
-          sound: isSilent ? undefined : nativeSoundResource(sound),
-          channelId: channelIdFor(sound),
-          schedule: { at: new Date(fireAt), allowWhileIdle: true },
-        },
-      ],
-    });
-    return id;
-  } catch (err) {
-    console.warn('[alarm] exact schedule failed, retrying without allowWhileIdle:', err);
-  }
-
-  // Stage 2: non-exact fallback (no allowWhileIdle) when SCHEDULE_EXACT_ALARM is denied
-  try {
-    await LocalNotifications.schedule({
-      notifications: [
-        {
-          id,
-          title: 'Timer Complete',
-          body: 'PomoCare',
-          sound: isSilent ? undefined : nativeSoundResource(sound),
-          channelId: channelIdFor(sound),
-          schedule: { at: new Date(fireAt) },
-        },
-      ],
-    });
-    return id;
-  } catch (err) {
-    console.warn('[alarm] native schedule failed entirely:', err);
-    return -1;
-  }
-}
-
-/** Cancel a previously scheduled native alarm by id. */
-export async function cancelNativeAlarm(id: number): Promise<void> {
-  if (!isNative() || id < 0) return;
-  try {
-    await LocalNotifications.cancel({ notifications: [{ id }] });
-  } catch { /* ignore */ }
-}
 
 /**
  * Request local notification permission on native platforms.
@@ -619,144 +220,348 @@ export async function requestNativeNotificationPermission(): Promise<void> {
   } catch { /* ignore */ }
 }
 
-export function playAlarm(
-  sound: AlarmSound,
-  repeat: number,
-  volume: number = 80,
-  vibrationMode: VibrationMode = 'silent',
-  channel: AlarmChannel = 'media',
-): void {
-  // --- Native + notification channel: OS 通知音（メディア音量と独立、repeat/volume 非対応） ---
-  if (isNative() && channel === 'notification') {
-    void playAlarmNative(sound, repeat, vibrationMode);
-    return;
+
+/* ------------------------------------------------------------------ */
+/*  プレビュー停止機構 (Bug2 fix)                                       */
+/*  previewAlarm 呼び出し時に前の再生を停止するためのグローバル参照。    */
+/* ------------------------------------------------------------------ */
+
+/** 現在プレビュー再生中の HTMLAudioElement (null = なし) */
+let previewHtmlAudio: HTMLAudioElement | null = null;
+
+/** 現在プレビュー再生中の Web Audio GainNode (null = なし)。gain を 0 にして無音化する。 */
+let previewGainNode: GainNode | null = null;
+
+/** 前のプレビュー再生を停止する */
+export function stopPreview(): void {
+  if (previewHtmlAudio) {
+    previewHtmlAudio.pause();
+    previewHtmlAudio.currentTime = 0;
+    previewHtmlAudio = null;
   }
-
-  // Web では notification channel を選ぶ手段が UI 側でガードされているが、Android 版で
-  // `channel: 'notification'` を保存したアカウントが Web からログインすると古い値が残る。
-  // Web の OS 通知 API (`new Notification` with `silent: false`) は環境次第で完全に
-  // 無音になる（Windows Focus Assist / 通知音 OFF / macOS Do Not Disturb など）。
-  // Web 側では一律 `media` 経路（Web Audio API）に降格させ、音量・繰り返しが効く挙動に揃える。
-  if (channel === 'notification') {
-    channel = 'media';
+  if (previewGainNode) {
+    try {
+      previewGainNode.gain.setValueAtTime(0, previewGainNode.context.currentTime);
+    } catch { /* ignore */ }
+    previewGainNode = null;
   }
+  notifyPreviewPlaying(false);
+}
 
-  const isSilent = sound === 'none' || volume === 0;
+/* ------------------------------------------------------------------ */
+/*  終了アラーム停止機構 (fix3 Issue-C)                                 */
+/*  タイマー終了時の前面 in-app 音を追跡・停止するためのグローバル参照。  */
+/*  fix6 変更D: document リスナーを撤去し React オーバーレイに一本化。   */
+/* ------------------------------------------------------------------ */
 
-  // バイブレーション判定
-  const shouldVibrate = vibrationMode === 'always' || (vibrationMode === 'silent' && isSilent);
-  if (shouldVibrate) {
-    if (isNative()) {
-      // Native: Capacitor Haptics を使用（navigator.vibrate は WebView で不安定）
-      void (async () => {
-        for (let i = 0; i < repeat; i++) {
-          try {
-            await Haptics.impact({ style: ImpactStyle.Heavy });
-          } catch { /* ignore */ }
-          if (i < repeat - 1) await new Promise((r) => setTimeout(r, 400));
-        }
-      })();
-    } else {
-      vibrate(repeat);
-      sendTimerNotification(buildVibrationPattern(repeat));
-    }
-  } else if (!isNative()) {
-    sendTimerNotification();
-  }
+/** 現在終了アラーム再生中の HTMLAudioElement (null = なし) */
+let alarmHtmlAudio: HTMLAudioElement | null = null;
 
-  if (isSilent) return;
+/** 現在終了アラーム再生中の Web Audio GainNode (null = なし) */
+let alarmGainNode: GainNode | null = null;
 
-  // --- Media channel: Web Audio / HTML5 Audio（volume と repeat に対応、メディア音量連動） ---
-  // 上で notification → media に降格済みなので、Web では必ずこの経路を通る。
-  // Native + notification は冒頭で early-return 済み。
-  playViaMediaChannel(sound, repeat, volume);
+/** document の pointerdown / touchstart リスナー (stop-on-touch 用) */
+let touchStopListener: ((_e: Event) => void) | null = null;
+
+/** dismiss タップの click イベントを1回だけ握り潰す click リスナー (alarm 用) */
+let clickSwallowListener: ((e: MouseEvent) => void) | null = null;
+
+/* ------------------------------------------------------------------ */
+/*  fix6 変更D: 鳴動中フラグ通知コールバック                            */
+/*  in-app 音の開始/停止を React に伝え、React オーバーレイを条件マウント */
+/* ------------------------------------------------------------------ */
+
+/** アラーム鳴動状態が変化したときに呼ばれるコールバック */
+let alarmRingingCallback: ((ringing: boolean) => void) | null = null;
+/** プレビュー再生状態が変化したときに呼ばれるコールバック */
+let previewPlayingCallback: ((playing: boolean) => void) | null = null;
+
+/** React から呼ぶ: アラーム鳴動状態変化を受け取るコールバックを登録する */
+export function setAlarmRingingCallback(fn: ((ringing: boolean) => void) | null): void {
+  alarmRingingCallback = fn;
+}
+
+/** React から呼ぶ: プレビュー再生状態変化を受け取るコールバックを登録する */
+export function setPreviewPlayingCallback(fn: ((playing: boolean) => void) | null): void {
+  previewPlayingCallback = fn;
+}
+
+export function notifyAlarmRinging(ringing: boolean): void {
+  alarmRingingCallback?.(ringing);
+}
+
+function notifyPreviewPlaying(playing: boolean): void {
+  previewPlayingCallback?.(playing);
 }
 
 /**
- * Notification channel: fire system notifications with `silent: false`
- * to produce the default notification sound (works even when media is muted).
+ * 終了アラームの再生を停止する。
+ * fix6 変更D: document リスナー撤去済、React オーバーレイへコールバック通知。
  */
-function playViaNotificationChannel(repeat: number): void {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+export function stopAlarm(): void {
+  if (alarmHtmlAudio) {
+    alarmHtmlAudio.pause();
+    alarmHtmlAudio.currentTime = 0;
+    alarmHtmlAudio = null;
+  }
+  if (alarmGainNode) {
+    try {
+      alarmGainNode.gain.setValueAtTime(0, alarmGainNode.context.currentTime);
+    } catch { /* ignore */ }
+    alarmGainNode = null;
+  }
+  notifyAlarmRinging(false);
+  deactivateTouchStopListener();
+}
 
-  for (let i = 0; i < repeat; i++) {
-    setTimeout(() => {
-      try {
-        const options: NotificationOptions & { renotify?: boolean; vibrate?: number[] } = {
-          body: 'PomoCare',
-          icon: '/icons/icon-192x192.png',
-          tag: `pomocare-timer-${i}`, // unique tag per repeat so each one sounds
-          renotify: true,
-          silent: false,
-          vibrate: [300, 100, 300],
+/**
+ * 音が再生中に document への任意タップで停止する リスナーを有効化する (fix3 Issue-C)。
+ * リスナーは一度発火するか deactivateTouchStopListener() で解除される。
+ *
+ * fix5(ii): Capacitor WebView では pointerdown が document capture に届かない場合がある。
+ * touchstart も併用し、{ once: true } をやめて手動 removeEventListener に変更。
+ * これにより任意タップで確実に stop が発火する。
+ *
+ * @param suppressClick
+ *   true  = タイマー終了アラームの dismiss 用。最初のタップはアラームを止めるだけで
+ *            タップ先のボタン動作・ナビゲーションも発火させない（click も1回握り潰す）。
+ *           2回目以降のタップは通常どおり。
+ *   false = プレビュー停止用（デフォルト）。タップで音は止まるが、タップ先の動作は通過させる。
+ *           設定画面で別の音をタップして切り替える操作を阻害しないために通過させる。
+ */
+export function activateTouchStopListener(suppressClick = false): void {
+  // 既にリスナーが登録済みの場合は二重登録しない
+  if (touchStopListener) return;
+
+  touchStopListener = () => {
+    // fix5(ii): touchstart は pointerdown と両方来る場合があるため、
+    // 一方が発火した時点で両方を除去してから処理する（二重発火防止）。
+    deactivateTouchStopListener();
+
+    // アラームと（もし残っていれば）プレビューを停止する
+    stopAlarm();
+    stopPreview();
+
+    if (suppressClick) {
+      // pointerdown の直後に来る click イベントを1回だけ握り潰す。
+      // pointerdown と click は別イベントなので pointerdown で stopPropagation/preventDefault
+      // しても click は独立して発火する。ここで click capture リスナーを1回限りで仕込む。
+      // touchstart の場合も click が続く（touch → click の合成）ので同じ処理。
+      if (!clickSwallowListener) {
+        clickSwallowListener = (ce: MouseEvent) => {
+          ce.stopPropagation();
+          ce.stopImmediatePropagation();
+          ce.preventDefault();
+          clickSwallowListener = null;
         };
-        new Notification('Timer Complete', options);
-      } catch { /* ignore */ }
-    }, i * 1500);
+        // setTimeout 0 で次 tick に登録することで、同一フレームの click に確実に間に合わせる。
+        // capture: true, once: true で1回だけ発火して自動解除される。
+        setTimeout(() => {
+          if (clickSwallowListener) {
+            document.addEventListener('click', clickSwallowListener, { capture: true, once: true });
+          }
+        }, 0);
+      }
+    }
+    // touchstart の場合、デフォルト動作（スクロールなど）は防がない。
+    // suppressClick=true でも preventDefault は click のみに適用する設計を維持。
+  };
+
+  // fix5(ii): pointerdown と touchstart の両方に attach する（{ once: true } は使わない）。
+  // Capacitor WebView で pointerdown が document capture に届かない場合、
+  // touchstart が確実にフォールバックとして機能する。
+  // deactivateTouchStopListener() で両方まとめて除去する。
+  document.addEventListener('pointerdown', touchStopListener, { capture: true });
+  document.addEventListener('touchstart', touchStopListener, { capture: true });
+}
+
+/**
+ * stop-on-touch リスナーを解除する (クリーンアップ用)。
+ * click swallow リスナーもあれば合わせて解除する。
+ */
+export function deactivateTouchStopListener(): void {
+  if (touchStopListener) {
+    document.removeEventListener('pointerdown', touchStopListener, { capture: true });
+    document.removeEventListener('touchstart', touchStopListener, { capture: true });
+    touchStopListener = null;
+  }
+  if (clickSwallowListener) {
+    document.removeEventListener('click', clickSwallowListener, { capture: true });
+    clickSwallowListener = null;
   }
 }
 
 /**
- * Media channel: try Web Audio API first, fall back to HTMLAudioElement,
- * then finally to system notification sound.
+ * 終了アラーム専用の playViaMediaChannel — 再生を追跡して停止可能にする。
+ * fix6 変更D: document リスナー (activateTouchStopListener) を撤去し、
+ * notifyAlarmRinging(true) で React オーバーレイ側に通知する。
  */
-function playViaMediaChannel(sound: AlarmSound, repeat: number, volume: number): void {
+function playViaMediaChannelForAlarm(sound: AlarmSound, repeat: number, volume: number): void {
   const ctx = getSharedContext();
 
-  // Attempt Web Audio API
   if (ctx) {
     const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
     resume.then(() => {
-      // Check if context is actually running after resume attempt
       if (ctx.state === 'running') {
         const master = createMasterGain(ctx, volume);
-        if (WAV_SOUNDS.includes(sound)) {
-          void (async () => {
-            const gap = 0.4;
-            let cursor = ctx.currentTime;
-            for (let i = 0; i < repeat; i++) {
-              const d = await playWavAlarm(ctx, master, sound, cursor);
-              cursor += d + gap;
-            }
-          })();
-        } else {
-          let cursor = ctx.currentTime;
+        alarmGainNode = master;
+        // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+        notifyAlarmRinging(true);
+        // All sounds are now MP3
+        void (async () => {
           const gap = 0.4;
+          let cursor = ctx.currentTime;
           for (let i = 0; i < repeat; i++) {
-            const d = playSingleAlarm(ctx, master, sound, cursor);
+            const d = await playMp3Alarm(ctx, master, sound, cursor);
             cursor += d + gap;
           }
-        }
+        })();
       } else {
-        // AudioContext still suspended (e.g. iOS after background) — try HTMLAudioElement
-        void playAlarmViaHtmlAudio(sound, repeat, volume).then((ok) => {
-          if (!ok) {
-            // Last resort: fire a notification with sound
-            playViaNotificationChannel(1);
-          }
-        });
+        // AudioContext suspended → HTMLAudioElement fallback
+        void (async () => {
+          const basePath = import.meta.env.BASE_URL || '/';
+          const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
+          const audio = new Audio(src);
+          audio.volume = Math.max(0, Math.min(1, volume / 100));
+          alarmHtmlAudio = audio;
+          // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+          notifyAlarmRinging(true);
+          audio.play().catch(() => { /* ignore */ });
+        })();
       }
     }).catch(() => {
-      // resume() rejected — try HTMLAudioElement fallback
-      void playAlarmViaHtmlAudio(sound, repeat, volume).then((ok) => {
-        if (!ok) playViaNotificationChannel(1);
-      });
+      void (async () => {
+        const basePath = import.meta.env.BASE_URL || '/';
+        const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
+        const audio = new Audio(src);
+        audio.volume = Math.max(0, Math.min(1, volume / 100));
+        alarmHtmlAudio = audio;
+        // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+        notifyAlarmRinging(true);
+        audio.play().catch(() => { /* ignore */ });
+      })();
     });
   } else {
-    // No AudioContext available — try HTMLAudioElement directly
-    void playAlarmViaHtmlAudio(sound, repeat, volume).then((ok) => {
-      if (!ok) playViaNotificationChannel(1);
-    });
+    void (async () => {
+      const basePath = import.meta.env.BASE_URL || '/';
+      const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
+      const audio = new Audio(src);
+      audio.volume = Math.max(0, Math.min(1, volume / 100));
+      alarmHtmlAudio = audio;
+      // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+      notifyAlarmRinging(true);
+      audio.play().catch(() => { /* ignore */ });
+    })();
   }
 }
 
-/** プレビュー: 指定の繰り返し回数で再生 */
+/**
+ * 前面 in-app 終了アラームを再生する (fix3 Issue-A)。
+ * native/web 問わずアプリが前面可視のときに呼ぶ。
+ * stop-on-touch リスナーも自動で有効化される。
+ */
+export function playAlarmForForeground(
+  sound: AlarmSound,
+  repeat: number,
+  volume: number = 80,
+  vibrationMode: VibrationMode = 'off',
+): void {
+  // Android は OS 通知1経路のため in-app 前面音を鳴らさない（① judgment「Android=OS通知1経路」の構造強制）
+  if (isNative()) return;
+  if (sound === 'none' || volume === 0) return;
+
+  // バイブレーション
+  const shouldVibrate = vibrationMode === 'always';
+  if (shouldVibrate) {
+    if (isNative()) {
+      void (async () => {
+        try {
+          await Haptics.impact({ style: ImpactStyle.Heavy });
+        } catch { /* ignore */ }
+      })();
+    } else {
+      vibrate(repeat);
+    }
+  }
+
+  playViaMediaChannelForAlarm(sound, repeat, volume);
+}
+
+/**
+ * プレビュー専用の playViaMediaChannel — 再生を追跡して停止可能にする。
+ * fix6 変更D: document リスナー (activateTouchStopListener) を撤去し、
+ * notifyPreviewPlaying(true) で React オーバーレイ側に通知する。
+ */
+function playViaMediaChannelForPreview(sound: AlarmSound, repeat: number, volume: number): void {
+  const ctx = getSharedContext();
+
+  if (ctx) {
+    const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
+    resume.then(() => {
+      if (ctx.state === 'running') {
+        const master = createMasterGain(ctx, volume);
+        previewGainNode = master;  // 参照を保持して停止可能にする
+        // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+        notifyPreviewPlaying(true);
+        // All sounds are now MP3
+        void (async () => {
+          const gap = 0.4;
+          let cursor = ctx.currentTime;
+          for (let i = 0; i < repeat; i++) {
+            const d = await playMp3Alarm(ctx, master, sound, cursor);
+            cursor += d + gap;
+          }
+        })();
+      } else {
+        void (async () => {
+          const basePath = import.meta.env.BASE_URL || '/';
+          const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
+          const audio = new Audio(src);
+          audio.volume = Math.max(0, Math.min(1, volume / 100));
+          previewHtmlAudio = audio;  // 参照を保持して停止可能にする
+          // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+          notifyPreviewPlaying(true);
+          audio.play().catch(() => { /* ignore */ });
+        })();
+      }
+    }).catch(() => {
+      void (async () => {
+        const basePath = import.meta.env.BASE_URL || '/';
+        const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
+        const audio = new Audio(src);
+        audio.volume = Math.max(0, Math.min(1, volume / 100));
+        previewHtmlAudio = audio;
+        // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+        notifyPreviewPlaying(true);
+        audio.play().catch(() => { /* ignore */ });
+      })();
+    });
+  } else {
+    void (async () => {
+      const basePath = import.meta.env.BASE_URL || '/';
+      const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
+      const audio = new Audio(src);
+      audio.volume = Math.max(0, Math.min(1, volume / 100));
+      previewHtmlAudio = audio;
+      // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+      notifyPreviewPlaying(true);
+      audio.play().catch(() => { /* ignore */ });
+    })();
+  }
+}
+
+/** プレビュー: 指定の繰り返し回数で再生。前の再生が続いていれば停止してから開始する。 */
 export function previewAlarm(
   sound: AlarmSound,
   repeat: number,
   volume: number = 80,
-  vibrationMode: VibrationMode = 'silent',
-  channel: AlarmChannel = 'media',
 ): void {
-  playAlarm(sound, repeat, volume, vibrationMode, channel);
+  // Bug2 fix: 前のプレビュー再生を必ず止めてから新しい音を鳴らす
+  stopPreview();
+  // fix3 Issue-C: 終了アラームが再生中であれば停止してからプレビューを開始する
+  stopAlarm();
+
+  if (sound === 'none' || volume === 0) return;
+
+  playViaMediaChannelForPreview(sound, repeat, volume);
 }

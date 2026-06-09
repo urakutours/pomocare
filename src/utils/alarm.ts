@@ -38,6 +38,10 @@ export function unlockAudio(): void {
   // (fires Android 13+ runtime prompt). No-op on web.
   void requestNativeNotificationPermission();
 
+  // 永続 HTMLAudioElement をこのジェスチャで解除する（成功するまで毎ジェスチャ試行）。
+  // AudioContext が後で suspended / 復帰不能になっても、この要素経由で前面アラームを鳴らせる。
+  unlockHtmlAudio();
+
   if (sharedCtx && sharedCtx.state === 'running') return;
 
   if (!sharedCtx || sharedCtx.state === 'closed') {
@@ -59,9 +63,6 @@ export function unlockAudio(): void {
   } catch {
     // ignore — context may not be fully ready yet
   }
-
-  // Pre-unlock HTMLAudioElement on iOS (user-gesture context)
-  unlockHtmlAudio();
 }
 
 /**
@@ -80,32 +81,52 @@ export function tryResumeAudio(): void {
 /* ------------------------------------------------------------------ */
 let htmlAudioUnlocked = false;
 
-/** Pre-unlock HTMLAudioElement by playing silence during user gesture */
+/**
+ * 単一の永続 HTMLAudioElement。START タップ（ユーザージェスチャ）中に一度 play() して
+ * iOS / モバイルのオートプレイ制限を解除し、以後この「同一要素」を使い回す。
+ * iOS はジェスチャで一度解除した要素の再生は後から（ジェスチャ無しでも）許可するが、
+ * 毎回 new Audio() した新規要素はブロックする。タイマー終了コールバックは
+ * ジェスチャを持たないため、前面で確実に鳴らすにはこの primed 要素を再利用する必要がある。
+ */
+let primedAudio: HTMLAudioElement | null = null;
+
+/** Tiny silent WAV (44 bytes) data URI — prime 用の無音ソース。 */
+const SILENT_WAV =
+  'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
+
+/** 永続 primed 要素を取得（無ければ生成）。 */
+function getPrimedAudio(): HTMLAudioElement {
+  if (!primedAudio) primedAudio = new Audio();
+  return primedAudio;
+}
+
+/**
+ * Pre-unlock HTMLAudioElement by playing silence during a user gesture.
+ * 永続要素を使い、解除に成功するまで毎ジェスチャ試行する（reject 時は再試行余地を残す）。
+ */
 function unlockHtmlAudio(): void {
   if (htmlAudioUnlocked) return;
   try {
-    const audio = new Audio();
-    // Tiny silent WAV (44 bytes) as data URI
-    audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
-    audio.volume = 0.01;
-    audio.play().then(() => {
-      htmlAudioUnlocked = true;
-      audio.pause();
-    }).catch(() => { /* ignore */ });
+    const audio = getPrimedAudio();
+    audio.src = SILENT_WAV;
+    audio.volume = 0;
+    const p = audio.play();
+    if (p && typeof p.then === 'function') {
+      p.then(() => {
+        htmlAudioUnlocked = true;
+        audio.pause();
+        audio.currentTime = 0;
+      }).catch(() => { /* ignore — gesture may be insufficient on this platform */ });
+    }
   } catch {
     // ignore
   }
 }
 
-/**
- * Play alarm via HTMLAudioElement (fallback when AudioContext is unavailable).
- * Returns true if playback started successfully.
- */
 /** Return the file extension for a given alarm sound in public/sounds/
  * All alarm sounds are now MP3 (windchime/canon/boxing/cuckoo converted from WAV masters,
  * classic/gentle/soft are original MP3 long-form masters).
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function soundExt(sound: AlarmSound): string {
   void sound; // all sounds are MP3
   return 'mp3';
@@ -392,9 +413,42 @@ export function deactivateTouchStopListener(): void {
 }
 
 /**
+ * 終了アラームを永続 primed 要素で再生する（AudioContext が suspended / 復帰不能なときの確実な経路）。
+ * new Audio() でなく START 時に解除済みの「同一要素」を使い回すため、iOS 前面でもジェスチャ無しで鳴る。
+ * repeat はここでは無視する（②′ 仕様＝長尺音 1 回再生。旧 fresh-Audio fallback も同挙動）。
+ *
+ * 注: ここでの `audio` は `primedAudio` と同一オブジェクト。`alarmHtmlAudio` はその「鳴動中マーカー」で、
+ * stopAlarm() / 自然終了(onended) で null に戻すが `primedAudio` 自体は次回再利用のため保持する。
+ * 前提として START ジェスチャで unlock 済みだが、unlock が未完了(=play 拒否)なら htmlAudioUnlocked を
+ * 倒して次ジェスチャでの再 unlock を促す（自己修復）。
+ */
+function playAlarmViaPrimedAudio(sound: AlarmSound, volume: number): void {
+  try {
+    const basePath = import.meta.env.BASE_URL || '/';
+    const audio = getPrimedAudio();
+    audio.src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
+    audio.volume = Math.max(0, Math.min(1, volume / 100));
+    audio.currentTime = 0;
+    alarmHtmlAudio = audio;
+    // 自然終了時に鳴動中マーカーを解除する（primed 要素は保持）。
+    audio.onended = () => { if (alarmHtmlAudio === audio) alarmHtmlAudio = null; };
+    // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
+    notifyAlarmRinging(true);
+    audio.play().catch(() => {
+      // 再生拒否（unlock 未完了の可能性）→ 次ジェスチャで再 unlock を試みる
+      htmlAudioUnlocked = false;
+    });
+  } catch {
+    // ignore
+  }
+}
+
+/**
  * 終了アラーム専用の playViaMediaChannel — 再生を追跡して停止可能にする。
  * fix6 変更D: document リスナー (activateTouchStopListener) を撤去し、
  * notifyAlarmRinging(true) で React オーバーレイ側に通知する。
+ * Web の A 修正: AudioContext が running なら Web Audio（音量連動）、suspended / 復帰不能なら
+ * 永続 primed 要素にフォールバックして前面でも確実に鳴らす。
  */
 function playViaMediaChannelForAlarm(sound: AlarmSound, repeat: number, volume: number): void {
   const ctx = getSharedContext();
@@ -417,41 +471,16 @@ function playViaMediaChannelForAlarm(sound: AlarmSound, repeat: number, volume: 
           }
         })();
       } else {
-        // AudioContext suspended → HTMLAudioElement fallback
-        void (async () => {
-          const basePath = import.meta.env.BASE_URL || '/';
-          const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
-          const audio = new Audio(src);
-          audio.volume = Math.max(0, Math.min(1, volume / 100));
-          alarmHtmlAudio = audio;
-          // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
-          notifyAlarmRinging(true);
-          audio.play().catch(() => { /* ignore */ });
-        })();
+        // AudioContext suspended / 復帰不能 → 永続 primed 要素で確実に鳴らす
+        playAlarmViaPrimedAudio(sound, volume);
       }
     }).catch(() => {
-      void (async () => {
-        const basePath = import.meta.env.BASE_URL || '/';
-        const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
-        const audio = new Audio(src);
-        audio.volume = Math.max(0, Math.min(1, volume / 100));
-        alarmHtmlAudio = audio;
-        // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
-        notifyAlarmRinging(true);
-        audio.play().catch(() => { /* ignore */ });
-      })();
+      // resume() が reject → 永続 primed 要素で確実に鳴らす
+      playAlarmViaPrimedAudio(sound, volume);
     });
   } else {
-    void (async () => {
-      const basePath = import.meta.env.BASE_URL || '/';
-      const src = `${basePath}sounds/${sound}.${soundExt(sound)}`;
-      const audio = new Audio(src);
-      audio.volume = Math.max(0, Math.min(1, volume / 100));
-      alarmHtmlAudio = audio;
-      // fix6 変更D: document リスナーの代わりに React オーバーレイへ通知
-      notifyAlarmRinging(true);
-      audio.play().catch(() => { /* ignore */ });
-    })();
+    // AudioContext を生成できない環境 → 永続 primed 要素で鳴らす
+    playAlarmViaPrimedAudio(sound, volume);
   }
 }
 

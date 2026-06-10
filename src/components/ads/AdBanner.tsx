@@ -8,6 +8,7 @@ import {
   BannerAdPluginEvents,
 } from '@capacitor-community/admob';
 import { AmazonBanner } from './AmazonBanner';
+import { ADS_ENABLED } from '@/config/features';
 
 // ---- Configuration ----
 
@@ -93,6 +94,9 @@ function AdMobBanner({ hidden }: AdBannerProps) {
 
 export function AdBanner({ hidden }: AdBannerProps) {
   const features = useFeatures();
+
+  // Global kill-switch: 広告無効時は何も描画しない（--admob-banner-height も付かない）
+  if (!ADS_ENABLED) return null;
 
   // Paid users never see ads
   if (features.adFree || hidden) {

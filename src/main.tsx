@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AdMob } from '@capacitor-community/admob';
+import { ADS_ENABLED } from '@/config/features';
 import App from './App';
 import './index.css';
 // T2d: v2 channel 確保 (旧 channel を削除→再作成で immutable sound 問題を回避)
@@ -22,9 +23,11 @@ if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
   // T2d: v2 channel を確保 (旧 v1 channel を deleteChannel→再作成で immutable sound 問題を回避)
   // 旧 ensureNotificationChannels() は T2e で削除予定、並走は不要なので v2 のみ呼ぶ
   void ensureNotificationChannelsV2();
-  // Google AdMob SDK を初期化（テスト広告モード）
-  // TODO: 本番リリース時に initializeForTesting を削除
-  AdMob.initialize({ initializeForTesting: true }).catch(() => {});
+  // Google AdMob SDK を初期化（ADS_ENABLED が true の時のみ）
+  // 広告 kill-switch が false の間は SDK を起動しない（テスト広告も出ない）
+  if (ADS_ENABLED) {
+    AdMob.initialize({ initializeForTesting: true }).catch(() => {});
+  }
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

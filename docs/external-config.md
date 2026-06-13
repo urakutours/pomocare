@@ -266,6 +266,8 @@ keytool -list -v \
 現在登録済みの 2 件はいったん残し、新しい fingerprint を追加する形で並行稼働させること。
 （動作確認完了後、不要な旧 fingerprint を削除する）
 
+> ⚠️ **再追加禁止**: `2C:2C:FD:13:DA:93:75:AC:9B:98:7E:B7:C6:7A:25:91:8C:77:58:89:97:1C:E5:F0:88:B5:BC:18:86:03:41:DA`（旧 TWA 署名鍵）は keystore + 平文パスワードが公開 git 履歴（commit `2e5de9be`）に漏洩したため**恒久失効**（2026-06-13 に assetlinks から削除済み）。ローテーション作業時にこの fingerprint を再混入させないこと。
+
 ```json
 [
   {
@@ -274,8 +276,8 @@ keytool -list -v \
       "namespace": "android_app",
       "package_name": "com.pomocare.app",
       "sha256_cert_fingerprints": [
-        "2C:2C:FD:13:DA:93:75:AC:9B:98:7E:B7:C6:7A:25:91:8C:77:58:89:97:1C:E5:F0:88:B5:BC:18:86:03:41:DA",
         "AF:27:D7:40:B6:95:96:DA:2F:1F:14:ED:F7:8A:2A:2E:8B:35:2F:2E:21:9F:1F:43:81:F7:00:B6:35:8B:8B:DB",
+        "83:47:B8:7E:84:EC:3C:B8:91:3C:BA:81:7C:00:9E:4B:4A:92:9E:AC:33:61:49:2F:61:E0:14:32:EE:FC:8F:66",
         "<新しい SHA-256 fingerprint をここに追記>"
       ]
     }

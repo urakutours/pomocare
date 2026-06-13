@@ -39,7 +39,8 @@ export async function handleDeleteAccount(
     if (!user) return jsonResponse({ error: 'Unauthorized' }, 401, origin);
 
     const sql = getSQL(env);
-    const errors: string[] = [];
+    const stripeErrors: string[] = [];
+    const dbErrors: string[] = [];
 
     // 1. Cancel Stripe subscription (if any)
     try {
@@ -58,20 +59,22 @@ export async function handleDeleteAccount(
           await stripe.subscriptions.cancel(profile.stripe_subscription_id);
         } catch (err) {
           // Subscription may already be cancelled; log but don't fail
-          errors.push(`stripe_cancel: ${err instanceof Error ? err.message : 'unknown'}`);
+          stripeErrors.push(`stripe_cancel: ${err instanceof Error ? err.message : 'unknown'}`);
         }
       }
     } catch (err) {
-      errors.push(`stripe_lookup: ${err instanceof Error ? err.message : 'unknown'}`);
+      stripeErrors.push(`stripe_lookup: ${err instanceof Error ? err.message : 'unknown'}`);
     }
 
-    // 2-6. Delete from Neon DB tables
+    if (stripeErrors.length > 0) {
+      console.warn('[delete-account] stripe partial errors for user', user.id, stripeErrors);
+    }
+
+    // 2-4. Delete from Neon DB tables
     const tables = [
       'user_profiles',
-      'user_sessions',
+      'user_sessions_v2',
       'user_settings',
-      'push_subscriptions',
-      'scheduled_notifications',
     ];
     for (const table of tables) {
       try {
@@ -80,12 +83,17 @@ export async function handleDeleteAccount(
           [user.id],
         );
       } catch (err) {
-        // Table may not exist or have user_id column; log and continue
-        errors.push(`${table}: ${err instanceof Error ? err.message : 'unknown'}`);
+        dbErrors.push(`${table}: ${err instanceof Error ? err.message : 'unknown'}`);
       }
     }
 
-    // 7. Call Neon Auth /delete-user endpoint
+    // Fail if any DB table deletion failed (user data may be partially retained)
+    if (dbErrors.length > 0) {
+      console.error('[delete-account] DB deletion failed for user', user.id, dbErrors);
+      return jsonResponse({ error: 'Account deletion failed' }, 500, origin);
+    }
+
+    // 5. Call Neon Auth /delete-user endpoint
     //    Session cookie from the incoming request is forwarded so Better Auth
     //    can authorize the delete.
     try {
@@ -101,20 +109,19 @@ export async function handleDeleteAccount(
       });
       if (!authRes.ok) {
         const text = await authRes.text().catch(() => '');
-        errors.push(`neon_auth_delete: status=${authRes.status} body=${text.slice(0, 200)}`);
+        console.error('[delete-account] neon_auth_delete failed for user', user.id,
+          `status=${authRes.status} body=${text.slice(0, 200)}`);
+        return jsonResponse({ error: 'Account deletion failed' }, 500, origin);
       }
     } catch (err) {
-      errors.push(`neon_auth_delete: ${err instanceof Error ? err.message : 'unknown'}`);
-    }
-
-    if (errors.length > 0) {
-      console.warn('[delete-account] partial errors for user', user.id, errors);
+      console.error('[delete-account] neon_auth_delete error for user', user.id,
+        err instanceof Error ? err.message : 'unknown');
+      return jsonResponse({ error: 'Account deletion failed' }, 500, origin);
     }
 
     return jsonResponse({
       success: true,
       userId: user.id,
-      partialErrors: errors.length > 0 ? errors : undefined,
     }, 200, origin);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Internal Server Error';

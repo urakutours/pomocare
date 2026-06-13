@@ -4,6 +4,7 @@ import { useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { createCheckoutSession, type CheckoutPlan } from '@/services/stripe/StripeService';
 import type { UserTier } from '@/services/auth/AuthService';
+import { PAYMENTS_UI_ENABLED } from '@/config/features';
 
 // ---------- Discount helpers ----------
 const MAX_DISCOUNT_MONTHS = 6;
@@ -71,20 +72,26 @@ interface UpgradePromptProps {
 }
 
 export function UpgradePrompt({ onClose, onRequestLogin, currentTier, subscriptionStartDate }: UpgradePromptProps) {
+  // Hooks must be called unconditionally before any early return (React rules of hooks)
   const { t, language } = useI18n();
   const { user } = useAuth();
   const [loadingPlan, setLoadingPlan] = useState<CheckoutPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // 割引計算（useMemo はすべての early return より前に置く）
+  const discount = useMemo(() => {
+    const tier = currentTier ?? user?.tier ?? 'free';
+    if (tier !== 'standard') return null;
+    return calcDiscount(subscriptionStartDate ?? user?.subscriptionStartDate ?? null, language);
+  }, [currentTier, user?.tier, user?.subscriptionStartDate, subscriptionStartDate, language]);
+
+  // Play 消費専用アプリ要件: native では決済 UI を一切出さない（self-guard）。
+  // 全 Hooks の後に置くことで Rules of Hooks を維持しつつ、4 箇所のマウント全てをカバーする。
+  if (!PAYMENTS_UI_ENABLED) return null;
+
   const tier = currentTier ?? user?.tier ?? 'free';
   const isStandard = tier === 'standard';
   const isLoading = loadingPlan !== null;
-
-  // 割引計算（Standard → Pro 時のみ）
-  const discount = useMemo(() => {
-    if (!isStandard) return null;
-    return calcDiscount(subscriptionStartDate ?? user?.subscriptionStartDate ?? null, language);
-  }, [isStandard, subscriptionStartDate, user?.subscriptionStartDate, language]);
 
   const handleCheckout = async (plan: CheckoutPlan) => {
     // 未ログインの場合はログインを促す

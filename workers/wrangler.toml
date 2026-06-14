@@ -1,4 +1,7 @@
 name = "pomocare-api"
+# own (urakutours) account にピン留め — 未指定だと認証 account の default に落ちて
+# 誤 account への deploy 事故が起きうる（CLAUDE.md「Cloudflare account 分離・確認」）。
+account_id = "c36cc68ef81c11b24b7ee8f7de1604db"
 main = "src/index.ts"
 compatibility_date = "2025-03-28"
 compatibility_flags = ["nodejs_compat"]

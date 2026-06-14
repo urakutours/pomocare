@@ -30,3 +30,6 @@ android/app/signing-key-info.txt
 .env.development
 .env.vercel
 # .env.local は *.local で自動 ignore (上記参照)
+
+# 旧 Supabase CLI の一時ファイル（接続文字列が入りうる、誤コミット防止）
+supabase/.temp/

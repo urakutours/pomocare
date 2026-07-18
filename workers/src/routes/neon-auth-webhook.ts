@@ -1,5 +1,5 @@
 import type { Env } from '../types';
-import { sendEmail, passwordResetTemplate, emailVerificationTemplate } from '../lib/email';
+import { sendWithFallback, passwordResetTemplate, emailVerificationTemplate } from '../lib/email';
 
 interface NeonAuthWebhookPayload {
   event_type: string;
@@ -146,14 +146,16 @@ export async function handleNeonAuthWebhook(request: Request, env: Env): Promise
 
   try {
     if (linkType === 'forget-password') {
-      await sendEmail(env, {
+      await sendWithFallback(env, {
+        from: env.RESEND_FROM,
         to: email,
         subject: 'Reset your PomoCare password',
         html: passwordResetTemplate(linkUrl),
       });
       console.log(`[neon-auth-webhook] Password reset email sent to ${email}`);
     } else if (linkType === 'email-verification') {
-      await sendEmail(env, {
+      await sendWithFallback(env, {
+        from: env.RESEND_FROM,
         to: email,
         subject: 'Confirm your PomoCare email',
         html: emailVerificationTemplate(linkUrl),

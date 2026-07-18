@@ -5,6 +5,7 @@ import { handleCancelSubscription } from './routes/cancel-subscription';
 import { handleDeleteAccount } from './routes/delete-account';
 import { handleStripeWebhook } from './routes/stripe-webhook';
 import { handleNeonAuthWebhook } from './routes/neon-auth-webhook';
+import { handleEmailSmokeCanary } from './routes/email-smoke-canary';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -24,6 +25,8 @@ export default {
         return handleStripeWebhook(request, env);
       case '/neon-auth-webhook':
         return handleNeonAuthWebhook(request, env);
+      case '/internal/email-smoke-canary':
+        return handleEmailSmokeCanary(request, env);
       case '/health':
         return Response.json({ ok: true, ts: Date.now() });
       default:

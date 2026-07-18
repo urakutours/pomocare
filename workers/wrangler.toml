@@ -6,6 +6,17 @@ main = "src/index.ts"
 compatibility_date = "2025-03-28"
 compatibility_flags = ["nodejs_compat"]
 
+# Non-secret config for the Resend/FreeResend email fallback layer
+# (src/lib/email.ts) + the pre-cutover smoke canary (src/routes/email-smoke-canary.ts).
+# Left at safe no-op defaults: fallback disabled and canary disabled until the
+# FreeResend host + control mailbox are actually provisioned.
+[vars]
+EMAIL_PRIMARY = "resend"
+EMAIL_FALLBACK = "none"
+RESEND_BASE_URL = ""
+SMOKE_CANARY_ENABLED = "false" # default OFF, flip to "true" only during an active cutover verification window
+SMOKE_CANARY_MAILBOX = ""
+
 # Environment variables are set via `wrangler secret put <KEY>`
 # Required secrets:
 #   NEON_DATABASE_URL        - postgresql://user:pass@host/neondb
@@ -19,6 +30,9 @@ compatibility_flags = ["nodejs_compat"]
 
 # Optional:
 #   STRIPE_PORTAL_CONFIG_ID  - Custom portal configuration
+#   FREERESEND_API_KEY       - FreeResend API key (fallback provider; skipped with a warn log if unset)
+#   SLACK_ALERT_WEBHOOK_URL  - Slack Incoming Webhook, notified when the email fallback fires
+#   SMOKE_CANARY_SECRET      - Bearer secret gating POST /internal/email-smoke-canary
 
 # Legacy (kept for rollback window, can be removed after 2026-06-13):
 #   VAPID_SUBJECT / VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY — used by the old

@@ -8,4 +8,14 @@ export interface Env {
   STRIPE_PORTAL_CONFIG_ID?: string;
   RESEND_API_KEY: string;
   RESEND_FROM: string;
+  // Resend/FreeResend fallback layer (see src/lib/email.ts)
+  EMAIL_PRIMARY?: string;
+  EMAIL_FALLBACK?: string;
+  RESEND_BASE_URL?: string;
+  FREERESEND_API_KEY?: string;
+  SLACK_ALERT_WEBHOOK_URL?: string;
+  // Pre-cutover smoke canary (see src/routes/email-smoke-canary.ts)
+  SMOKE_CANARY_SECRET?: string;
+  SMOKE_CANARY_ENABLED?: string;
+  SMOKE_CANARY_MAILBOX?: string;
 }

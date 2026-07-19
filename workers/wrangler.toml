@@ -17,7 +17,7 @@ EMAIL_PRIMARY = "freeresend"
 # EMAIL_PRIMARY="freeresend" at cutover and null out the fallback (self-retry
 # guard, email.ts resolveProviderOrder), silently disabling the resend safety net.
 EMAIL_FALLBACK = ""
-RESEND_BASE_URL = "https://invalid.example.invalid/api" # TEMP fault injection (Phase 9 verification), restore after test
+RESEND_BASE_URL = "https://mail-api.uraku.info/api"
 SMOKE_CANARY_ENABLED = "true" # verification window active during Phase C cutover
 SMOKE_CANARY_MAILBOX = "relatista2026@gmail.com"
 

@@ -12,10 +12,14 @@ compatibility_flags = ["nodejs_compat"]
 # FreeResend host + control mailbox are actually provisioned.
 [vars]
 EMAIL_PRIMARY = "resend"
-EMAIL_FALLBACK = "none"
-RESEND_BASE_URL = ""
-SMOKE_CANARY_ENABLED = "false" # default OFF, flip to "true" only during an active cutover verification window
-SMOKE_CANARY_MAILBOX = ""
+# Empty (not "none"): resolveProviderOrder() computes the fallback as the
+# opposite of EMAIL_PRIMARY. An explicit "freeresend" here would collide with
+# EMAIL_PRIMARY="freeresend" at cutover and null out the fallback (self-retry
+# guard, email.ts resolveProviderOrder), silently disabling the resend safety net.
+EMAIL_FALLBACK = ""
+RESEND_BASE_URL = "https://mail-api.uraku.info/api"
+SMOKE_CANARY_ENABLED = "true" # verification window active during Phase C cutover
+SMOKE_CANARY_MAILBOX = "relatista2026@gmail.com"
 
 # Environment variables are set via `wrangler secret put <KEY>`
 # Required secrets:

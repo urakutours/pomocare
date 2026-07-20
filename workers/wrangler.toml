@@ -18,7 +18,7 @@ EMAIL_PRIMARY = "freeresend"
 # guard, email.ts resolveProviderOrder), silently disabling the resend safety net.
 EMAIL_FALLBACK = ""
 RESEND_BASE_URL = "https://mail-api.uraku.info/api"
-SMOKE_CANARY_ENABLED = "false" # verification window closed after Phase C cutover
+SMOKE_CANARY_ENABLED = "false" # verification window closed after Slack webhook redirect test (親#10, 2026-07-20)
 SMOKE_CANARY_MAILBOX = "relatista2026@gmail.com"
 
 # Environment variables are set via `wrangler secret put <KEY>`
